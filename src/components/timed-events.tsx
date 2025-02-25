@@ -6,9 +6,11 @@ import { generatePrefabHours } from "src/utils/date-utils";
 import BackgroundHoursContent from "src/components/background-hours-content";
 import NewEventContainer from "src/components/new-event-container";
 import EventContainer from "src/components/event-container";
+import TimeIndicator from "src/components/time-indicator";
 
 const TimedEvents = () => {
-  const { theme, timeFormat, layout } = useContext(ConfigProvider);
+  const { theme, timeFormat, layout, showTimeIndicator } =
+    useContext(ConfigProvider);
   const hours = useMemo(() => generatePrefabHours(timeFormat), [timeFormat]);
 
   return (
@@ -19,6 +21,7 @@ const TimedEvents = () => {
         {layout.partDayEventsLayout.map((partDayLayout) => (
           <EventContainer key={partDayLayout.event.id} layout={partDayLayout} />
         ))}
+        {showTimeIndicator ? <TimeIndicator /> : null}
       </View>
       <NewEventContainer />
     </View>
@@ -40,5 +43,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flex: 1,
     paddingRight: 20,
+    overflow: "hidden",
   },
 });

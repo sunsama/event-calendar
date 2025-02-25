@@ -262,6 +262,7 @@ export default function App() {
             userCalendarId="primary-calendar"
             startDayOfWeekOffset={0}
             timeFormat={timeFormat}
+            showTimeIndicator
             renderEvent={(event: any, height: SharedValue<number>) => (
               <RenderEvent event={event} height={height} />
             )}

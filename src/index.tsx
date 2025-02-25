@@ -22,6 +22,7 @@ type EventCalenderProps = {
   onPressEvent?: (event: CalendarEvent) => void;
   userCalendarId: string;
   startDayOfWeekOffset: number;
+  showTimeIndicator?: boolean;
 };
 
 const EventCalendar = ({
@@ -36,6 +37,7 @@ const EventCalendar = ({
   onPressEvent,
   userCalendarId,
   startDayOfWeekOffset,
+  showTimeIndicator,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -73,6 +75,7 @@ const EventCalendar = ({
           timezone,
           renderEvent,
           onPressEvent,
+          showTimeIndicator,
         }}
       >
         <AllDayEvents />

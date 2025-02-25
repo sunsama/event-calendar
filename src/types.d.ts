@@ -75,6 +75,7 @@ type Config = {
     eventHeight: SharedValue<number>
   ) => ReactNode;
   onPressEvent?: (event: CalendarEvent) => void;
+  showTimeIndicator?: boolean;
 };
 
 type PrefabHour = {
