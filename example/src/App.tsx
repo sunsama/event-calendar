@@ -9,7 +9,7 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 
-const events: CalendarEvent[] = [
+const events: any[] = [
   {
     id: "1",
     title: "Event 1",
@@ -208,7 +208,7 @@ const RenderEvent = ({
   event,
   height,
 }: {
-  event: CalendarEvent;
+  event: any;
   height: SharedValue<number>;
 }) => {
   const start = moment(event.start);
