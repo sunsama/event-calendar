@@ -52,6 +52,8 @@ type ThemeStyle = {
   eventSubtitle?: TextStyle;
   // Event container main container
   eventContainer?: ViewStyle;
+  // Style the time indicator
+  timeIndicator?: ViewStyle;
 };
 
 type onCreateEvent = (arg: {

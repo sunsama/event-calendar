@@ -9,7 +9,7 @@ import { AppState, StyleSheet } from "react-native";
 
 const TimeIndicator = memo(
   () => {
-    const { zoomLevel, timezone } = useContext(ConfigProvider);
+    const { zoomLevel, timezone, theme } = useContext(ConfigProvider);
 
     const currentMinutes = useCallback(() => {
       const time = moment.tz(timezone);
@@ -47,7 +47,11 @@ const TimeIndicator = memo(
       top: zoomLevel.value * currentMoment.value,
     }));
 
-    return <Animated.View style={[styles.timeIndicator, style]} />;
+    return (
+      <Animated.View
+        style={[styles.timeIndicator, style, theme?.timeIndicator]}
+      />
+    );
   },
   () => true
 );
