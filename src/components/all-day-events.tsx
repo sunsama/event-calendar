@@ -56,8 +56,6 @@ const styles = StyleSheet.create({
   eventContainer: {
     marginLeft: 50,
     marginRight: 10,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderColor: "black",
   },
   moreContainer: {
     padding: 5,

@@ -16,7 +16,6 @@ const TimedEvents = () => {
   return (
     <View style={[styles.container, theme?.timedEventsContainer]}>
       <BackgroundHoursLayout hours={hours} />
-      <View style={[styles.borderContainer, theme?.borderContainer]} />
       <View style={styles.backgroundContainer}>
         <BackgroundHoursContent hours={hours} />
         {layout.partDayEventsLayout.map((partDayLayout) => (
@@ -48,14 +47,5 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingRight: 20,
     overflow: "hidden",
-  },
-  borderContainer: {
-    position: "absolute",
-    height: "200%",
-    left: 50,
-    top: -18,
-    width: 5,
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderColor: "black",
   },
 });

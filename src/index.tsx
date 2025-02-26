@@ -93,6 +93,7 @@ const EventCalendar = ({
           </ZoomProvider>
         </ScrollView>
       </ConfigProvider.Provider>
+      <View style={[styles.borderContainer, theme?.borderContainer]} />
     </View>
   );
 };
@@ -103,11 +104,21 @@ const styles = StyleSheet.create({
     marginTop: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "#F0F0F0",
+    overflow: "hidden",
   },
   scrollView: {
     paddingTop: 8,
     backgroundColor: "white",
     flex: 1,
+  },
+  borderContainer: {
+    position: "absolute",
+    height: "200%",
+    left: 50,
+    top: -18,
+    width: 5,
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderColor: "black",
   },
 });
 
