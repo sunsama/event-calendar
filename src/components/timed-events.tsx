@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     marginTop: -TOP_MARGIN_PIXEL_OFFSET,
     flexDirection: "column",
     flex: 1,
-    paddingRight: 20,
+    paddingRight: 10,
     overflow: "hidden",
   },
 });

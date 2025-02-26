@@ -1,5 +1,5 @@
 import EventCalendar from "@sunsama/event-calendar";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -15,56 +15,56 @@ const events: any[] = [
   {
     id: "1",
     title: "Event 1",
-    start: "2023-10-10T08:00:00Z",
-    end: "2023-10-10T09:00:00Z",
+    start: "2023-10-10T05:00:00Z",
+    end: "2023-10-10T06:00:00Z",
     isAllDay: false,
     calendarId: "primary-calendar",
   },
   {
     id: "2",
     title: "Event 2",
-    start: "2023-10-10T08:30:00Z",
-    end: "2023-10-10T09:30:00Z",
+    start: "2023-10-10T05:30:00Z",
+    end: "2023-10-10T06:30:00Z",
     isAllDay: false,
     calendarId: "secondary-calendar",
   },
   {
     id: "3",
     title: "Event 3",
-    start: "2023-10-10T08:10:00Z",
-    end: "2023-10-10T10:00:00Z",
+    start: "2023-10-10T05:10:00Z",
+    end: "2023-10-10T07:00:00Z",
     isAllDay: false,
     calendarId: "tertiary-calendar",
   },
   {
     id: "4",
     title: "Event 4",
-    start: "2023-10-10T09:30:00Z",
-    end: "2023-10-10T10:30:00Z",
+    start: "2023-10-10T05:40:00Z",
+    end: "2023-10-10T07:30:00Z",
     isAllDay: false,
     calendarId: "secondary-calendar",
   },
   {
     id: "5",
     title: "Event 5",
-    start: "2023-10-10T10:00:00Z",
-    end: "2023-10-10T11:00:00Z",
+    start: "2023-10-10T08:00:00Z",
+    end: "2023-10-10T09:00:00Z",
     isAllDay: false,
     calendarId: "primary-calendar",
   },
   {
     id: "6",
     title: "Event 6",
-    start: "2023-10-10T10:30:00Z",
-    end: "2023-10-10T11:30:00Z",
+    start: "2023-10-10T08:30:00Z",
+    end: "2023-10-10T09:30:00Z",
     isAllDay: false,
     calendarId: "secondary-calendar",
   },
   {
     id: "7",
     title: "Event 7",
-    start: "2023-10-10T11:00:00Z",
-    end: "2023-10-10T12:00:00Z",
+    start: "2023-10-10T08:10:00Z",
+    end: "2023-10-10T10:00:00Z",
     isAllDay: false,
     calendarId: "primary-calendar",
   },
@@ -111,16 +111,16 @@ const events: any[] = [
   {
     id: "13",
     title: "Event 13",
-    start: "2023-10-10T14:00:00Z",
-    end: "2023-10-10T15:00:00Z",
+    start: "2023-10-10T02:00:00Z",
+    end: "2023-10-10T03:00:00Z",
     isAllDay: false,
     calendarId: "primary-calendar",
   },
   {
     id: "14",
     title: "Event 14",
-    start: "2023-10-10T14:30:00Z",
-    end: "2023-10-10T15:30:00Z",
+    start: "2023-10-10T02:30:00Z",
+    end: "2023-10-10T04:30:00Z",
     isAllDay: false,
     calendarId: "secondary-calendar",
   },
@@ -151,16 +151,16 @@ const events: any[] = [
   {
     id: "18",
     title: "Event 18",
-    start: "2023-10-10T16:30:00Z",
-    end: "2023-10-10T17:30:00Z",
+    start: "2023-10-10T17:30:00Z",
+    end: "2023-10-10T18:00:00Z",
     isAllDay: false,
     calendarId: "secondary-calendar",
   },
   {
     id: "19",
     title: "Event 19",
-    start: "2023-10-10T17:00:00Z",
-    end: "2023-10-10T17:10:00Z",
+    start: "2023-10-10T17:30:00Z",
+    end: "2023-10-10T18:00:00Z",
     isAllDay: false,
     calendarId: "primary-calendar",
   },
@@ -243,7 +243,7 @@ const eventColor = (calendarId: string) => {
   }
 };
 
-const timeFormat = "hh:mm";
+const timeFormat = "HH:mm";
 // const timeFormat = "h a";
 
 const RenderEvent = ({
@@ -286,24 +286,26 @@ const RenderEvent = ({
   }, [height]);
 
   return (
-    <Animated.View
-      style={[
-        styles.eventContainer,
-        styleRowOrColumn,
-        {
-          backgroundColor: eventColor(event.calendarId),
-        },
-      ]}
-    >
-      <Text style={styles.eventTextTitle}>
-        {event.title} {extendText}
-      </Text>
-      {height ? (
-        <Text style={styles.eventTextTime}>
-          {start.format(timeFormat)} - {end.format(timeFormat)}
+    <View style={styles.eventContainer}>
+      <Animated.View
+        style={[
+          styles.eventInnerContainer,
+          styleRowOrColumn,
+          {
+            backgroundColor: eventColor(event.calendarId),
+          },
+        ]}
+      >
+        <Text style={styles.eventTextTitle}>
+          {event.title} {extendText}
         </Text>
-      ) : null}
-    </Animated.View>
+        {height ? (
+          <Text style={styles.eventTextTime}>
+            {start.format(timeFormat)} - {end.format(timeFormat)}
+          </Text>
+        ) : null}
+      </Animated.View>
+    </View>
   );
 };
 
@@ -344,12 +346,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   eventContainer: {
-    margin: 2,
-    flex: 1,
+    backgroundColor: "white",
     borderRadius: 4,
-    borderWidth: 1,
-    borderColor: "white",
     overflow: "hidden",
+  },
+  eventInnerContainer: {
+    margin: 2,
+    borderRadius: 4,
   },
   eventTextTitle: {
     marginRight: 5,

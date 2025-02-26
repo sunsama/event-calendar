@@ -41,7 +41,7 @@ const computePositioning = ({
     width =
       collisions.order + 1 < collisions.total
         ? Math.max(100 - 12 * collisions.total, 20)
-        : 100 / collisions.total + 3;
+        : 100 / collisions.total;
   }
 
   return {
