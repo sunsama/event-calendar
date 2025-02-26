@@ -9,8 +9,13 @@ import { StyleSheet, View } from "react-native";
 
 const NewEventContainer = memo(
   () => {
-    const { renderNewEventContainer, zoomLevel, createY, theme } =
-      useContext(ConfigProvider);
+    const {
+      fiveMinuteInterval,
+      renderNewEventContainer,
+      zoomLevel,
+      createY,
+      theme,
+    } = useContext(ConfigProvider);
 
     const styleVisible = useAnimatedStyle(() => {
       return {
@@ -30,6 +35,7 @@ const NewEventContainer = memo(
       () => !!renderNewEventContainer,
       [renderNewEventContainer]
     );
+
     useAnimatedReaction(
       () => ({ zoomLevel: zoomLevel.value, createY: createY.value }),
       (state) => {
@@ -39,7 +45,9 @@ const NewEventContainer = memo(
 
         const freshTime = Math.floor(state.createY / state.zoomLevel);
         const freshHour = Math.floor(freshTime / 60);
-        const freshMinute = freshTime - freshHour * 60;
+        const freshMinute = !fiveMinuteInterval
+          ? freshTime - freshHour * 60
+          : Math.round(freshTime / 5) * 5 - freshHour * 60;
 
         runOnJS(setTime)([freshHour, freshMinute]);
       },

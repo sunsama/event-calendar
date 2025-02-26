@@ -91,6 +91,7 @@ type Config = {
   maxAllDayEvents: number;
   canCreateEvents: boolean;
   renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
+  fiveMinuteInterval?: boolean;
 };
 
 type PrefabHour = {

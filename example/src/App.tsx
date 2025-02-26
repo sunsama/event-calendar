@@ -355,7 +355,7 @@ export default function App() {
             ) => <RenderEvent event={event} height={height} extend={extend} />}
             // The theme of the calendar, overrides the default theme
             theme={undefined}
-            // The initial zoom level of the calendar, you can use this to save the zoom level and restore it
+            // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar
             initialZoomLevel={undefined}
             // Maximum number of all day events to display before showing a "show more" button
             maxAllDayEvents={3}
@@ -373,6 +373,8 @@ export default function App() {
                 </View>
               </View>
             )}
+            // When editing an event or creating a new one this is making sure that it isn't granular per minute
+            fiveMinuteInterval
           />
         </SafeAreaView>
       </GestureHandlerRootView>

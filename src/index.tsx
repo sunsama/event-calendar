@@ -26,6 +26,7 @@ type EventCalenderProps = {
   maxAllDayEvents?: number;
   canCreateEvents?: boolean;
   renderNewEventContainer?: Config["renderNewEventContainer"];
+  fiveMinuteInterval?: boolean;
 };
 
 const EventCalendar = ({
@@ -44,6 +45,7 @@ const EventCalendar = ({
   maxAllDayEvents = 5,
   canCreateEvents = true,
   renderNewEventContainer,
+  fiveMinuteInterval,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -85,6 +87,7 @@ const EventCalendar = ({
           maxAllDayEvents,
           canCreateEvents,
           renderNewEventContainer,
+          fiveMinuteInterval,
         }}
       >
         <AllDayEvents />
