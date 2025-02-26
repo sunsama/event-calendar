@@ -1,6 +1,6 @@
 import { ConfigProvider } from "src/utils/globals";
-import { useContext, useMemo } from "react";
-import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { useCallback, useContext, useMemo } from "react";
+import { Pressable } from "react-native-gesture-handler";
 import { EventExtend } from "src/enums";
 import { View } from "react-native";
 
@@ -9,12 +9,12 @@ type EventContainerProps = {
 };
 
 const EventContainer = ({ layout }: EventContainerProps) => {
-  const { renderEvent, initialZoomLevel } = useContext(ConfigProvider);
+  const { onPressEvent, renderEvent, initialZoomLevel } =
+    useContext(ConfigProvider);
 
   // const isEditing = useIsEventEditingAnimated(layout.event.id);
 
   // const [time, setTime] = useState(formatTimeLabel());
-  const gestures = useMemo(() => Gesture.Simultaneous(), []);
 
   const render = useMemo(
     () =>
@@ -34,10 +34,14 @@ const EventContainer = ({ layout }: EventContainerProps) => {
     [initialZoomLevel]
   );
 
+  const onPress = useCallback(() => {
+    onPressEvent && onPressEvent(layout.event);
+  }, [layout.event, onPressEvent]);
+
   return (
-    <GestureDetector gesture={gestures}>
+    <Pressable onPress={onPress}>
       <View style={stylePosition}>{render}</View>
-    </GestureDetector>
+    </Pressable>
   );
 };
 

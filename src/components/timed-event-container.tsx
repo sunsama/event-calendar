@@ -1,4 +1,5 @@
 import Animated, {
+  runOnJS,
   SharedValue,
   useAnimatedReaction,
   useAnimatedStyle,
@@ -65,7 +66,7 @@ const useIsEventEditingAnimated = (eventId: string): SharedValue<boolean> => {
 };
 
 const TimedEventContainer = ({ layout }: TimedEventContainerProps) => {
-  const { zoomLevel, timezone, dayDate, renderEvent } =
+  const { onPressEvent, zoomLevel, timezone, dayDate, renderEvent } =
     useContext(ConfigProvider);
 
   const [positioning] = useMemo(() => {
@@ -94,8 +95,11 @@ const TimedEventContainer = ({ layout }: TimedEventContainerProps) => {
 
   const isEditing = useIsEventEditingAnimated(layout.event.id);
 
-  // const [time, setTime] = useState(formatTimeLabel());
-  const gestures = useMemo(() => Gesture.Simultaneous(), []);
+  const gestureTap = Gesture.Tap().onStart(() => {
+    if (onPressEvent) {
+      runOnJS(onPressEvent)(layout.event);
+    }
+  });
 
   const height = useSharedValue(0);
 
@@ -143,7 +147,7 @@ const TimedEventContainer = ({ layout }: TimedEventContainerProps) => {
   }, [positioning]);
 
   return (
-    <GestureDetector gesture={gestures}>
+    <GestureDetector gesture={gestureTap}>
       <Animated.View style={stylePosition}>
         <View style={styles.hairline}>{render}</View>
       </Animated.View>
