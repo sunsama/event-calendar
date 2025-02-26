@@ -349,10 +349,12 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderRadius: 4,
     overflow: "hidden",
+    flex: 1,
   },
   eventInnerContainer: {
     margin: 2,
     borderRadius: 4,
+    flex: 1,
   },
   eventTextTitle: {
     marginRight: 5,

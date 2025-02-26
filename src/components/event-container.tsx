@@ -1,8 +1,8 @@
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { ConfigProvider } from "src/utils/globals";
 import { useContext, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { EventExtend } from "src/enums";
+import { View } from "react-native";
 
 type EventContainerProps = {
   layout: AllDayEventLayoutType;
@@ -27,17 +27,16 @@ const EventContainer = ({ layout }: EventContainerProps) => {
     [layout, renderEvent]
   );
 
-  const stylePosition = useAnimatedStyle(() => {
-    const basePosition: any = {
+  const stylePosition = useMemo(
+    () => ({
       height: Math.max(28, 24 * initialZoomLevel),
-    };
-
-    return basePosition;
-  }, []);
+    }),
+    [initialZoomLevel]
+  );
 
   return (
     <GestureDetector gesture={gestures}>
-      <Animated.View style={stylePosition}>{render}</Animated.View>
+      <View style={stylePosition}>{render}</View>
     </GestureDetector>
   );
 };
