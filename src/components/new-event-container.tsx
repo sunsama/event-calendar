@@ -1,15 +1,20 @@
-import { memo, useContext } from "react";
+import { memo, useContext, useMemo, useState } from "react";
 import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+  useAnimatedStyle,
+} from "react-native-reanimated";
 import { StyleSheet, View } from "react-native";
 
 const NewEventContainer = memo(
   () => {
-    const { zoomLevel, createY, theme } = useContext(ConfigProvider);
+    const { renderNewEventContainer, zoomLevel, createY, theme } =
+      useContext(ConfigProvider);
 
     const styleVisible = useAnimatedStyle(() => {
       return {
-        opacity: createY.value >= 0 ? 0.7 : 0,
+        opacity: createY.value >= 0 ? 1 : 0,
         transform: [
           {
             translateY: createY.value - TOP_MARGIN_PIXEL_OFFSET,
@@ -19,36 +24,35 @@ const NewEventContainer = memo(
       };
     }, []);
 
-    // const [time, setTime] = useState("");
-    // const momentUse = useRef(moment());
+    const [[hour, minute], setTime] = useState([0, 0]);
 
-    // const formatTime = useCallback(
-    //   (hour: number, minute: number) => {
-    //     const date = momentUse.current
-    //       .startOf("day")
-    //       .add(hour, "hours")
-    //       .add(minute, "minutes");
-    //
-    //     setTime(date.format(timeFormat));
-    //   },
-    //   [timeFormat]
-    // );
+    const hasRenderEvent = useMemo(
+      () => !!renderNewEventContainer,
+      [renderNewEventContainer]
+    );
+    useAnimatedReaction(
+      () => ({ zoomLevel: zoomLevel.value, createY: createY.value }),
+      (state) => {
+        if (!hasRenderEvent) {
+          return;
+        }
 
-    // useAnimatedReaction(
-    //   () => ({ zoomLevel: zoomLevel.value, createY: createY.value }),
-    //   (state) => {
-    //     const time = Math.floor(state.createY / state.zoomLevel);
-    //     const hour = Math.floor(time / 60);
-    //     const minute = time - hour * 60;
-    //
-    //     runOnJS(formatTime)(hour, minute);
-    //   },
-    //   []
-    // );
+        const freshTime = Math.floor(state.createY / state.zoomLevel);
+        const freshHour = Math.floor(freshTime / 60);
+        const freshMinute = freshTime - freshHour * 60;
+
+        runOnJS(setTime)([freshHour, freshMinute]);
+      },
+      []
+    );
 
     return (
       <Animated.View style={[styles.container, styleVisible]}>
-        <View style={[styles.innerContainer, theme?.newEventContainer]} />
+        {renderNewEventContainer ? (
+          renderNewEventContainer(hour, minute)
+        ) : (
+          <View style={[styles.defaultContainer, theme?.newEventContainer]} />
+        )}
       </Animated.View>
     );
   },
@@ -62,13 +66,14 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     left: 51,
-    right: 0,
+    right: 10,
     height: 50,
   },
-  innerContainer: {
+  defaultContainer: {
     flex: 1,
     borderRadius: 3,
     padding: 5,
     backgroundColor: "pink",
+    opacity: 0.8,
   },
 });

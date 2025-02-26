@@ -45,7 +45,7 @@ type ThemeStyle = {
   backgroundHoursText?: TextStyle;
   // Background hours layout container
   backgroundHoursLayoutContainer?: ViewStyle;
-  // New event container styling
+  // New event inner container, if you don't want to use the `renderNewEventContainer` prop
   newEventContainer?: ViewStyle;
   // Event container title
   eventTitle?: TextStyle;
@@ -89,6 +89,8 @@ type Config = {
   onPressEvent?: (event: CalendarEvent) => void;
   showTimeIndicator?: boolean;
   maxAllDayEvents: number;
+  canCreateEvents: boolean;
+  renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
 };
 
 type PrefabHour = {

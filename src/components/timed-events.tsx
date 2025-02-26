@@ -4,12 +4,12 @@ import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
 import BackgroundHoursLayout from "src/components/background-hours-layout";
 import { generatePrefabHours } from "src/utils/date-utils";
 import BackgroundHoursContent from "src/components/background-hours-content";
-import NewEventContainer from "src/components/new-event-container";
 import TimedEventContainer from "src/components/timed-event-container";
 import TimeIndicator from "src/components/time-indicator";
+import NewEventContainer from "src/components/new-event-container";
 
 const TimedEvents = () => {
-  const { theme, timeFormat, layout, showTimeIndicator } =
+  const { theme, canCreateEvents, timeFormat, layout, showTimeIndicator } =
     useContext(ConfigProvider);
   const hours = useMemo(() => generatePrefabHours(timeFormat), [timeFormat]);
 
@@ -26,7 +26,7 @@ const TimedEvents = () => {
         ))}
         {showTimeIndicator ? <TimeIndicator /> : null}
       </View>
-      <NewEventContainer />
+      {canCreateEvents ? <NewEventContainer /> : null}
     </View>
   );
 };

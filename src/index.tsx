@@ -20,10 +20,12 @@ type EventCalenderProps = {
   timezone?: string;
   renderEvent: Config["renderEvent"];
   onPressEvent?: Config["onPressEvent"];
-  userCalendarId: string;
+  userCalendarId?: string;
   startDayOfWeekOffset: number;
   showTimeIndicator?: boolean;
   maxAllDayEvents?: number;
+  canCreateEvents?: boolean;
+  renderNewEventContainer?: Config["renderNewEventContainer"];
 };
 
 const EventCalendar = ({
@@ -36,10 +38,12 @@ const EventCalendar = ({
   timezone = "UTC",
   renderEvent,
   onPressEvent,
-  userCalendarId,
+  userCalendarId = "",
   startDayOfWeekOffset,
   showTimeIndicator,
   maxAllDayEvents = 5,
+  canCreateEvents = true,
+  renderNewEventContainer,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -79,6 +83,8 @@ const EventCalendar = ({
           onPressEvent,
           showTimeIndicator,
           maxAllDayEvents,
+          canCreateEvents,
+          renderNewEventContainer,
         }}
       >
         <AllDayEvents />
@@ -89,11 +95,11 @@ const EventCalendar = ({
           style={[styles.scrollView, theme?.scrollView]}
         >
           <ZoomProvider>
+            <View style={[styles.borderContainer, theme?.borderContainer]} />
             <TimedEvents />
           </ZoomProvider>
         </ScrollView>
       </ConfigProvider.Provider>
-      <View style={[styles.borderContainer, theme?.borderContainer]} />
     </View>
   );
 };

@@ -11,6 +11,7 @@ import useIsEditing from "src/hooks/use-is-editing";
 import { useShallow } from "zustand/react/shallow";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { EventExtend } from "src/enums";
+import { StyleSheet, View } from "react-native";
 
 type TimedEventContainerProps = {
   layout: PartDayEventLayoutType;
@@ -143,9 +144,15 @@ const TimedEventContainer = ({ layout }: TimedEventContainerProps) => {
 
   return (
     <GestureDetector gesture={gestures}>
-      <Animated.View style={stylePosition}>{render}</Animated.View>
+      <Animated.View style={stylePosition}>
+        <View style={styles.hairline}>{render}</View>
+      </Animated.View>
     </GestureDetector>
   );
 };
+
+const styles = StyleSheet.create({
+  hairline: { marginHorizontal: StyleSheet.hairlineWidth, flex: 1 },
+});
 
 export default TimedEventContainer;

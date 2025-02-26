@@ -309,6 +309,15 @@ const RenderEvent = ({
   );
 };
 
+const m = moment();
+
+const formatTime = (hour: number, minute: number) => {
+  const start = m.hour(hour).minute(minute);
+  const end = start.clone().add(1, "hour");
+
+  return `${start.format(timeFormat)} - ${end.format(timeFormat)}`;
+};
+
 export default function App() {
   return (
     <SafeAreaProvider>
@@ -316,23 +325,54 @@ export default function App() {
         <StatusBar style="auto" />
         <SafeAreaView style={styles.container}>
           <EventCalendar
+            // Events to display on the calendar
             events={events}
+            // The current date of the calendar
             dayDate={date}
+            // Triggered when a new event is created
             onCreateEvent={(params: any) => {
               console.log("Create event", params);
             }}
+            // Triggered when pressed on an event
             onPressEvent={(event: any) => {
               console.log("Press event", event);
             }}
+            // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
+            // always show up at the beginning of the stack if reasonably possible
             userCalendarId="primary-calendar"
+            // Day of the week the user begins their week
             startDayOfWeekOffset={0}
+            // How the time should be formatted
             timeFormat={timeFormat}
             showTimeIndicator
+            // Can the user create new events
+            canCreateEvents
+            // Render the main event component, timed and all day events
             renderEvent={(
               event: any,
               extend: EventExtend,
               height?: SharedValue<number>
             ) => <RenderEvent event={event} height={height} extend={extend} />}
+            // The theme of the calendar, overrides the default theme
+            theme={undefined}
+            // The initial zoom level of the calendar, you can use this to save the zoom level and restore it
+            initialZoomLevel={undefined}
+            // Maximum number of all day events to display before showing a "show more" button
+            maxAllDayEvents={3}
+            // The timezone of the calendar
+            timezone="UTC"
+            // Renders the new event container, this is the component that shows up when the user is creating a new event
+            // The time is already formatted in the timeFormat given
+            renderNewEventContainer={(hour: number, minute: number) => (
+              <View style={styles.eventContainer}>
+                <View style={styles.newEventContainer}>
+                  <Text style={styles.eventTextTitle}>New event</Text>
+                  <Text style={styles.eventTextTime}>
+                    {formatTime(hour, minute)}
+                  </Text>
+                </View>
+              </View>
+            )}
           />
         </SafeAreaView>
       </GestureHandlerRootView>
@@ -361,5 +401,12 @@ const styles = StyleSheet.create({
   },
   eventTextTime: {
     fontSize: 11,
+  },
+  newEventContainer: {
+    margin: 2,
+    borderRadius: 4,
+    padding: 5,
+    flex: 1,
+    backgroundColor: eventColor("primary-calendar"),
   },
 });

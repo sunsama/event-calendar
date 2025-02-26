@@ -13,8 +13,13 @@ type ZoomProviderProps = {
 const fraction = 0.1;
 
 const ZoomProvider = ({ children }: ZoomProviderProps) => {
-  const { zoomLevel, initialZoomLevel, createY, onCreateEvent } =
-    useContext(ConfigProvider);
+  const {
+    canCreateEvents,
+    zoomLevel,
+    initialZoomLevel,
+    createY,
+    onCreateEvent,
+  } = useContext(ConfigProvider);
   const previewScale = useSharedValue(-1);
 
   useEffect(() => {
@@ -55,21 +60,18 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
       .onStart((event) => {
         "worklet";
 
-        if (editing) {
-          createY.value = -1;
+        if (!canCreateEvents || editing) {
+          createY.value = -100000;
           isDragging.value = false;
           yPosition.value = -1;
-          // console.log("BackgroundHoursLayout gesture start is editing");
           return;
         }
 
         isDragging.value = true;
-        createY.value =
-          event.y - TOP_MARGIN_PIXEL_OFFSET - (zoomLevel.value * 60) / 2;
-        // console.log(
-        //   "BackgroundHoursLayout gesture start is not editing",
-        //   event.y
-        // );
+        createY.value = Math.max(
+          0,
+          event.y - TOP_MARGIN_PIXEL_OFFSET - (zoomLevel.value * 60) / 2
+        );
       })
       .onTouchesMove((event) => {
         "worklet";
@@ -78,11 +80,12 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
           return;
         }
 
-        createY.value =
+        createY.value = Math.max(
+          0,
           event.allTouches[0].y -
-          TOP_MARGIN_PIXEL_OFFSET -
-          (zoomLevel.value * 60) / 2;
-        // console.log("BackgroundHoursLayout gesture move", event.allTouches[0].y);
+            TOP_MARGIN_PIXEL_OFFSET -
+            (zoomLevel.value * 60) / 2
+        );
       })
       .onEnd((event, success) => {
         "worklet";
@@ -90,14 +93,13 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
         if (!isDragging.value) {
           return;
         }
-        // console.log("BackgroundHoursLayout gesture end", event.y, success);
+
         // Make sure it doesn't show the new event component anymore
         createY.value = -1;
         yPosition.value = -1;
         isDragging.value = false;
 
         if (!success) {
-          // console.log("BackgroundHoursLayout gesture end not success");
           return;
         }
 
@@ -107,13 +109,6 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
         const time = Math.floor(normalizedY / zoomLevel.value);
         const hour = Math.floor(time / 60);
         const minute = time - hour * 60;
-
-        // console.log(
-        //   "BackgroundHoursLayout gesture end success",
-        //   hour,
-        //   minute,
-        //   !!config.onCreateEvent
-        // );
 
         if (onCreateEvent) {
           runOnJS(onCreateEvent)({
