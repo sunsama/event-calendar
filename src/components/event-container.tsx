@@ -29,7 +29,7 @@ const EventContainer = ({ layout }: EventContainerProps) => {
 
   const stylePosition = useAnimatedStyle(() => {
     const basePosition: any = {
-      height: Math.max(26, 24 * initialZoomLevel),
+      height: Math.max(28, 24 * initialZoomLevel),
     };
 
     return basePosition;

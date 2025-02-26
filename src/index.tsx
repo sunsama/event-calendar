@@ -23,6 +23,7 @@ type EventCalenderProps = {
   userCalendarId: string;
   startDayOfWeekOffset: number;
   showTimeIndicator?: boolean;
+  maxAllDayEvents?: number;
 };
 
 const EventCalendar = ({
@@ -38,6 +39,7 @@ const EventCalendar = ({
   userCalendarId,
   startDayOfWeekOffset,
   showTimeIndicator,
+  maxAllDayEvents = 5,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -61,7 +63,6 @@ const EventCalendar = ({
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
 
-  console.info(initialZoomLevel);
   return (
     <View style={[styles.container, theme?.container]}>
       <ConfigProvider.Provider
@@ -77,6 +78,7 @@ const EventCalendar = ({
           renderEvent,
           onPressEvent,
           showTimeIndicator,
+          maxAllDayEvents,
         }}
       >
         <AllDayEvents />

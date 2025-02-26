@@ -59,6 +59,10 @@ type ThemeStyle = {
   allDayContainer?: ViewStyle;
   // All day event container
   allDayEventContainer?: ViewStyle;
+  // Container showing when there are too many all day events to show
+  allDayShowMoreContainer?: ViewStyle;
+  // Text showing when there are too many all day events to show
+  allDayShowMoreText?: TextStyle;
 };
 
 type onCreateEvent = (arg: {
@@ -84,6 +88,7 @@ type Config = {
   ) => ReactNode;
   onPressEvent?: (event: CalendarEvent) => void;
   showTimeIndicator?: boolean;
+  maxAllDayEvents: number;
 };
 
 type PrefabHour = {

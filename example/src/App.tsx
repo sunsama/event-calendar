@@ -204,6 +204,30 @@ const events: any[] = [
     isAllDay: true,
     calendarId: "secondary-calendar",
   },
+  {
+    id: "25",
+    title: "All Day Event 5",
+    start: "2023-10-10T00:00:00Z",
+    end: "2023-10-10T23:59:59Z",
+    isAllDay: true,
+    calendarId: "secondary-calendar",
+  },
+  {
+    id: "26",
+    title: "All Day Event 6",
+    start: "2023-10-10T00:00:00Z",
+    end: "2023-10-10T23:59:59Z",
+    isAllDay: true,
+    calendarId: "secondary-calendar",
+  },
+  {
+    id: "27",
+    title: "All Day Event 7",
+    start: "2023-10-10T00:00:00Z",
+    end: "2023-10-10T23:59:59Z",
+    isAllDay: true,
+    calendarId: "secondary-calendar",
+  },
 ];
 
 const date = "2023-10-10T15:00:00.000Z";
