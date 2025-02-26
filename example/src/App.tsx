@@ -8,6 +8,8 @@ import Animated, {
   SharedValue,
   useAnimatedStyle,
 } from "react-native-reanimated";
+import { EventExtend } from "src/enums";
+import { useMemo } from "react";
 
 const events: any[] = [
   {
@@ -181,8 +183,24 @@ const events: any[] = [
   {
     id: "22",
     title: "All Day Event 2",
-    start: "2023-10-10T00:00:00Z",
+    start: "2023-10-09T00:00:00Z",
     end: "2023-10-10T23:59:59Z",
+    isAllDay: true,
+    calendarId: "secondary-calendar",
+  },
+  {
+    id: "23",
+    title: "All Day Event 3",
+    start: "2023-10-10T00:00:00Z",
+    end: "2023-10-11T23:59:59Z",
+    isAllDay: true,
+    calendarId: "secondary-calendar",
+  },
+  {
+    id: "24",
+    title: "All Day Event 4",
+    start: "2023-10-09T00:00:00Z",
+    end: "2023-10-11T23:59:59Z",
     isAllDay: true,
     calendarId: "secondary-calendar",
   },
@@ -207,15 +225,32 @@ const timeFormat = "hh:mm";
 const RenderEvent = ({
   event,
   height,
+  extend,
 }: {
   event: any;
-  height: SharedValue<number>;
+  extend: EventExtend;
+  height?: SharedValue<number>;
 }) => {
-  const start = moment(event.start);
-  const end = moment(event.end);
+  const start = moment.tz(event.start, "UTC");
+  const end = moment.tz(event.end, "UTC");
+
+  const extendText = useMemo(() => {
+    switch (extend) {
+      case EventExtend.Past:
+        return " (past)";
+      case EventExtend.Future:
+        return " (future)";
+      case EventExtend.Both:
+        return " (both)";
+      default:
+        return "";
+    }
+  }, [extend]);
 
   const styleRowOrColumn = useAnimatedStyle(() => {
-    if (height.value < 45) {
+    // When there is NO height, this means it is an all-day event, of if there is a height, but it is less than 45,
+    // it is a short event, and we want to display it in a row.
+    if (!height || height.value < 45) {
       return {
         flexDirection: "row",
         alignItems: "center",
@@ -236,10 +271,14 @@ const RenderEvent = ({
         },
       ]}
     >
-      <Text style={styles.eventTextTitle}>{event.title}</Text>
-      <Text style={styles.eventTextTime}>
-        {start.format(timeFormat)} - {end.format(timeFormat)}
+      <Text style={styles.eventTextTitle}>
+        {event.title} {extendText}
       </Text>
+      {height ? (
+        <Text style={styles.eventTextTime}>
+          {start.format(timeFormat)} - {end.format(timeFormat)}
+        </Text>
+      ) : null}
     </Animated.View>
   );
 };
@@ -263,9 +302,11 @@ export default function App() {
             startDayOfWeekOffset={0}
             timeFormat={timeFormat}
             showTimeIndicator
-            renderEvent={(event: any, height: SharedValue<number>) => (
-              <RenderEvent event={event} height={height} />
-            )}
+            renderEvent={(
+              event: any,
+              extend: EventExtend,
+              height?: SharedValue<number>
+            ) => <RenderEvent event={event} height={height} extend={extend} />}
           />
         </SafeAreaView>
       </GestureHandlerRootView>

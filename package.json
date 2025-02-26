@@ -90,6 +90,7 @@
     "react-native": "0.76.7",
     "react-native-builder-bob": "^0.37.0",
     "release-it": "^17.10.0",
+    "ts-jest": "^29.2.6",
     "typescript": "^5.2.2"
   },
   "resolutions": {
@@ -103,13 +104,6 @@
     "example"
   ],
   "packageManager": "yarn@3.6.4",
-  "jest": {
-    "preset": "react-native",
-    "modulePathIgnorePatterns": [
-      "<rootDir>/example/node_modules",
-      "<rootDir>/lib/"
-    ]
-  },
   "commitlint": {
     "extends": [
       "@commitlint/config-conventional"
@@ -186,6 +180,11 @@
           "esm": true
         }
       ]
+    ],
+    "exclude": [
+      "**/__tests__/**",
+      "**/*.test.ts",
+      "**/*.test.tsx"
     ]
   },
   "create-react-native-library": {

@@ -3,7 +3,7 @@ import _reduce from "lodash/reduce";
 import _sortBy from "lodash/sortBy";
 import _reverse from "lodash/reverse";
 import moment from "moment-timezone";
-import { CalendarLayout } from "../utils/calendar-layout";
+import { CalendarLayout } from "src/utils/calendar-layout";
 import {
   computeCalendarDateRange,
   dateRangeIntersect,
@@ -11,7 +11,8 @@ import {
   getDurationInDays,
   isAllDayOrSpansMidnight,
   startOfUserWeek,
-} from "../utils/date-utils";
+} from "src/utils/date-utils";
+import { EventExtend } from "src/enums";
 
 interface GenerateEventLayouts {
   events: CalendarEvent[];
@@ -142,8 +143,7 @@ export const generateEventLayouts = ({
         const {
           event,
           visibleWidthDays,
-          wrapStart,
-          wrapEnd,
+          extend = EventExtend.None,
           isPrimaryRendered,
         } = calendarViewDayLayout.getViewAt(x, y);
         if (event) {
@@ -152,8 +152,7 @@ export const generateEventLayouts = ({
             rowIndex: y,
             // @ts-ignore we know visibleWidthDays will be set for all day events if an event is returned
             visibleWidthDays,
-            wrapStart,
-            wrapEnd,
+            extend,
             isPrimaryRendered,
           });
         }

@@ -1,4 +1,5 @@
 import { max } from "lodash";
+import { EventExtend } from "src/enums";
 
 export class CalendarLayout {
   // visibleX is an array of numbers representing the x indexes currently 'in view'
@@ -109,16 +110,30 @@ export class CalendarLayout {
       ) {
         visibleWidthDays++;
       }
+
+      const wrapStart = x !== rootX;
+      const wrapEnd =
+        this.getAt(x + visibleWidthDays, y) &&
+        this.getAt(x + visibleWidthDays, y).value === event;
+
+      let extend = EventExtend.None;
+
+      if (wrapStart && wrapEnd) {
+        extend = EventExtend.Both;
+      } else if (wrapStart) {
+        extend = EventExtend.Past;
+      } else if (wrapEnd) {
+        extend = EventExtend.Future;
+      }
+
       return {
         event,
         visibleWidthDays,
-        wrapStart: x !== rootX,
-        wrapEnd:
-          this.getAt(x + visibleWidthDays, y) &&
-          this.getAt(x + visibleWidthDays, y).value === event,
         isPrimaryRendered,
+        extend,
       };
     }
+
     return {};
   }
 }

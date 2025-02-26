@@ -1,4 +1,5 @@
 import generateEventLayouts from "../generate-event-layouts";
+import { EventExtend } from "src/enums";
 
 describe("generateEventLayouts", () => {
   it("should separate all-day events and timed events", () => {
@@ -158,7 +159,7 @@ describe("generateEventLayouts", () => {
         calendarId: "primary-calendar",
         title: "Event 1",
         start: "2023-10-10T05:00:00Z",
-        end: "2023-10-11T05:00:00Z",
+        end: "2023-10-12T05:00:00Z",
       },
       {
         id: "2",
@@ -171,7 +172,7 @@ describe("generateEventLayouts", () => {
 
     const layouts = generateEventLayouts({
       startCalendarDate: "2023-10-10",
-      endCalendarDate: "2023-10-11",
+      endCalendarDate: "2023-10-12",
       events,
       timezone: "UTC",
       userCalendarId: "primary-calendar",
@@ -179,6 +180,7 @@ describe("generateEventLayouts", () => {
 
     const layoutDay1 = layouts["2023-10-10"];
     const layoutDay2 = layouts["2023-10-11"];
+    const layoutDay3 = layouts["2023-10-12"];
 
     // Day 2 should see both events overlapping from 00:00–01:00
     expect(layoutDay2?.allDayEventsLayout.length).toBe(1);
@@ -186,9 +188,11 @@ describe("generateEventLayouts", () => {
 
     const evt1 = layoutDay1.allDayEventsLayout[0];
     const evt2 = layoutDay2.allDayEventsLayout[0];
+    const evt3 = layoutDay3.allDayEventsLayout[0];
 
-    expect(evt1.wrapEnd).toBeTruthy();
-    expect(evt2.wrapEnd).toBeFalsy();
+    expect(evt1.extend).toBe(EventExtend.Future);
+    expect(evt2.extend).toBe(EventExtend.Both);
+    expect(evt3.extend).toBe(EventExtend.Past);
   });
 
   it("should handle events in different time zones", () => {

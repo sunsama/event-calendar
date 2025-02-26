@@ -17,7 +17,7 @@
     "allowJs": false,
     "noEmit": true,
     "paths": {
-      "@sunsama/event-calendar": ["./src"],
+      "@sunsama/event-calendar": ["./src"]
     }
-  },
+  }
 }

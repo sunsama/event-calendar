@@ -39,7 +39,6 @@ const BackgroundHoursContent = memo(
 const styles = StyleSheet.create({
   hourContainer: {
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderLeftWidth: StyleSheet.hairlineWidth,
     marginRight: -20,
     borderColor: "black",
   },

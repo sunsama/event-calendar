@@ -58,10 +58,10 @@ const EventCalendar = ({
   );
 
   const layout = useEventsLayout(memoizedProps);
-
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
 
+  console.info(initialZoomLevel);
   return (
     <View style={[styles.container, theme?.container]}>
       <ConfigProvider.Provider
@@ -71,6 +71,7 @@ const EventCalendar = ({
           layout,
           zoomLevel,
           createY,
+          initialZoomLevel,
           onCreateEvent,
           timezone,
           renderEvent,

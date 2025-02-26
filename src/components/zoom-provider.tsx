@@ -1,11 +1,7 @@
 import Animated, { runOnJS, useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { useContext, useEffect, useRef } from "react";
-import {
-  ConfigProvider,
-  DEFAULT_MINUTE_HEIGHT,
-  TOP_MARGIN_PIXEL_OFFSET,
-} from "src/utils/globals";
+import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
 import { StyleSheet } from "react-native";
 import useIsEditing from "src/hooks/use-is-editing";
 
@@ -17,12 +13,13 @@ type ZoomProviderProps = {
 const fraction = 0.1;
 
 const ZoomProvider = ({ children }: ZoomProviderProps) => {
-  const config = useContext(ConfigProvider);
+  const { zoomLevel, initialZoomLevel, createY, onCreateEvent } =
+    useContext(ConfigProvider);
   const previewScale = useSharedValue(-1);
 
   useEffect(() => {
-    previewScale.value = config.zoomLevel.get();
-  }, [config.zoomLevel, previewScale]);
+    previewScale.value = zoomLevel.get();
+  }, [zoomLevel, previewScale]);
 
   const pinchGesture = useRef(
     Gesture.Pinch().onUpdate((event) => {
@@ -30,8 +27,8 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
 
       const newScale = previewScale.value * (1 + fraction * (event.scale - 1));
 
-      config.zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
-      previewScale.value = config.zoomLevel.value;
+      zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
+      previewScale.value = zoomLevel.value;
     })
   );
 
@@ -41,7 +38,7 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
       .onEnd((_event, success) => {
         if (success) {
           // Reset the zoom level to the default
-          config.zoomLevel.value = DEFAULT_MINUTE_HEIGHT;
+          zoomLevel.value = initialZoomLevel;
         }
       })
   );
@@ -59,7 +56,7 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
         "worklet";
 
         if (editing) {
-          config.createY.value = -1;
+          createY.value = -1;
           isDragging.value = false;
           yPosition.value = -1;
           // console.log("BackgroundHoursLayout gesture start is editing");
@@ -67,8 +64,8 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
         }
 
         isDragging.value = true;
-        config.createY.value =
-          event.y - TOP_MARGIN_PIXEL_OFFSET - (config.zoomLevel.value * 60) / 2;
+        createY.value =
+          event.y - TOP_MARGIN_PIXEL_OFFSET - (zoomLevel.value * 60) / 2;
         // console.log(
         //   "BackgroundHoursLayout gesture start is not editing",
         //   event.y
@@ -81,10 +78,10 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
           return;
         }
 
-        config.createY.value =
+        createY.value =
           event.allTouches[0].y -
           TOP_MARGIN_PIXEL_OFFSET -
-          (config.zoomLevel.value * 60) / 2;
+          (zoomLevel.value * 60) / 2;
         // console.log("BackgroundHoursLayout gesture move", event.allTouches[0].y);
       })
       .onEnd((event, success) => {
@@ -95,7 +92,7 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
         }
         // console.log("BackgroundHoursLayout gesture end", event.y, success);
         // Make sure it doesn't show the new event component anymore
-        config.createY.value = -1;
+        createY.value = -1;
         yPosition.value = -1;
         isDragging.value = false;
 
@@ -106,8 +103,8 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
 
         // Determine the hour that was clicked and trigger the event creation
         const normalizedY =
-          event.y - TOP_MARGIN_PIXEL_OFFSET - (config.zoomLevel.value * 60) / 2;
-        const time = Math.floor(normalizedY / config.zoomLevel.value);
+          event.y - TOP_MARGIN_PIXEL_OFFSET - (zoomLevel.value * 60) / 2;
+        const time = Math.floor(normalizedY / zoomLevel.value);
         const hour = Math.floor(time / 60);
         const minute = time - hour * 60;
 
@@ -118,8 +115,8 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
         //   !!config.onCreateEvent
         // );
 
-        if (config.onCreateEvent) {
-          runOnJS(config.onCreateEvent)({
+        if (onCreateEvent) {
+          runOnJS(onCreateEvent)({
             hour,
             minute,
           });

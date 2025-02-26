@@ -49,10 +49,8 @@ const styles = StyleSheet.create({
     marginTop: -12,
     marginBottom: 12,
     marginRight: 0,
-    borderTopColor: "transparent",
   },
   hourText: {
-    textTransform: "uppercase",
     textAlign: "right",
     color: "black",
     fontSize: 10,

@@ -11,8 +11,7 @@ type AllDayEventLayoutType = {
   event: CalendarEvent;
   rowIndex?: number;
   visibleWidthDays?: number;
-  wrapStart?: boolean;
-  wrapEnd?: boolean;
+  extend: EventExtend;
   isPrimaryRendered?: boolean;
 };
 
@@ -36,6 +35,8 @@ type ThemeStyle = {
   scrollView?: ViewStyle;
   // Timed events main container
   timedEventsContainer?: ViewStyle;
+  // Border container used to separate the hours and the main grid
+  borderContainer?: ViewStyle;
   // Background hours container
   backgroundHoursContainer?: ViewStyle;
   // Background hours inner container
@@ -54,6 +55,10 @@ type ThemeStyle = {
   eventContainer?: ViewStyle;
   // Style the time indicator
   timeIndicator?: ViewStyle;
+  // All day main container
+  allDayContainer?: ViewStyle;
+  // All day event container
+  allDayEventContainer?: ViewStyle;
 };
 
 type onCreateEvent = (arg: {
@@ -61,17 +66,6 @@ type onCreateEvent = (arg: {
   minute?: number;
   isAllDay?: boolean;
 }) => void;
-
-/**
- * Tells us if an event extends into the next day, the previous day, or both.
- * Used for all day events.
- */
-enum EventExtend {
-  Yesterday,
-  Tomorrow,
-  Both,
-  None,
-}
 
 type Config = {
   timezone: string;
@@ -82,11 +76,11 @@ type Config = {
   layout: FullCalendarEventLayout;
   createY: SharedValue<nummber>;
   onCreateEvent?: onCreateEvent;
-  primaryCalendarId?: string;
+  initialZoomLevel: number;
   renderEvent: (
     event: CalendarEvent,
-    eventHeight: SharedValue<number>,
-    extended: EventExtend
+    extended: EventExtend,
+    eventHeight?: SharedValue<number>
   ) => ReactNode;
   onPressEvent?: (event: CalendarEvent) => void;
   showTimeIndicator?: boolean;
