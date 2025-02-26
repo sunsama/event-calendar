@@ -63,12 +63,13 @@ type onCreateEvent = (arg: {
 }) => void;
 
 /**
- * Tells us if an event extends into the next day or the previous day.
- * Used mainly for all day events.
+ * Tells us if an event extends into the next day, the previous day, or both.
+ * Used for all day events.
  */
 enum EventExtend {
   Yesterday,
   Tomorrow,
+  Both,
   None,
 }
 
