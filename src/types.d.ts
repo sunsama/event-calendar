@@ -62,6 +62,16 @@ type onCreateEvent = (arg: {
   isAllDay?: boolean;
 }) => void;
 
+/**
+ * Tells us if an event extends into the next day or the previous day.
+ * Used mainly for all day events.
+ */
+enum EventExtend {
+  Yesterday,
+  Tomorrow,
+  None,
+}
+
 type Config = {
   timezone: string;
   timeFormat: string;
@@ -74,7 +84,8 @@ type Config = {
   primaryCalendarId?: string;
   renderEvent: (
     event: CalendarEvent,
-    eventHeight: SharedValue<number>
+    eventHeight: SharedValue<number>,
+    extended: EventExtend
   ) => ReactNode;
   onPressEvent?: (event: CalendarEvent) => void;
   showTimeIndicator?: boolean;

@@ -2,13 +2,13 @@ import { StyleSheet, View } from "react-native";
 import AllDayEvents from "src/components/all-day-events";
 import { ScrollView } from "react-native-gesture-handler";
 import { refScrollView } from "src/utils/references";
-import { SharedValue, useSharedValue } from "react-native-reanimated";
+import { useSharedValue } from "react-native-reanimated";
 import ZoomProvider from "src/components/zoom-provider";
 import TimedEvents from "src/components/timed-events";
 import useEventsLayout, { UpdateEvent } from "src/hooks/use-events-layout";
 import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "src/utils/globals";
 import moment from "moment-timezone";
-import { ReactNode, useMemo } from "react";
+import { useMemo } from "react";
 
 type EventCalenderProps = {
   events: CalendarEvent[];
@@ -18,8 +18,8 @@ type EventCalenderProps = {
   initialZoomLevel?: number;
   onCreateEvent?: onCreateEvent;
   timezone?: string;
-  renderEvent: (event: CalendarEvent, height: SharedValue<number>) => ReactNode;
-  onPressEvent?: (event: CalendarEvent) => void;
+  renderEvent: Config["renderEvent"];
+  onPressEvent?: Config["onPressEvent"];
   userCalendarId: string;
   startDayOfWeekOffset: number;
   showTimeIndicator?: boolean;

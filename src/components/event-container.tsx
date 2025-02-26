@@ -126,7 +126,7 @@ const EventContainer = ({ layout }: EventContainerProps) => {
   );
 
   const render = useMemo(
-    () => renderEvent(layout.event, height),
+    () => renderEvent(layout.event, height, EventExtend.None),
     [height, layout.event, renderEvent]
   );
 

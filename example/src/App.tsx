@@ -1,4 +1,4 @@
-import EventCalender from "@sunsama/event-calendar";
+import EventCalendar from "@sunsama/event-calendar";
 import { StyleSheet, Text } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -250,7 +250,7 @@ export default function App() {
       <GestureHandlerRootView style={styles.container}>
         <StatusBar style="auto" />
         <SafeAreaView style={styles.container}>
-          <EventCalender
+          <EventCalendar
             events={events}
             dayDate={date}
             onCreateEvent={(params: any) => {
