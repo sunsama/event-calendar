@@ -54,7 +54,7 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
       .enabled(canCreateEvents && !isEditing)
       .withRef(refNewEvent as any)
       .numberOfPointers(1)
-      .minDuration(500)
+      .minDuration(250)
       .maxDistance(10000)
       .onStart((event) => {
         "worklet";

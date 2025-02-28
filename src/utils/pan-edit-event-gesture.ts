@@ -15,7 +15,7 @@ const gesturePan = (
   startEditing?: () => void
 ) =>
   Gesture.Pan()
-    .activateAfterLongPress(500)
+    .activateAfterLongPress(250)
     .blocksExternalGesture(refNewEvent)
     .onStart(() => {
       if (startEditing) {
