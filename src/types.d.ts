@@ -91,20 +91,25 @@ type Config = {
   theme?: ThemeStyle;
   zoomLevel: SharedValue<number>;
   layout: FullCalendarEventLayout;
-  createY: SharedValue<nummber>;
+  createY: SharedValue<number>;
+  maximumHour: SharedValue<number>;
   onCreateEvent?: onCreateEvent;
   initialZoomLevel: number;
   renderEvent: (
     event: CalendarEvent,
     extended: EventExtend,
-    eventHeight?: SharedValue<number>
+    eventHeight?: SharedValue<number>,
+    updatedTimes?: {
+      updatedStart: DerivedValue<number>;
+      updatedEnd: DerivedValue<number>;
+    }
   ) => ReactNode;
   onEventEdit?: (params: {
     event: CalendarEvent;
     status: EditStatus;
     updatedTimes?: {
-      updatedStart: DerivedValue<number>;
-      updatedEnd: DerivedValue<number>;
+      updatedStart: string;
+      updatedEnd: string;
     };
   }) => void;
   onPressEvent?: (event: CalendarEvent) => void;
@@ -114,6 +119,7 @@ type Config = {
   canEditEvent: boolean | ((event: CalendarEvent) => boolean);
   renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
   fiveMinuteInterval?: boolean;
+  renderDragBars?: { top?: () => ReactNode; bottom?: () => ReactNode };
 };
 
 type PrefabHour = {

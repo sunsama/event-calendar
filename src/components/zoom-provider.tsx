@@ -1,4 +1,8 @@
-import Animated, { runOnJS, useSharedValue } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  useAnimatedReaction,
+  useSharedValue,
+} from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { forwardRef, useContext, useEffect } from "react";
 import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
@@ -21,6 +25,7 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
       initialZoomLevel,
       createY,
       onCreateEvent,
+      maximumHour,
     } = useContext(ConfigProvider);
     const previewScale = useSharedValue(-1);
 
@@ -49,6 +54,14 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
     const yPosition = useSharedValue(-1);
     const { isEditing } = useIsEditing();
     const isDragging = useSharedValue(false);
+
+    useAnimatedReaction(
+      () => zoomLevel.value,
+      (zoom) => {
+        maximumHour.value = 1440 * zoom;
+      },
+      [maximumHour]
+    );
 
     const longPressGesture = Gesture.LongPress()
       .enabled(canCreateEvents && !isEditing)

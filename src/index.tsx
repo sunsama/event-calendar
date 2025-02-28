@@ -30,6 +30,7 @@ type EventCalenderProps = {
   renderNewEventContainer?: Config["renderNewEventContainer"];
   fiveMinuteInterval?: boolean;
   onEventEdit?: Config["onEventEdit"];
+  renderDragBars?: Config["renderDragBars"];
 };
 
 const EventCalendar = ({
@@ -51,6 +52,7 @@ const EventCalendar = ({
   fiveMinuteInterval,
   canEditEvent = true,
   onEventEdit,
+  renderDragBars,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -73,6 +75,7 @@ const EventCalendar = ({
   const layout = useEventsLayout(memoizedProps);
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
+  const maximumHour = useSharedValue(0);
 
   const refNewEvent = useRef<GestureRef>(null);
 
@@ -97,6 +100,8 @@ const EventCalendar = ({
           fiveMinuteInterval,
           canEditEvent,
           onEventEdit,
+          renderDragBars,
+          maximumHour,
         }}
       >
         <AllDayEvents />

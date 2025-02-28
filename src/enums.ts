@@ -9,3 +9,8 @@ export enum EventExtend {
   Future,
   Both,
 }
+
+export enum EditStatus {
+  Start,
+  Finish,
+}

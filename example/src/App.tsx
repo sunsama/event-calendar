@@ -5,11 +5,14 @@ import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import moment from "moment-timezone";
 import Animated, {
+  DerivedValue,
+  runOnJS,
   SharedValue,
+  useAnimatedReaction,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { EventExtend } from "src/enums";
-import { useMemo } from "react";
+import { EditStatus, EventExtend } from "src/enums";
+import { useCallback, useMemo, useState } from "react";
 import Toast from "react-native-toast-message";
 
 const events: any[] = [
@@ -251,6 +254,7 @@ const RenderEvent = ({
   event,
   height,
   extend,
+  updatedTimes,
 }: {
   // The raw CalendarEvent
   event: any;
@@ -258,15 +262,69 @@ const RenderEvent = ({
   extend: EventExtend;
   // The height of the event, if there is no height, this is an all-day event
   height?: SharedValue<number>;
+  // The updated start and end times, if the event is being edited, only for timed events
+  // DerivedValues are read-only values that are updated when the dependencies change
+  // Now these values are the minutes from the start of the day on the day of the event,
+  // e.g. 5:00 PM is 1020 minutes from the start of the day. You can convert this to a date
+  // using `moment.tz(event.start, "UTC").startOf("day").add(freshMinutes, "minutes")`
+  // This is done out of pure ~laziness~ optimisation to avoid having to convert the minutes to a
+  // date every time the time changes.
+  updatedTimes?: {
+    updatedStart: DerivedValue<number>;
+    updatedEnd: DerivedValue<number>;
+  };
 }) => {
-  const start = useMemo(
-    () => moment.tz(event.start, "UTC").format(timeFormat),
+  const [start, setStart] = useState(
+    moment.tz(event.start, "UTC").format(timeFormat)
+  );
+  const [end, setEnd] = useState(
+    moment.tz(event.end, "UTC").format(timeFormat)
+  );
+
+  const setFormattedStart = useCallback(
+    (freshStart: number) => {
+      setStart(
+        moment
+          .tz(event.start, "UTC")
+          .startOf("day")
+          .add(freshStart, "minutes")
+          .format(timeFormat)
+      );
+    },
     [event.start]
   );
 
-  const end = useMemo(
-    () => moment.tz(event.end, "UTC").format(timeFormat),
-    [event.end]
+  const setFormattedEnd = useCallback(
+    (freshEnd: number) => {
+      setEnd(
+        moment
+          .tz(event.start, "UTC")
+          .startOf("day")
+          .add(freshEnd, "minutes")
+          .format(timeFormat)
+      );
+    },
+    [event.start]
+  );
+
+  useAnimatedReaction(
+    () => updatedTimes?.updatedStart.value,
+    (newStart) => {
+      if (updatedTimes) {
+        runOnJS(setFormattedStart)(newStart || 0);
+      }
+    },
+    [updatedTimes]
+  );
+
+  useAnimatedReaction(
+    () => updatedTimes?.updatedEnd.value,
+    (newEnd) => {
+      if (updatedTimes) {
+        runOnJS(setFormattedEnd)(newEnd || 0);
+      }
+    },
+    [updatedTimes]
   );
 
   const extendText = useMemo(() => {
@@ -342,11 +400,11 @@ export default function App() {
             dayDate={date}
             // Triggered when a new event is created
             onCreateEvent={(params: any) => {
-              console.log("Create event", params);
+              console.log("onCreateEvent", params);
             }}
             // Triggered when pressed on an event
             onPressEvent={(event: any) => {
-              console.log("Press event", event);
+              console.log("onPressEvent", event);
             }}
             // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
             // always show up at the beginning of the stack if reasonably possible
@@ -355,6 +413,7 @@ export default function App() {
             startDayOfWeekOffset={0}
             // How the time should be formatted
             timeFormat={timeFormat}
+            // Shows a line on the calendar indicating the current time
             showTimeIndicator
             // Can the user create new events
             canCreateEvents
@@ -377,12 +436,42 @@ export default function App() {
 
               return allowed;
             }}
+            // When editing this is shown in the edited event to indicate the user can change the height of the event
+            // You can either give nothing, a top and bottom component or just a top or bottom component. Whatever you
+            // supply will be shown in the event when editing. If not supplied the user cannot use that part of the event
+            // to change the height.
+            renderDragBars={{
+              top: () => <View style={styles.dragBarTop} />,
+              bottom: () => <View style={styles.dragBarBottom} />,
+            }}
             // Render the main event component, timed and all day events
             renderEvent={(
               event: any,
               extend: EventExtend,
-              height?: SharedValue<number>
-            ) => <RenderEvent event={event} height={height} extend={extend} />}
+              height?: SharedValue<number>,
+              updatedTimes?: {
+                updatedStart: DerivedValue<number>;
+                updatedEnd: DerivedValue<number>;
+              }
+            ) => (
+              <RenderEvent
+                event={event}
+                height={height}
+                extend={extend}
+                updatedTimes={updatedTimes}
+              />
+            )}
+            // This callback is triggered when an event is edited, at the start and when the user is done editing
+            onEventEdit={(params: {
+              event: any;
+              status: EditStatus;
+              updatedTimes?: {
+                updatedStart: string;
+                updatedEnd: string;
+              };
+            }) => {
+              console.info("onEventEdit", params);
+            }}
             // The theme of the calendar, overrides the default theme
             theme={undefined}
             // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar
@@ -441,5 +530,19 @@ const styles = StyleSheet.create({
     padding: 5,
     flex: 1,
     backgroundColor: eventColor("primary-calendar"),
+  },
+  dragBarTop: {
+    margin: 2,
+    height: 10,
+    backgroundColor: "red",
+    borderTopLeftRadius: 4,
+    borderTopRightRadius: 4,
+  },
+  dragBarBottom: {
+    margin: 2,
+    height: 10,
+    backgroundColor: "blue",
+    borderBottomLeftRadius: 4,
+    borderBottomRightRadius: 4,
   },
 });

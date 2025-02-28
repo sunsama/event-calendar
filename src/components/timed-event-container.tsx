@@ -2,7 +2,6 @@ import Animated, {
   runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
-  useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import { ConfigProvider } from "src/utils/globals";
@@ -23,8 +22,13 @@ const TimedEventContainer = ({
   refNewEvent,
 }: TimedEventContainerProps) => {
   const { currentY, setIsEditing, isEditing } = useIsEditing();
-  const { onPressEvent, fiveMinuteInterval, zoomLevel, renderEvent } =
-    useContext(ConfigProvider);
+  const {
+    onPressEvent,
+    maximumHour,
+    fiveMinuteInterval,
+    zoomLevel,
+    renderEvent,
+  } = useContext(ConfigProvider);
 
   const height = useSharedValue(0);
   const top = useSharedValue(0);
@@ -42,9 +46,6 @@ const TimedEventContainer = ({
     });
 
   const startY = useSharedValue(0);
-  const maximumHour = useDerivedValue(() => {
-    return 1440 * zoomLevel.value;
-  }, [zoomLevel]);
 
   const gestures = Gesture.Exclusive(
     gestureTap,
@@ -59,7 +60,7 @@ const TimedEventContainer = ({
       fiveMinuteInterval,
       isEditing,
       startEditing
-    )
+    ).activateAfterLongPress(250)
   );
 
   useAnimatedReaction(

@@ -1,4 +1,11 @@
-import { memo, RefObject, useContext, useEffect } from "react";
+import {
+  memo,
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+} from "react";
 import { useIsEditing } from "src/hooks/use-is-editing";
 import { ConfigProvider } from "src/utils/globals";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
@@ -11,6 +18,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { EventExtend } from "src/enums";
 import gesturePan from "src/utils/pan-edit-event-gesture";
+import DragBar from "src/components/drag-bar";
+import { StyleSheet } from "react-native";
+import moment from "moment-timezone";
 
 type EditEventContainerProps = {
   refNewEvent: RefObject<any>;
@@ -19,8 +29,15 @@ type EditEventContainerProps = {
 const EditEventContainer = memo(
   ({ refNewEvent }: EditEventContainerProps) => {
     const { currentY, isEditing: editingEvent, setIsEditing } = useIsEditing();
-    const { fiveMinuteInterval, zoomLevel, renderEvent } =
-      useContext(ConfigProvider);
+    const {
+      maximumHour,
+      fiveMinuteInterval,
+      renderDragBars,
+      zoomLevel,
+      renderEvent,
+      timezone,
+      dayDate,
+    } = useContext(ConfigProvider);
     const height = useSharedValue(0);
 
     useEffect(() => {
@@ -42,12 +59,12 @@ const EditEventContainer = memo(
     );
 
     const styleAnimatedPosition = useAnimatedStyle(() => {
-      // The element isn't even there
       if (!editingEvent) {
         return { opacity: 0 };
       }
 
       return {
+        marginLeft: StyleSheet.hairlineWidth,
         position: "absolute",
         height: height.value,
         top: currentY.value,
@@ -57,15 +74,33 @@ const EditEventContainer = memo(
     }, [editingEvent]);
 
     const startY = useSharedValue(0);
-    const maximumHour = useDerivedValue(() => {
-      return 1440 * zoomLevel.value;
-    }, [zoomLevel]);
+
+    const updatedStart = useDerivedValue(() => {
+      return currentY.value / zoomLevel.value;
+    }, []);
+
+    const updatedEnd = useDerivedValue(() => {
+      return (currentY.value + height.value) / zoomLevel.value;
+    }, []);
+
+    const endEventEditing = useCallback(
+      (newStart: number, newEnd: number) => {
+        // Format the new start and end times
+        setIsEditing(null, {
+          updatedStart: moment.tz(dayDate, timezone).minutes(newStart).format(),
+          updatedEnd: moment.tz(dayDate, timezone).minutes(newEnd).format(),
+        });
+      },
+      [dayDate, setIsEditing, timezone]
+    );
 
     const gestureTap = Gesture.Tap()
       .numberOfTaps(1)
       .onStart(() => {
-        runOnJS(setIsEditing)(null);
+        runOnJS(endEventEditing)(updatedStart.value, updatedEnd.value);
       });
+
+    const refMainContainer = useRef();
 
     if (!editingEvent) {
       return null;
@@ -84,11 +119,35 @@ const EditEventContainer = memo(
             height,
             refNewEvent,
             fiveMinuteInterval
-          )
+          ).withRef(refMainContainer)
         )}
       >
         <Animated.View style={styleAnimatedPosition}>
-          {renderEvent(editingEvent.event, EventExtend.None, height)}
+          {renderEvent(editingEvent.event, EventExtend.None, height, {
+            updatedEnd,
+            updatedStart,
+          })}
+          {renderDragBars?.top ? (
+            <DragBar
+              top={currentY}
+              height={height}
+              render={renderDragBars.top}
+              refMainContainer={refMainContainer}
+              zoomLevel={zoomLevel}
+              maximumHour={maximumHour}
+              fiveMinuteInterval={fiveMinuteInterval}
+            />
+          ) : null}
+          {renderDragBars?.bottom ? (
+            <DragBar
+              height={height}
+              render={renderDragBars.bottom}
+              refMainContainer={refMainContainer}
+              zoomLevel={zoomLevel}
+              maximumHour={maximumHour}
+              fiveMinuteInterval={fiveMinuteInterval}
+            />
+          ) : null}
         </Animated.View>
       </GestureDetector>
     );
