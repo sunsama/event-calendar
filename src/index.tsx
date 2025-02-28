@@ -1,14 +1,15 @@
 import { StyleSheet, View } from "react-native";
 import AllDayEvents from "src/components/all-day-events";
 import { ScrollView } from "react-native-gesture-handler";
-import { refScrollView } from "src/utils/references";
 import { useSharedValue } from "react-native-reanimated";
 import ZoomProvider from "src/components/zoom-provider";
 import TimedEvents from "src/components/timed-events";
 import useEventsLayout, { UpdateEvent } from "src/hooks/use-events-layout";
 import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "src/utils/globals";
 import moment from "moment-timezone";
-import { useMemo } from "react";
+import { useMemo, useRef } from "react";
+import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
+import { IsEditingProvider } from "src/hooks/use-is-editing";
 
 type EventCalenderProps = {
   events: CalendarEvent[];
@@ -25,8 +26,10 @@ type EventCalenderProps = {
   showTimeIndicator?: boolean;
   maxAllDayEvents?: number;
   canCreateEvents?: boolean;
+  canEditEvent?: Config["canEditEvent"];
   renderNewEventContainer?: Config["renderNewEventContainer"];
   fiveMinuteInterval?: boolean;
+  onEventEdit?: Config["onEventEdit"];
 };
 
 const EventCalendar = ({
@@ -42,10 +45,12 @@ const EventCalendar = ({
   userCalendarId = "",
   startDayOfWeekOffset,
   showTimeIndicator,
-  maxAllDayEvents = 5,
+  maxAllDayEvents = 2,
   canCreateEvents = true,
   renderNewEventContainer,
   fiveMinuteInterval,
+  canEditEvent = true,
+  onEventEdit,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -69,6 +74,8 @@ const EventCalendar = ({
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
 
+  const refNewEvent = useRef<GestureRef>(null);
+
   return (
     <View style={[styles.container, theme?.container]}>
       <ConfigProvider.Provider
@@ -88,19 +95,22 @@ const EventCalendar = ({
           canCreateEvents,
           renderNewEventContainer,
           fiveMinuteInterval,
+          canEditEvent,
+          onEventEdit,
         }}
       >
         <AllDayEvents />
         <ScrollView
-          ref={refScrollView}
           bounces={false}
           keyboardShouldPersistTaps="always"
           style={[styles.scrollView, theme?.scrollView]}
         >
-          <ZoomProvider>
-            <View style={[styles.borderContainer, theme?.borderContainer]} />
-            <TimedEvents />
-          </ZoomProvider>
+          <IsEditingProvider>
+            <ZoomProvider ref={refNewEvent}>
+              <View style={[styles.borderContainer, theme?.borderContainer]} />
+              <TimedEvents refNewEvent={refNewEvent} />
+            </ZoomProvider>
+          </IsEditingProvider>
         </ScrollView>
       </ConfigProvider.Provider>
     </View>

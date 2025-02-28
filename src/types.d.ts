@@ -21,6 +21,19 @@ type PartDayEventLayoutType = {
     total: number;
     order: number;
   };
+  position: EventPosition;
+};
+
+interface CollisionObject {
+  event: CalendarEvent;
+  collisions?: { total: number; order: number };
+}
+
+type EventPosition = {
+  top: number;
+  height: number;
+  width: string;
+  marginLeft: string;
 };
 
 type FullCalendarEventLayout = {
@@ -86,10 +99,19 @@ type Config = {
     extended: EventExtend,
     eventHeight?: SharedValue<number>
   ) => ReactNode;
+  onEventEdit?: (params: {
+    event: CalendarEvent;
+    status: EditStatus;
+    updatedTimes?: {
+      updatedStart: DerivedValue<number>;
+      updatedEnd: DerivedValue<number>;
+    };
+  }) => void;
   onPressEvent?: (event: CalendarEvent) => void;
   showTimeIndicator?: boolean;
   maxAllDayEvents: number;
   canCreateEvents: boolean;
+  canEditEvent: boolean | ((event: CalendarEvent) => boolean);
   renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
   fiveMinuteInterval?: boolean;
 };

@@ -1,9 +1,10 @@
 import Animated, { runOnJS, useSharedValue } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useContext, useEffect, useRef } from "react";
+import { forwardRef, useContext, useEffect } from "react";
 import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
 import { StyleSheet } from "react-native";
-import useIsEditing from "src/hooks/use-is-editing";
+import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
+import { useIsEditing } from "src/hooks/use-is-editing";
 
 type ZoomProviderProps = {
   children: any;
@@ -12,60 +13,51 @@ type ZoomProviderProps = {
 // This fraction determines how quickly zoom grows
 const fraction = 0.1;
 
-const ZoomProvider = ({ children }: ZoomProviderProps) => {
-  const {
-    canCreateEvents,
-    zoomLevel,
-    initialZoomLevel,
-    createY,
-    onCreateEvent,
-  } = useContext(ConfigProvider);
-  const previewScale = useSharedValue(-1);
+const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
+  ({ children }, refNewEvent) => {
+    const {
+      canCreateEvents,
+      zoomLevel,
+      initialZoomLevel,
+      createY,
+      onCreateEvent,
+    } = useContext(ConfigProvider);
+    const previewScale = useSharedValue(-1);
 
-  useEffect(() => {
-    previewScale.value = zoomLevel.get();
-  }, [zoomLevel, previewScale]);
+    useEffect(() => {
+      previewScale.value = zoomLevel.get();
+    }, [zoomLevel, previewScale]);
 
-  const pinchGesture = useRef(
-    Gesture.Pinch().onUpdate((event) => {
+    const pinchGesture = Gesture.Pinch().onUpdate((event) => {
       "worklet";
 
       const newScale = previewScale.value * (1 + fraction * (event.scale - 1));
 
       zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
       previewScale.value = zoomLevel.value;
-    })
-  );
+    });
 
-  const doubleTapGesture = useRef(
-    Gesture.Tap()
+    const doubleTapGesture = Gesture.Tap()
       .numberOfTaps(2)
       .onEnd((_event, success) => {
         if (success) {
           // Reset the zoom level to the default
           zoomLevel.value = initialZoomLevel;
         }
-      })
-  );
+      });
 
-  const yPosition = useSharedValue(-1);
-  const editing = useIsEditing();
-  const isDragging = useSharedValue(false);
+    const yPosition = useSharedValue(-1);
+    const { isEditing } = useIsEditing();
+    const isDragging = useSharedValue(false);
 
-  const longPressGesture = useRef(
-    Gesture.LongPress()
+    const longPressGesture = Gesture.LongPress()
+      .enabled(canCreateEvents && !isEditing)
+      .withRef(refNewEvent as any)
       .numberOfPointers(1)
       .minDuration(500)
       .maxDistance(10000)
       .onStart((event) => {
         "worklet";
-
-        if (!canCreateEvents || editing) {
-          createY.value = -100000;
-          isDragging.value = false;
-          yPosition.value = -1;
-          return;
-        }
 
         isDragging.value = true;
         createY.value = Math.max(
@@ -116,21 +108,21 @@ const ZoomProvider = ({ children }: ZoomProviderProps) => {
             minute,
           });
         }
-      })
-  );
+      });
 
-  const combinedGesture = Gesture.Simultaneous(
-    pinchGesture.current,
-    longPressGesture.current,
-    doubleTapGesture.current
-  );
+    const combinedGesture = Gesture.Simultaneous(
+      pinchGesture,
+      longPressGesture,
+      doubleTapGesture
+    );
 
-  return (
-    <GestureDetector gesture={combinedGesture}>
-      <Animated.View style={styles.container}>{children}</Animated.View>
-    </GestureDetector>
-  );
-};
+    return (
+      <GestureDetector gesture={combinedGesture}>
+        <Animated.View style={styles.container}>{children}</Animated.View>
+      </GestureDetector>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {

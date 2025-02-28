@@ -1,5 +1,5 @@
 import { StyleSheet, View } from "react-native";
-import { useContext, useMemo } from "react";
+import { RefObject, useContext, useMemo } from "react";
 import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
 import BackgroundHoursLayout from "src/components/background-hours-layout";
 import { generatePrefabHours } from "src/utils/date-utils";
@@ -7,10 +7,21 @@ import BackgroundHoursContent from "src/components/background-hours-content";
 import TimedEventContainer from "src/components/timed-event-container";
 import TimeIndicator from "src/components/time-indicator";
 import NewEventContainer from "src/components/new-event-container";
+import EditEventContainer from "src/components/edit-event-container";
 
-const TimedEvents = () => {
-  const { theme, canCreateEvents, timeFormat, layout, showTimeIndicator } =
-    useContext(ConfigProvider);
+type TimedEventsProps = {
+  refNewEvent: RefObject<any>;
+};
+
+const TimedEvents = ({ refNewEvent }: TimedEventsProps) => {
+  const {
+    theme,
+    canCreateEvents,
+    canEditEvent,
+    timeFormat,
+    layout,
+    showTimeIndicator,
+  } = useContext(ConfigProvider);
   const hours = useMemo(() => generatePrefabHours(timeFormat), [timeFormat]);
 
   return (
@@ -22,9 +33,11 @@ const TimedEvents = () => {
           <TimedEventContainer
             key={partDayLayout.event.id}
             layout={partDayLayout}
+            refNewEvent={refNewEvent}
           />
         ))}
         {showTimeIndicator ? <TimeIndicator /> : null}
+        {canEditEvent ? <EditEventContainer refNewEvent={refNewEvent} /> : null}
       </View>
       {canCreateEvents ? <NewEventContainer /> : null}
     </View>

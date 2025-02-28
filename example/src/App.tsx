@@ -10,6 +10,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { EventExtend } from "src/enums";
 import { useMemo } from "react";
+import Toast from "react-native-toast-message";
 
 const events: any[] = [
   {
@@ -251,12 +252,22 @@ const RenderEvent = ({
   height,
   extend,
 }: {
+  // The raw CalendarEvent
   event: any;
+  // If this event has started in the past, extends into the future, both or none
   extend: EventExtend;
+  // The height of the event, if there is no height, this is an all-day event
   height?: SharedValue<number>;
 }) => {
-  const start = moment.tz(event.start, "UTC");
-  const end = moment.tz(event.end, "UTC");
+  const start = useMemo(
+    () => moment.tz(event.start, "UTC").format(timeFormat),
+    [event.start]
+  );
+
+  const end = useMemo(
+    () => moment.tz(event.end, "UTC").format(timeFormat),
+    [event.end]
+  );
 
   const extendText = useMemo(() => {
     switch (extend) {
@@ -301,7 +312,7 @@ const RenderEvent = ({
         </Text>
         {height ? (
           <Text style={styles.eventTextTime}>
-            {start.format(timeFormat)} - {end.format(timeFormat)}
+            {start} - {end}
           </Text>
         ) : null}
       </Animated.View>
@@ -347,6 +358,25 @@ export default function App() {
             showTimeIndicator
             // Can the user create new events
             canCreateEvents
+            // Can the user this SPECIFIC event (in combination with canEditEvents).
+            // Can either be a function or a boolean in general to allow/block all event editing.
+            // The library will NOT let the user know if it is editable or not, that's up to you.
+            // - By default, all events are editable.
+            // - Currently all day events are not editable.
+            canEditEvent={(event: { calendarId: string }) => {
+              const allowed = event.calendarId !== "tertiary-calendar";
+
+              if (!allowed) {
+                Toast.show({
+                  type: "error",
+                  autoHide: true,
+                  position: "top",
+                  text1: "You cannot edit this event.",
+                });
+              }
+
+              return allowed;
+            }}
             // Render the main event component, timed and all day events
             renderEvent={(
               event: any,
@@ -358,7 +388,7 @@ export default function App() {
             // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar
             initialZoomLevel={undefined}
             // Maximum number of all day events to display before showing a "show more" button
-            maxAllDayEvents={3}
+            maxAllDayEvents={2}
             // The timezone of the calendar
             timezone="UTC"
             // Renders the new event container, this is the component that shows up when the user is creating a new event
@@ -376,6 +406,7 @@ export default function App() {
             // When editing an event or creating a new one this is making sure that it isn't granular per minute
             fiveMinuteInterval
           />
+          <Toast />
         </SafeAreaView>
       </GestureHandlerRootView>
     </SafeAreaProvider>

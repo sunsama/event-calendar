@@ -2,7 +2,7 @@ import _partition from "lodash/partition";
 import _reduce from "lodash/reduce";
 import _sortBy from "lodash/sortBy";
 import _reverse from "lodash/reverse";
-import moment from "moment-timezone";
+import moment, { Moment } from "moment-timezone";
 import { CalendarLayout } from "src/utils/calendar-layout";
 import {
   computeCalendarDateRange,
@@ -13,6 +13,7 @@ import {
   startOfUserWeek,
 } from "src/utils/date-utils";
 import { EventExtend } from "src/enums";
+import computePositioning from "src/utils/compute-positioning";
 
 interface GenerateEventLayouts {
   events: CalendarEvent[];
@@ -128,7 +129,8 @@ export const generateEventLayouts = ({
     const calendarDates = date.calendarDates || [];
 
     calendarDates.forEach((calendarDate) => {
-      const startDate = moment.tz(calendarDate, timezone).toDate();
+      const currentDayDate = moment.tz(calendarDate, timezone).startOf("day");
+      const startDate = currentDayDate.toDate();
       const endDate = moment.tz(startDate, timezone).endOf("day").toDate();
       const showHours = !["month"].includes(calendarViewInterval);
       const dayId = calendarDate;
@@ -174,7 +176,9 @@ export const generateEventLayouts = ({
                   { startDate, endDate }
                 )
             ),
-            userCalendarId
+            userCalendarId,
+            currentDayDate,
+            timezone
           )
         );
       }
@@ -189,15 +193,29 @@ export const generateEventLayouts = ({
   return result;
 };
 
-interface CollisionObject {
-  event: CalendarEvent;
-  collisions?: { total: number; order: number };
-}
+const combineEventPosition = (
+  dayDate: Moment,
+  timezone: string,
+  collisionObject: CollisionObject
+): PartDayEventLayoutType => {
+  const position = computePositioning({
+    timezone,
+    collisionObject: collisionObject,
+    startOfDayMoment: dayDate,
+  });
+
+  return {
+    ...collisionObject,
+    position,
+  };
+};
 
 const handleCollisions = (
   allEvents: CalendarEvent[],
-  userCalendarId: string
-) => {
+  userCalendarId: string,
+  dayDate: Moment,
+  timezone: string
+): PartDayEventLayoutType[] => {
   let stackableEvents = _sortBy(allEvents, (event) => event.id);
   stackableEvents = _sortBy(stackableEvents, (event) => {
     // current user's primary calendar should always be leftmost option
@@ -207,7 +225,7 @@ const handleCollisions = (
     new Date(event.start).valueOf()
   );
   // calculate overlap stack properties
-  const stackedEvtsByPos: Record<string, CollisionObject[]> = {};
+  const stackedEvtsByPos: Record<string, PartDayEventLayoutType[]> = {};
   let curStack: (CollisionObject | null)[] = [];
 
   for (const evt of stackableEvents) {
@@ -229,12 +247,18 @@ const handleCollisions = (
         if (endDate <= eventStart) {
           // null out this event's position in stack
           curStack[idx] = null;
+
           if (curStack.length > 1) {
             stackEvt.collisions = { total: curStack.length, order: idx };
           }
+
           stackedEvtsByPos[idx]
-            ? stackedEvtsByPos[idx].push(stackEvt)
-            : (stackedEvtsByPos[idx] = [stackEvt]);
+            ? stackedEvtsByPos[idx].push(
+                combineEventPosition(dayDate, timezone, stackEvt)
+              )
+            : (stackedEvtsByPos[idx] = [
+                combineEventPosition(dayDate, timezone, stackEvt),
+              ]);
 
           if (!curStack.some((el) => el)) {
             curStack = [];
@@ -258,17 +282,24 @@ const handleCollisions = (
       if (curStack.length > 1) {
         stackEvt.collisions = { total: curStack.length, order: idx };
       }
+
       stackedEvtsByPos[idx]
-        ? stackedEvtsByPos[idx].push(stackEvt)
-        : (stackedEvtsByPos[idx] = [stackEvt]);
+        ? stackedEvtsByPos[idx].push(
+            combineEventPosition(dayDate, timezone, stackEvt)
+          )
+        : (stackedEvtsByPos[idx] = [
+            combineEventPosition(dayDate, timezone, stackEvt),
+          ]);
     }
   }
 
   // always draw position 0 stack elements first.
-  let stackedEvents: CollisionObject[] = [];
+  let stackedEvents: PartDayEventLayoutType[] = [];
+
   Object.keys(stackedEvtsByPos).forEach(
     (pos) => (stackedEvents = stackedEvents.concat(stackedEvtsByPos[pos]))
   );
+
   return [...stackedEvents];
 };
 

@@ -1,129 +1,86 @@
 import Animated, {
   runOnJS,
-  SharedValue,
   useAnimatedReaction,
   useAnimatedStyle,
+  useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
 import { ConfigProvider } from "src/utils/globals";
-import { useContext, useEffect, useMemo } from "react";
-import moment from "moment-timezone";
-import useIsEditing from "src/hooks/use-is-editing";
-import { useShallow } from "zustand/react/shallow";
+import { RefObject, useCallback, useContext, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { EventExtend } from "src/enums";
 import { StyleSheet, View } from "react-native";
+import { useIsEditing } from "src/hooks/use-is-editing";
+import gesturePan from "src/utils/pan-edit-event-gesture";
 
 type TimedEventContainerProps = {
   layout: PartDayEventLayoutType;
+  refNewEvent: RefObject<any>;
 };
 
-type ComputePositioning = {
-  layout: PartDayEventLayoutType;
-  startDateMoment: any;
-  startOfDayMoment: any;
-  durationMinutes: number;
-};
-
-const computePositioning = ({
+const TimedEventContainer = ({
   layout,
-  startDateMoment,
-  startOfDayMoment,
-  durationMinutes,
-}: ComputePositioning) => {
-  let width = 100;
-  let margin = 0;
-
-  const top = startDateMoment.diff(startOfDayMoment, "minutes");
-  const height = Math.max(30, durationMinutes);
-  const collisions = layout.collisions;
-
-  if (collisions) {
-    margin = (100 / collisions.total) * collisions.order;
-    width =
-      collisions.order + 1 < collisions.total
-        ? Math.max(100 - 12 * collisions.total, 20)
-        : 100 / collisions.total;
-  }
-
-  return {
-    top,
-    height,
-    width: `${width}%`,
-    marginLeft: `${margin}%`,
-  };
-};
-
-const useIsEventEditingAnimated = (eventId: string): SharedValue<boolean> => {
-  const isEditing = useIsEditing(useShallow((state) => state === eventId));
-  const isEditingAnimated = useSharedValue(isEditing);
-
-  useEffect(() => {
-    isEditingAnimated.value = isEditing;
-  }, [isEditing, isEditingAnimated]);
-
-  return isEditingAnimated;
-};
-
-const TimedEventContainer = ({ layout }: TimedEventContainerProps) => {
-  const { onPressEvent, zoomLevel, timezone, dayDate, renderEvent } =
+  refNewEvent,
+}: TimedEventContainerProps) => {
+  const { currentY, setIsEditing, isEditing } = useIsEditing();
+  const { onPressEvent, fiveMinuteInterval, zoomLevel, renderEvent } =
     useContext(ConfigProvider);
 
-  const [positioning] = useMemo(() => {
-    const freshStartDateMoment = moment.tz(layout.event.start, timezone);
-    const freshEndDateMoment = moment.tz(layout.event.end, timezone);
-    const freshIsPast = freshEndDateMoment.isBefore();
-    const durationMinutes = freshEndDateMoment.diff(
-      freshStartDateMoment,
-      "minutes"
-    );
-
-    const freshPositioning = computePositioning({
-      layout,
-      startDateMoment: freshStartDateMoment,
-      startOfDayMoment: dayDate,
-      durationMinutes,
-    });
-
-    return [
-      freshPositioning,
-      freshStartDateMoment,
-      freshEndDateMoment,
-      freshIsPast,
-    ];
-  }, [dayDate, layout, timezone]);
-
-  const isEditing = useIsEventEditingAnimated(layout.event.id);
-
-  const gestureTap = Gesture.Tap().onStart(() => {
-    if (onPressEvent) {
-      runOnJS(onPressEvent)(layout.event);
-    }
-  });
-
   const height = useSharedValue(0);
-
-  useAnimatedReaction(
-    () => zoomLevel.value,
-    (newZoomLevel) => {
-      height.value = newZoomLevel * positioning.height;
-    },
-    [positioning.height]
-  );
-
   const top = useSharedValue(0);
 
+  const startEditing = useCallback(() => {
+    setIsEditing(layout);
+  }, [layout, setIsEditing]);
+
+  const gestureTap = Gesture.Tap()
+    .enabled(!isEditing)
+    .onStart(() => {
+      if (onPressEvent) {
+        runOnJS(onPressEvent)(layout.event);
+      }
+    });
+
+  const startY = useSharedValue(0);
+  const maximumHour = useDerivedValue(() => {
+    return 1440 * zoomLevel.value;
+  }, [zoomLevel]);
+
+  const gestures = Gesture.Exclusive(
+    gestureTap,
+    gesturePan(
+      startY,
+      top,
+      currentY,
+      zoomLevel,
+      maximumHour,
+      height,
+      refNewEvent,
+      fiveMinuteInterval,
+      isEditing,
+      startEditing
+    )
+  );
+
   useAnimatedReaction(
     () => zoomLevel.value,
     (newZoomLevel) => {
-      top.value = newZoomLevel * positioning.top;
+      height.value = newZoomLevel * layout.position.height;
     },
-    [positioning.top]
+    [layout.position.height]
+  );
+
+  useAnimatedReaction(
+    () => zoomLevel.value,
+    (newZoomLevel) => {
+      top.value = newZoomLevel * layout.position.top;
+    },
+    [layout.position.top]
   );
 
   const render = useMemo(
     () => renderEvent(layout.event, EventExtend.None, height),
-    [height, layout, renderEvent]
+    [height, layout.event, renderEvent]
   );
 
   const stylePosition = useAnimatedStyle(() => {
@@ -131,23 +88,23 @@ const TimedEventContainer = ({ layout }: TimedEventContainerProps) => {
       position: "absolute",
       height: height.value,
       top: top.value,
+      opacity: 1,
+      width: layout.position.width,
+      marginLeft: layout.position.marginLeft,
+
+      // This is to prevent the event from being clickable while editing
+      pointerEvents: isEditing ? "none" : "auto",
     };
 
-    if (isEditing.value) {
-      // We want to span the whole width of the container
-      basePosition.width = "100%";
-      basePosition.marginLeft = 0;
-    } else {
-      // We want to adhere to the positioning
-      basePosition.width = positioning.width;
-      basePosition.marginLeft = positioning.marginLeft;
+    if (isEditing?.event.id === layout.event.id) {
+      basePosition.opacity = 0.5;
     }
 
     return basePosition;
-  }, [positioning]);
+  }, [layout, isEditing]);
 
   return (
-    <GestureDetector gesture={gestureTap}>
+    <GestureDetector gesture={gestures}>
       <Animated.View style={stylePosition}>
         <View style={styles.hairline}>{render}</View>
       </Animated.View>

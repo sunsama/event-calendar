@@ -12,10 +12,6 @@ const EventContainer = ({ layout }: EventContainerProps) => {
   const { onPressEvent, renderEvent, initialZoomLevel } =
     useContext(ConfigProvider);
 
-  // const isEditing = useIsEventEditingAnimated(layout.event.id);
-
-  // const [time, setTime] = useState(formatTimeLabel());
-
   const render = useMemo(
     () =>
       renderEvent(

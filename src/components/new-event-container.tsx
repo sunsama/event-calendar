@@ -6,6 +6,7 @@ import Animated, {
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { StyleSheet, View } from "react-native";
+import { useIsEditing } from "src/hooks/use-is-editing";
 
 const NewEventContainer = memo(
   () => {
@@ -17,9 +18,11 @@ const NewEventContainer = memo(
       theme,
     } = useContext(ConfigProvider);
 
+    const { isEditing } = useIsEditing();
+
     const styleVisible = useAnimatedStyle(() => {
       return {
-        opacity: createY.value >= 0 ? 1 : 0,
+        opacity: !isEditing && createY.value >= 0 ? 1 : 0,
         transform: [
           {
             translateY: createY.value - TOP_MARGIN_PIXEL_OFFSET,
@@ -27,7 +30,7 @@ const NewEventContainer = memo(
         ],
         height: zoomLevel.value * 60,
       };
-    }, []);
+    }, [isEditing]);
 
     const [[hour, minute], setTime] = useState([0, 0]);
 
