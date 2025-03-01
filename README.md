@@ -56,10 +56,11 @@ The Event Calendar component supports the following gestures:
 - Pinch: Zooms in and out of the calendar.
 - Drag: Moves the calendar vertically.
 - Tap event: Opens the event details view.
+- Hold & Drag: Create a new event.
 
 Edit mode:
-- Hold & Drag events: Moves events to different times, starts edit mode.
-- Hold & Drag event edges: When in edit mode, resizes events.
+- Hold & Drag event: Moves event to different times, starts edit mode.
+- Hold & Drag event edges: When in edit mode, resizes event.
 - Tap event: Stops edit mode.
 
 ## Props
