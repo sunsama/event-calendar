@@ -13,26 +13,26 @@ import { IsEditingProvider } from "src/hooks/use-is-editing";
 import useClonedEvents from "src/hooks/use-cloned-events";
 
 type EventCalenderProps = {
-  events: CalendarEvent[];
-  timeFormat?: string;
-  dayDate: string;
-  theme?: ThemeStyle;
-  initialZoomLevel?: number;
-  onCreateEvent?: onCreateEvent;
-  timezone?: string;
-  renderEvent: Config["renderEvent"];
-  onPressEvent?: Config["onPressEvent"];
-  userCalendarId?: string;
-  startDayOfWeekOffset: number;
-  showTimeIndicator?: boolean;
-  maxAllDayEvents?: number;
   canCreateEvents?: boolean;
   canEditEvent?: Config["canEditEvent"];
-  renderNewEventContainer?: Config["renderNewEventContainer"];
+  dayDate: string;
+  events: CalendarEvent[];
   fiveMinuteInterval?: boolean;
+  initialZoomLevel?: number;
+  maxAllDayEvents?: number;
+  onCreateEvent?: onCreateEvent;
   onEventEdit?: Config["onEventEdit"];
+  onPressEvent?: Config["onPressEvent"];
   renderDragBars?: Config["renderDragBars"];
+  renderEvent: Config["renderEvent"];
+  renderNewEventContainer?: Config["renderNewEventContainer"];
+  showTimeIndicator?: boolean;
+  startDayOfWeekOffset?: number;
+  theme?: ThemeStyle;
+  timeFormat?: string;
+  timezone?: string;
   updateLocalStateAfterEdit?: boolean;
+  userCalendarId?: string;
 };
 
 const EventCalendar = ({
@@ -46,7 +46,7 @@ const EventCalendar = ({
   renderEvent,
   onPressEvent,
   userCalendarId = "",
-  startDayOfWeekOffset,
+  startDayOfWeekOffset = 0,
   showTimeIndicator,
   maxAllDayEvents = 2,
   canCreateEvents = true,
