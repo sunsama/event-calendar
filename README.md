@@ -16,6 +16,19 @@ We use this library in the Sunsama mobile app to display and manage events acros
 - Timezone support.
 - Zoom and drag interactions.
 
+## Screenshots
+
+<div style="display: flex; justify-content: space-around;">
+  <div>
+    <h3>iOS</h3>
+    <img src="assets/screenshot-ios.png" alt="Event Calendar iOS" style="max-width: 45%; height: auto;">
+  </div>
+  <div>
+    <h3>Android</h3>
+    <img src="assets/screenshot-android.png" alt="Event Calendar Android" style="max-width: 45%; height: auto;">
+  </div>
+</div>
+
 ## Installation
 To install the library, add it to your project using:
 
