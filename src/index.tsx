@@ -18,6 +18,8 @@ import type {
   ThemeStyle,
 } from "src/types";
 
+export * from "./types";
+
 type EventCalenderProps = {
   canCreateEvents?: boolean;
   canEditEvent?: Config["canEditEvent"];
