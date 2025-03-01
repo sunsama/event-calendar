@@ -15,6 +15,7 @@ We use this library in the Sunsama mobile app to display and manage events acros
 - Editable events with restrictions.
 - Timezone support.
 - Zoom and drag interactions.
+- Supports Expo Go and bare React Native projects.
 
 ## Screenshots
 
