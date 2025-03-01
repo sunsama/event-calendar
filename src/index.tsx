@@ -27,7 +27,6 @@ type EventCalenderProps = {
   renderEvent: Config["renderEvent"];
   renderNewEventContainer?: Config["renderNewEventContainer"];
   showTimeIndicator?: boolean;
-  startDayOfWeekOffset?: number;
   theme?: ThemeStyle;
   timeFormat?: string;
   timezone?: string;
@@ -46,7 +45,6 @@ const EventCalendar = ({
   renderEvent,
   onPressEvent,
   userCalendarId = "",
-  startDayOfWeekOffset = 0,
   showTimeIndicator,
   maxAllDayEvents = 2,
   canCreateEvents = true,
@@ -71,16 +69,10 @@ const EventCalendar = ({
       endCalendarDate: startCalendarDate.format("YYYY-MM-DD"),
       userCalendarId,
       timezone,
-      startDayOfWeekOffset,
+      startDayOfWeekOffset: 0,
       events: clonedEvents,
     }),
-    [
-      startCalendarDate,
-      userCalendarId,
-      timezone,
-      startDayOfWeekOffset,
-      clonedEvents,
-    ]
+    [startCalendarDate, userCalendarId, timezone, clonedEvents]
   );
 
   const layout = useEventsLayout(memoizedProps);
