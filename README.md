@@ -85,6 +85,7 @@ Edit mode:
 | `fiveMinuteInterval`        | `Boolean`               | No       | False   | Ensures event snapping to 5-minute increments.                                                                                     |
 | `updateLocalStateAfterEdit` | `Boolean`               | No       | True    | Optimistically updates local state after event editing.                                                                            |
 | `extraTimedComponents`      | `Function`              | No       |         | Allows rendering extra components in the calendar. These will be rendered before all the timed events.                             |
+| `onZoomChange`              | `Function`              | No       |         | Callback triggered when the zoom level changes.                                                                                    |
 
 ## Dependencies
 Ensure you have the following dependencies installed for proper functionality:

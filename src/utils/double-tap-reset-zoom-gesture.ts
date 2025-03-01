@@ -1,9 +1,10 @@
 import { Gesture } from "react-native-gesture-handler";
-import { SharedValue } from "react-native-reanimated";
+import { runOnJS, SharedValue } from "react-native-reanimated";
 
 const doubleTapGesture = (
   zoomLevel: SharedValue<number>,
-  initialZoomLevel: number
+  initialZoomLevel: number,
+  onZoomChange?: Config["onZoomChange"]
 ) =>
   Gesture.Tap()
     .numberOfTaps(2)
@@ -11,6 +12,10 @@ const doubleTapGesture = (
       if (success) {
         // Reset the zoom level to the default
         zoomLevel.value = initialZoomLevel;
+
+        if (onZoomChange) {
+          runOnJS(onZoomChange)(initialZoomLevel);
+        }
       }
     });
 

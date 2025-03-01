@@ -33,6 +33,7 @@ type EventCalenderProps = {
   updateLocalStateAfterEdit?: boolean;
   userCalendarId?: string;
   extraTimedComponents?: Config["extraTimedComponents"];
+  onZoomChange?: Config["onZoomChange"];
 };
 
 const EventCalendar = ({
@@ -56,6 +57,7 @@ const EventCalendar = ({
   renderDragBars,
   updateLocalStateAfterEdit = true,
   extraTimedComponents,
+  onZoomChange,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
@@ -109,6 +111,7 @@ const EventCalendar = ({
           maximumHour,
           updateLocalStateAfterEdit,
           extraTimedComponents,
+          onZoomChange,
         }}
       >
         <AllDayEvents />

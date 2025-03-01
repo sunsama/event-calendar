@@ -30,6 +30,7 @@ const TimedEventContainer = ({
     zoomLevel,
     renderEvent,
     initialZoomLevel,
+    onZoomChange,
   } = useContext(ConfigProvider);
 
   const height = useSharedValue(0);
@@ -50,7 +51,7 @@ const TimedEventContainer = ({
   const startY = useSharedValue(0);
 
   const gestures = Gesture.Exclusive(
-    doubleTapGesture(zoomLevel, initialZoomLevel),
+    doubleTapGesture(zoomLevel, initialZoomLevel, onZoomChange),
     gestureTap,
     gesturePan(
       startY,

@@ -27,6 +27,7 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
       createY,
       onCreateEvent,
       maximumHour,
+      onZoomChange,
     } = useContext(ConfigProvider);
     const previewScale = useSharedValue(-1);
 
@@ -34,14 +35,21 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
       previewScale.value = zoomLevel.get();
     }, [zoomLevel, previewScale]);
 
-    const pinchGesture = Gesture.Pinch().onUpdate((event) => {
-      "worklet";
+    const pinchGesture = Gesture.Pinch()
+      .onUpdate((event) => {
+        "worklet";
 
-      const newScale = previewScale.value * (1 + fraction * (event.scale - 1));
+        const newScale =
+          previewScale.value * (1 + fraction * (event.scale - 1));
 
-      zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
-      previewScale.value = zoomLevel.value;
-    });
+        zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
+        previewScale.value = zoomLevel.value;
+      })
+      .onEnd(() => {
+        if (onZoomChange) {
+          runOnJS(onZoomChange)(zoomLevel.value);
+        }
+      });
 
     const yPosition = useSharedValue(-1);
     const { isEditing } = useIsEditing();
@@ -118,7 +126,7 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
     const combinedGesture = Gesture.Simultaneous(
       pinchGesture,
       longPressGesture,
-      doubleTapGesture(zoomLevel, initialZoomLevel)
+      doubleTapGesture(zoomLevel, initialZoomLevel, onZoomChange)
     );
 
     return (

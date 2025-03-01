@@ -122,6 +122,7 @@ type Config = {
   renderDragBars?: { top?: () => ReactNode; bottom?: () => ReactNode };
   updateLocalStateAfterEdit: boolean;
   extraTimedComponents?: (zoomLevel: SharedValue<number>) => ReactNode;
+  onZoomChange?: (zoomLevel: number) => void;
 };
 
 type PrefabHour = {

@@ -553,6 +553,10 @@ export default function App() {
             updateLocalStateAfterEdit
             // Extra components to render in the timed section of the calendar
             extraTimedComponents={extraTimedComponents}
+            // Called when the zoom value changes
+            onZoomChange={(newZoom: number) => {
+              console.info("onZoomChange", newZoom);
+            }}
           />
           <Toast />
         </SafeAreaView>
