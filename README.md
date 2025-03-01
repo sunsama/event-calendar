@@ -70,6 +70,7 @@ For a full implementation example, refer to the **example app** included in the 
 | `renderNewEventContainer`   | `Function`              | No       |         | Custom UI for new event creation. If none supplied it will show a semi-transparent bar you can theme.                              |
 | `fiveMinuteInterval`        | `Boolean`               | No       | False   | Ensures event snapping to 5-minute increments.                                                                                     |
 | `updateLocalStateAfterEdit` | `Boolean`               | No       | True    | Optimistically updates local state after event editing.                                                                            |
+| `extraTimedComponents`      | `Function`              | No       |         | Allows rendering extra components in the calendar. These will be rendered before all the timed events.                             |
 
 ## Dependencies
 Ensure you have the following dependencies installed for proper functionality:

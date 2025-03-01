@@ -121,6 +121,7 @@ type Config = {
   fiveMinuteInterval?: boolean;
   renderDragBars?: { top?: () => ReactNode; bottom?: () => ReactNode };
   updateLocalStateAfterEdit: boolean;
+  extraTimedComponents?: (zoomLevel: SharedValue<number>) => ReactNode;
 };
 
 type PrefabHour = {

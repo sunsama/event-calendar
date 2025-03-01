@@ -378,6 +378,62 @@ const RenderEvent = ({
   );
 };
 
+const ExtraTimedComponents = ({
+  zoomLevel,
+}: {
+  zoomLevel: SharedValue<number>;
+}) => {
+  const styleViewEnd = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      paddingRight: 10,
+      left: 0,
+      right: 0,
+      height: 10000,
+      backgroundColor: "rgba(255,0,0,0.08)",
+      zIndex: 100,
+      pointerEvents: "none",
+      borderColor: "purple",
+      borderTopWidth: 2,
+      transform: [{ translateY: 1020 * zoomLevel.value }],
+      alignItems: "flex-end",
+    };
+  }, [zoomLevel]);
+
+  const styleViewStart = useAnimatedStyle(() => {
+    return {
+      position: "absolute",
+      paddingRight: 10,
+      right: 0,
+      left: 0,
+      top: 0,
+      height: 420 * zoomLevel.value,
+      backgroundColor: "rgba(72,255,0,0.08)",
+      zIndex: 100,
+      pointerEvents: "none",
+      borderColor: "green",
+      borderBottomWidth: 2,
+      alignItems: "flex-end",
+      justifyContent: "flex-end",
+    };
+  }, [zoomLevel]);
+
+  return (
+    <>
+      <Animated.View style={styleViewStart}>
+        <Text style={styles.extraText}>start of work day</Text>
+      </Animated.View>
+      <Animated.View style={styleViewEnd}>
+        <Text style={styles.extraText}>end of work day</Text>
+      </Animated.View>
+    </>
+  );
+};
+
+const extraTimedComponents = (zoomLevel: SharedValue<number>) => (
+  <ExtraTimedComponents zoomLevel={zoomLevel} />
+);
+
 const m = moment();
 
 const formatTime = (hour: number, minute: number) => {
@@ -409,8 +465,6 @@ export default function App() {
             // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
             // always show up at the beginning of the stack if reasonably possible
             userCalendarId="primary-calendar"
-            // Day of the week the user begins their week
-            startDayOfWeekOffset={0}
             // How the time should be formatted
             timeFormat={timeFormat}
             // Shows a line on the calendar indicating the current time
@@ -497,6 +551,8 @@ export default function App() {
             // Determines if the library should optimistically update the local state when editing has finished
             // Defaults to true
             updateLocalStateAfterEdit
+            // Extra components to render in the timed section of the calendar
+            extraTimedComponents={extraTimedComponents}
           />
           <Toast />
         </SafeAreaView>
@@ -547,5 +603,9 @@ const styles = StyleSheet.create({
     backgroundColor: "blue",
     borderBottomLeftRadius: 4,
     borderBottomRightRadius: 4,
+  },
+  extraText: {
+    fontSize: 10,
+    color: "gray",
   },
 });

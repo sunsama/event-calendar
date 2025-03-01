@@ -21,14 +21,22 @@ const TimedEvents = ({ refNewEvent }: TimedEventsProps) => {
     timeFormat,
     layout,
     showTimeIndicator,
+    extraTimedComponents,
+    zoomLevel,
   } = useContext(ConfigProvider);
   const hours = useMemo(() => generatePrefabHours(timeFormat), [timeFormat]);
+
+  const extraRender = useMemo(
+    () => extraTimedComponents?.(zoomLevel) || null,
+    [extraTimedComponents, zoomLevel]
+  );
 
   return (
     <View style={[styles.container, theme?.timedEventsContainer]}>
       <BackgroundHoursLayout hours={hours} />
       <View style={styles.backgroundContainer}>
         <BackgroundHoursContent hours={hours} />
+        {extraRender}
         {layout.partDayEventsLayout.map((partDayLayout) => (
           <TimedEventContainer
             key={partDayLayout.event.id}
