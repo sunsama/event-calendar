@@ -120,6 +120,7 @@ type Config = {
   renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
   fiveMinuteInterval?: boolean;
   renderDragBars?: { top?: () => ReactNode; bottom?: () => ReactNode };
+  updateLocalStateAfterEdit: boolean;
 };
 
 type PrefabHour = {

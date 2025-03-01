@@ -10,6 +10,7 @@ import moment from "moment-timezone";
 import { useMemo, useRef } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
 import { IsEditingProvider } from "src/hooks/use-is-editing";
+import useClonedEvents from "src/hooks/use-cloned-events";
 
 type EventCalenderProps = {
   events: CalendarEvent[];
@@ -31,6 +32,7 @@ type EventCalenderProps = {
   fiveMinuteInterval?: boolean;
   onEventEdit?: Config["onEventEdit"];
   renderDragBars?: Config["renderDragBars"];
+  updateLocalStateAfterEdit?: boolean;
 };
 
 const EventCalendar = ({
@@ -53,11 +55,14 @@ const EventCalendar = ({
   canEditEvent = true,
   onEventEdit,
   renderDragBars,
+  updateLocalStateAfterEdit = true,
 }: EventCalenderProps) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
     [dayDate, timezone]
   );
+
+  const clonedEvents = useClonedEvents(events, updateLocalStateAfterEdit);
 
   const memoizedProps = useMemo<UpdateEvent>(
     () => ({
@@ -67,9 +72,15 @@ const EventCalendar = ({
       userCalendarId,
       timezone,
       startDayOfWeekOffset,
-      events,
+      events: clonedEvents,
     }),
-    [startCalendarDate, userCalendarId, timezone, startDayOfWeekOffset, events]
+    [
+      startCalendarDate,
+      userCalendarId,
+      timezone,
+      startDayOfWeekOffset,
+      clonedEvents,
+    ]
   );
 
   const layout = useEventsLayout(memoizedProps);
@@ -102,6 +113,7 @@ const EventCalendar = ({
           onEventEdit,
           renderDragBars,
           maximumHour,
+          updateLocalStateAfterEdit,
         }}
       >
         <AllDayEvents />

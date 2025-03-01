@@ -9,6 +9,7 @@ import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "src/utils/globals";
 import { isFunction } from "lodash";
 import { EditStatus } from "src/enums";
+import { updateClonedEvents } from "src/hooks/use-cloned-events";
 
 interface IsEditingType {
   isEditing: null | PartDayEventLayoutType;
@@ -35,7 +36,8 @@ export const useIsEditing = () => {
 
 // Provider component
 export const IsEditingProvider = ({ children }: { children: ReactNode }) => {
-  const { canEditEvent, onEventEdit } = useContext(ConfigProvider);
+  const { canEditEvent, onEventEdit, updateLocalStateAfterEdit } =
+    useContext(ConfigProvider);
   const [isEditing, baseSetIsEditing] = useState<null | PartDayEventLayoutType>(
     null
   );
@@ -68,6 +70,25 @@ export const IsEditingProvider = ({ children }: { children: ReactNode }) => {
           status: EditStatus.Start,
         });
       } else if (isEditing) {
+        if (updateLocalStateAfterEdit) {
+          updateClonedEvents((events) => {
+            if (!updatedTimes) {
+              // This means we removed the event
+              return events.filter((event) => event.id !== isEditing.event.id);
+            }
+
+            return events.map((event) =>
+              event.id === isEditing.event.id
+                ? {
+                    ...event,
+                    start: updatedTimes?.updatedStart,
+                    end: updatedTimes?.updatedEnd,
+                  }
+                : event
+            );
+          });
+        }
+
         onEventEdit?.({
           event: isEditing.event,
           status: EditStatus.Finish,
@@ -77,7 +98,7 @@ export const IsEditingProvider = ({ children }: { children: ReactNode }) => {
 
       baseSetIsEditing(newValue);
     },
-    [canEditEvent, isEditing, onEventEdit]
+    [canEditEvent, isEditing, onEventEdit, updateLocalStateAfterEdit]
   );
 
   return (

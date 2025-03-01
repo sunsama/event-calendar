@@ -494,6 +494,9 @@ export default function App() {
             )}
             // When editing an event or creating a new one this is making sure that it isn't granular per minute
             fiveMinuteInterval
+            // Determines if the library should optimistically update the local state when editing has finished
+            // Defaults to true
+            updateLocalStateAfterEdit
           />
           <Toast />
         </SafeAreaView>
