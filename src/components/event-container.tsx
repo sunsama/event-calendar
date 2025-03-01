@@ -1,8 +1,8 @@
 import { ConfigProvider } from "src/utils/globals";
 import { useCallback, useContext, useMemo } from "react";
 import { Pressable } from "react-native-gesture-handler";
-import { EventExtend } from "src/enums";
 import { View } from "react-native";
+import { AllDayEventLayoutType, EventExtend } from "src/types";
 
 type EventContainerProps = {
   layout: AllDayEventLayoutType;

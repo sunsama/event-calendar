@@ -8,8 +8,8 @@ import React, {
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "src/utils/globals";
 import { isFunction } from "lodash";
-import { EditStatus } from "src/enums";
 import { updateClonedEvents } from "src/hooks/use-cloned-events";
+import { EditStatus, PartDayEventLayoutType } from "src/types";
 
 interface IsEditingType {
   isEditing: null | PartDayEventLayoutType;

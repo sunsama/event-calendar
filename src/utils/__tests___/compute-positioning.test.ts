@@ -1,5 +1,6 @@
 import computePositioning from "src/utils/compute-positioning";
 import moment from "moment-timezone";
+import { PartDayEventLayoutType } from "src/types";
 
 describe("computePositioning", () => {
   it("should compute positioning correctly without collisions", () => {

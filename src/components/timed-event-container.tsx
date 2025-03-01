@@ -7,11 +7,11 @@ import Animated, {
 import { ConfigProvider } from "src/utils/globals";
 import { RefObject, useCallback, useContext, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { EventExtend } from "src/enums";
 import { StyleSheet, View } from "react-native";
 import { useIsEditing } from "src/hooks/use-is-editing";
 import gesturePan from "src/utils/pan-edit-event-gesture";
 import doubleTapGesture from "src/utils/double-tap-reset-zoom-gesture";
+import { EventExtend, PartDayEventLayoutType } from "src/types";
 
 type TimedEventContainerProps = {
   layout: PartDayEventLayoutType;

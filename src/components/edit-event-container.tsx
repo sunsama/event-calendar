@@ -16,7 +16,7 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
-import { EventExtend } from "src/enums";
+import { EventExtend } from "src/types";
 import gesturePan from "src/utils/pan-edit-event-gesture";
 import DragBar from "src/components/drag-bar";
 import { StyleSheet } from "react-native";

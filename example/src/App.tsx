@@ -11,9 +11,14 @@ import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { EditStatus, EventExtend } from "src/enums";
 import { useCallback, useMemo, useState } from "react";
 import Toast from "react-native-toast-message";
+import {
+  CalendarEvent,
+  EditStatus,
+  EventExtend,
+  OnCreateEventProps,
+} from "src/types";
 
 const events: any[] = [
   {
@@ -257,7 +262,7 @@ const RenderEvent = ({
   updatedTimes,
 }: {
   // The raw CalendarEvent
-  event: any;
+  event: CalendarEvent;
   // If this event has started in the past, extends into the future, both or none
   extend: EventExtend;
   // The height of the event, if there is no height, this is an all-day event
@@ -455,11 +460,11 @@ export default function App() {
             // The current date of the calendar
             dayDate={date}
             // Triggered when a new event is created
-            onCreateEvent={(params: any) => {
+            onCreateEvent={(params: OnCreateEventProps) => {
               console.log("onCreateEvent", params);
             }}
             // Triggered when pressed on an event
-            onPressEvent={(event: any) => {
+            onPressEvent={(event: CalendarEvent) => {
               console.log("onPressEvent", event);
             }}
             // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
@@ -500,7 +505,7 @@ export default function App() {
             }}
             // Render the main event component, timed and all day events
             renderEvent={(
-              event: any,
+              event: CalendarEvent,
               extend: EventExtend,
               height?: SharedValue<number>,
               updatedTimes?: {

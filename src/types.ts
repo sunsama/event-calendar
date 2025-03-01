@@ -1,4 +1,9 @@
-type CalendarEvent = {
+import { Moment } from "moment-timezone";
+import { TextStyle, ViewStyle } from "react-native";
+import { DerivedValue, SharedValue } from "react-native-reanimated";
+import { ReactNode } from "react";
+
+export type CalendarEvent = {
   id: string;
   calendarId: string;
   title: string;
@@ -7,7 +12,7 @@ type CalendarEvent = {
   isAllDay?: boolean;
 };
 
-type AllDayEventLayoutType = {
+export type AllDayEventLayoutType = {
   event: CalendarEvent;
   rowIndex?: number;
   visibleWidthDays?: number;
@@ -15,7 +20,7 @@ type AllDayEventLayoutType = {
   isPrimaryRendered?: boolean;
 };
 
-type PartDayEventLayoutType = {
+export type PartDayEventLayoutType = {
   event: CalendarEvent;
   collisions?: {
     total: number;
@@ -24,24 +29,24 @@ type PartDayEventLayoutType = {
   position: EventPosition;
 };
 
-interface CollisionObject {
+export interface CollisionObject {
   event: CalendarEvent;
   collisions?: { total: number; order: number };
 }
 
-type EventPosition = {
+export type EventPosition = {
   top: number;
   height: number;
   width: string;
   marginLeft: string;
 };
 
-type FullCalendarEventLayout = {
+export type FullCalendarEventLayout = {
   allDayEventsLayout: AllDayEventLayoutType[];
   partDayEventsLayout: PartDayEventLayoutType[];
 };
 
-type ThemeStyle = {
+export type ThemeStyle = {
   // Main container style
   container?: ViewStyle;
   // Vertical scroll view
@@ -78,13 +83,15 @@ type ThemeStyle = {
   allDayShowMoreText?: TextStyle;
 };
 
-type onCreateEvent = (arg: {
+export type OnCreateEventProps = {
   hour?: number;
   minute?: number;
   isAllDay?: boolean;
-}) => void;
+};
 
-type Config = {
+export type onCreateEvent = (arg: OnCreateEventProps) => void;
+
+export type Config = {
   timezone: string;
   timeFormat: string;
   dayDate: Moment;
@@ -125,10 +132,32 @@ type Config = {
   onZoomChange?: (zoomLevel: number) => void;
 };
 
-type PrefabHour = {
+export type PrefabHour = {
   increment: number;
   hourFormatted: string;
   hourMoment: Moment;
 };
 
-type CalendarViewIntervalType = "month" | "workweek" | "3day" | "1day" | "week";
+export type CalendarViewIntervalType =
+  | "month"
+  | "workweek"
+  | "3day"
+  | "1day"
+  | "week";
+
+/**
+ * Tells us if an event extends into the next day, the previous day, or both.
+ * Used for all day events.
+ */
+export enum EventExtend {
+  // Keep None as value 0
+  None,
+  Past,
+  Future,
+  Both,
+}
+
+export enum EditStatus {
+  Start,
+  Finish,
+}

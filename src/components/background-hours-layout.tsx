@@ -2,6 +2,7 @@ import { memo, useContext } from "react";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { StyleSheet, Text, View } from "react-native";
 import { ConfigProvider } from "src/utils/globals";
+import { PrefabHour } from "src/types";
 
 type BackgroundHoursLayoutProps = {
   hours: PrefabHour[];

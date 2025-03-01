@@ -12,8 +12,16 @@ import {
   isAllDayOrSpansMidnight,
   startOfUserWeek,
 } from "src/utils/date-utils";
-import { EventExtend } from "src/enums";
 import computePositioning from "src/utils/compute-positioning";
+import {
+  AllDayEventLayoutType,
+  CalendarEvent,
+  CalendarViewIntervalType,
+  CollisionObject,
+  EventExtend,
+  FullCalendarEventLayout,
+  PartDayEventLayoutType,
+} from "src/types";
 
 interface GenerateEventLayouts {
   events: CalendarEvent[];

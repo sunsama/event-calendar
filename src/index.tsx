@@ -11,6 +11,12 @@ import { useMemo, useRef } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
 import { IsEditingProvider } from "src/hooks/use-is-editing";
 import useClonedEvents from "src/hooks/use-cloned-events";
+import type {
+  CalendarEvent,
+  Config,
+  onCreateEvent,
+  ThemeStyle,
+} from "src/types";
 
 type EventCalenderProps = {
   canCreateEvents?: boolean;

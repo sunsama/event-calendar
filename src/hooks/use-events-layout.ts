@@ -2,6 +2,11 @@ import { create } from "zustand";
 import { immer } from "zustand/middleware/immer";
 import generateEventLayouts from "../utils/generate-event-layouts";
 import { useEffect } from "react";
+import {
+  CalendarEvent,
+  CalendarViewIntervalType,
+  FullCalendarEventLayout,
+} from "src/types";
 
 type State = {
   events: FullCalendarEventLayout;

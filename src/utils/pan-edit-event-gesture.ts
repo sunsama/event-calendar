@@ -1,6 +1,7 @@
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, SharedValue } from "react-native-reanimated";
 import { RefObject } from "react";
+import { PartDayEventLayoutType } from "src/types";
 
 const gesturePan = (
   startY: SharedValue<number>,
