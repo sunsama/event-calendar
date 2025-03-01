@@ -1,7 +1,7 @@
 import { memo, useCallback, useContext, useState } from "react";
-import { ConfigProvider } from "src/utils/globals";
+import { ConfigProvider } from "../utils/globals";
 import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
-import EventContainer from "src/components/event-container";
+import EventContainer from "../components/event-container";
 import { Pressable } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,

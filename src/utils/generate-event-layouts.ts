@@ -3,7 +3,7 @@ import _reduce from "lodash/reduce";
 import _sortBy from "lodash/sortBy";
 import _reverse from "lodash/reverse";
 import moment, { Moment } from "moment-timezone";
-import { CalendarLayout } from "src/utils/calendar-layout";
+import { CalendarLayout } from "../utils/calendar-layout";
 import {
   computeCalendarDateRange,
   dateRangeIntersect,
@@ -11,8 +11,8 @@ import {
   getDurationInDays,
   isAllDayOrSpansMidnight,
   startOfUserWeek,
-} from "src/utils/date-utils";
-import computePositioning from "src/utils/compute-positioning";
+} from "../utils/date-utils";
+import computePositioning from "../utils/compute-positioning";
 import {
   AllDayEventLayoutType,
   CalendarEvent,
@@ -21,7 +21,7 @@ import {
   EventExtend,
   FullCalendarEventLayout,
   PartDayEventLayoutType,
-} from "src/types";
+} from "../types";
 
 interface GenerateEventLayouts {
   events: CalendarEvent[];

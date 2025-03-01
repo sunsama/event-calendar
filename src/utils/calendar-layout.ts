@@ -1,5 +1,5 @@
 import { max } from "lodash";
-import { EventExtend } from "src/types";
+import { EventExtend } from "../types";
 
 export class CalendarLayout {
   // visibleX is an array of numbers representing the x indexes currently 'in view'

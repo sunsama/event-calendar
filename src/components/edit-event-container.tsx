@@ -6,8 +6,8 @@ import {
   useEffect,
   useRef,
 } from "react";
-import { useIsEditing } from "src/hooks/use-is-editing";
-import { ConfigProvider } from "src/utils/globals";
+import { useIsEditing } from "../hooks/use-is-editing";
+import { ConfigProvider } from "../utils/globals";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -16,9 +16,9 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
-import { EventExtend } from "src/types";
-import gesturePan from "src/utils/pan-edit-event-gesture";
-import DragBar from "src/components/drag-bar";
+import { EventExtend } from "../types";
+import gesturePan from "../utils/pan-edit-event-gesture";
+import DragBar from "../components/drag-bar";
 import { StyleSheet } from "react-native";
 import moment from "moment-timezone";
 

@@ -1,12 +1,12 @@
 import { memo, useContext, useMemo, useState } from "react";
-import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
+import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
 import Animated, {
   runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
 } from "react-native-reanimated";
 import { StyleSheet, View } from "react-native";
-import { useIsEditing } from "src/hooks/use-is-editing";
+import { useIsEditing } from "../hooks/use-is-editing";
 
 const NewEventContainer = memo(
   () => {

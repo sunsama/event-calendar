@@ -1,22 +1,17 @@
 import { StyleSheet, View } from "react-native";
-import AllDayEvents from "src/components/all-day-events";
+import AllDayEvents from "./components/all-day-events";
 import { ScrollView } from "react-native-gesture-handler";
 import { useSharedValue } from "react-native-reanimated";
-import ZoomProvider from "src/components/zoom-provider";
-import TimedEvents from "src/components/timed-events";
-import useEventsLayout, { UpdateEvent } from "src/hooks/use-events-layout";
-import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "src/utils/globals";
+import ZoomProvider from "./components/zoom-provider";
+import TimedEvents from "./components/timed-events";
+import useEventsLayout, { UpdateEvent } from "./hooks/use-events-layout";
+import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "./utils/globals";
 import moment from "moment-timezone";
 import { useMemo, useRef } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
-import { IsEditingProvider } from "src/hooks/use-is-editing";
-import useClonedEvents from "src/hooks/use-cloned-events";
-import type {
-  CalendarEvent,
-  Config,
-  onCreateEvent,
-  ThemeStyle,
-} from "src/types";
+import { IsEditingProvider } from "./hooks/use-is-editing";
+import useClonedEvents from "./hooks/use-cloned-events";
+import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
 
 export * from "./types";
 

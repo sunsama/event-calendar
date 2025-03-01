@@ -1,6 +1,6 @@
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, SharedValue } from "react-native-reanimated";
-import { Config } from "src/types";
+import { Config } from "../types";
 
 const doubleTapGesture = (
   zoomLevel: SharedValue<number>,

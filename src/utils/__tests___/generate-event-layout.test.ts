@@ -1,5 +1,5 @@
 import generateEventLayouts from "../generate-event-layouts";
-import { CalendarEvent, EventExtend } from "src/types";
+import { CalendarEvent, EventExtend } from "../../types";
 
 describe("generateEventLayouts", () => {
   it("should separate all-day events and timed events", () => {

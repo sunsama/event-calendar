@@ -3,7 +3,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { ConfigProvider } from "src/utils/globals";
+import { ConfigProvider } from "../utils/globals";
 import moment from "moment-timezone";
 import { AppState, StyleSheet } from "react-native";
 

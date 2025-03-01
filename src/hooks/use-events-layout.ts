@@ -6,7 +6,7 @@ import {
   CalendarEvent,
   CalendarViewIntervalType,
   FullCalendarEventLayout,
-} from "src/types";
+} from "../types";
 
 type State = {
   events: FullCalendarEventLayout;

@@ -5,11 +5,10 @@ import Animated, {
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { forwardRef, useContext, useEffect } from "react";
-import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
+import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
 import { StyleSheet } from "react-native";
-import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
-import { useIsEditing } from "src/hooks/use-is-editing";
-import doubleTapGesture from "src/utils/double-tap-reset-zoom-gesture";
+import { useIsEditing } from "../hooks/use-is-editing";
+import doubleTapGesture from "../utils/double-tap-reset-zoom-gesture";
 
 type ZoomProviderProps = {
   children: any;
@@ -18,7 +17,7 @@ type ZoomProviderProps = {
 // This fraction determines how quickly zoom grows
 const fraction = 0.1;
 
-const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
+const ZoomProvider = forwardRef<any, ZoomProviderProps>(
   ({ children }, refNewEvent) => {
     const {
       canCreateEvents,

@@ -1,13 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import { RefObject, useContext, useMemo } from "react";
-import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
-import BackgroundHoursLayout from "src/components/background-hours-layout";
-import { generatePrefabHours } from "src/utils/date-utils";
-import BackgroundHoursContent from "src/components/background-hours-content";
-import TimedEventContainer from "src/components/timed-event-container";
-import TimeIndicator from "src/components/time-indicator";
-import NewEventContainer from "src/components/new-event-container";
-import EditEventContainer from "src/components/edit-event-container";
+import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
+import BackgroundHoursLayout from "../components/background-hours-layout";
+import { generatePrefabHours } from "../utils/date-utils";
+import BackgroundHoursContent from "../components/background-hours-content";
+import TimedEventContainer from "../components/timed-event-container";
+import TimeIndicator from "../components/time-indicator";
+import NewEventContainer from "../components/new-event-container";
+import EditEventContainer from "../components/edit-event-container";
 
 type TimedEventsProps = {
   refNewEvent: RefObject<any>;

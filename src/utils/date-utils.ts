@@ -1,6 +1,6 @@
 import moment, { type Moment } from "moment-timezone";
 import { isDate, range, size } from "lodash";
-import { CalendarEvent, PrefabHour } from "src/types";
+import { CalendarEvent, PrefabHour } from "../types";
 
 export const generatePrefabHours = (
   timeFormat: string = "HH:mm"

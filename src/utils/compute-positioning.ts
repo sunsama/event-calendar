@@ -1,5 +1,5 @@
 import moment, { Moment } from "moment-timezone";
-import { CollisionObject, EventPosition } from "src/types";
+import { CollisionObject, EventPosition } from "../types";
 
 type ComputePositioning = {
   // We only need the collisions part of this type

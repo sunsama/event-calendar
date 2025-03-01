@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { cloneDeep } from "lodash";
-import { CalendarEvent } from "src/types";
+import { CalendarEvent } from "../types";
 
 export let updateClonedEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
 

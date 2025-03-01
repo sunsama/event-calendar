@@ -6,10 +6,10 @@ import React, {
   useState,
 } from "react";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
-import { ConfigProvider } from "src/utils/globals";
+import { ConfigProvider } from "../utils/globals";
 import { isFunction } from "lodash";
-import { updateClonedEvents } from "src/hooks/use-cloned-events";
-import { EditStatus, PartDayEventLayoutType } from "src/types";
+import { updateClonedEvents } from "../hooks/use-cloned-events";
+import { EditStatus, PartDayEventLayoutType } from "../types";
 
 interface IsEditingType {
   isEditing: null | PartDayEventLayoutType;

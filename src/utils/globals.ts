@@ -1,5 +1,5 @@
 import { createContext } from "react";
-import { Config } from "src/types";
+import { Config } from "../types";
 
 export const ConfigProvider = createContext<Config>(undefined as never);
 
