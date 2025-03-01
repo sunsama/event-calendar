@@ -11,6 +11,7 @@ import { EventExtend } from "src/enums";
 import { StyleSheet, View } from "react-native";
 import { useIsEditing } from "src/hooks/use-is-editing";
 import gesturePan from "src/utils/pan-edit-event-gesture";
+import doubleTapGesture from "src/utils/double-tap-reset-zoom-gesture";
 
 type TimedEventContainerProps = {
   layout: PartDayEventLayoutType;
@@ -28,6 +29,7 @@ const TimedEventContainer = ({
     fiveMinuteInterval,
     zoomLevel,
     renderEvent,
+    initialZoomLevel,
   } = useContext(ConfigProvider);
 
   const height = useSharedValue(0);
@@ -48,6 +50,7 @@ const TimedEventContainer = ({
   const startY = useSharedValue(0);
 
   const gestures = Gesture.Exclusive(
+    doubleTapGesture(zoomLevel, initialZoomLevel),
     gestureTap,
     gesturePan(
       startY,
@@ -60,7 +63,7 @@ const TimedEventContainer = ({
       fiveMinuteInterval,
       isEditing,
       startEditing
-    ).activateAfterLongPress(250)
+    ).activateAfterLongPress(500)
   );
 
   useAnimatedReaction(

@@ -9,6 +9,7 @@ import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
 import { StyleSheet } from "react-native";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
 import { useIsEditing } from "src/hooks/use-is-editing";
+import doubleTapGesture from "src/utils/double-tap-reset-zoom-gesture";
 
 type ZoomProviderProps = {
   children: any;
@@ -41,15 +42,6 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
       zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
       previewScale.value = zoomLevel.value;
     });
-
-    const doubleTapGesture = Gesture.Tap()
-      .numberOfTaps(2)
-      .onEnd((_event, success) => {
-        if (success) {
-          // Reset the zoom level to the default
-          zoomLevel.value = initialZoomLevel;
-        }
-      });
 
     const yPosition = useSharedValue(-1);
     const { isEditing } = useIsEditing();
@@ -126,7 +118,7 @@ const ZoomProvider = forwardRef<GestureRef, ZoomProviderProps>(
     const combinedGesture = Gesture.Simultaneous(
       pinchGesture,
       longPressGesture,
-      doubleTapGesture
+      doubleTapGesture(zoomLevel, initialZoomLevel)
     );
 
     return (

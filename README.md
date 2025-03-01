@@ -48,6 +48,20 @@ npm install react-native-reanimated react-native-gesture-handler
 ## Usage
 For a full implementation example, refer to the **example app** included in the repository.
 
+### Gestures
+
+The Event Calendar component supports the following gestures:
+
+- Double tap: Resets the zoom level to the initial value.
+- Pinch: Zooms in and out of the calendar.
+- Drag: Moves the calendar vertically.
+- Tap event: Opens the event details view.
+
+Edit mode:
+- Hold & Drag events: Moves events to different times, starts edit mode.
+- Hold & Drag event edges: When in edit mode, resizes events.
+- Tap event: Stops edit mode.
+
 ## Props
 | Prop                        | Type                    | Required | Default | Description                                                                                                                        |
 |-----------------------------|-------------------------|----------|---------|------------------------------------------------------------------------------------------------------------------------------------|
