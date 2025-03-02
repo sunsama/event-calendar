@@ -4,13 +4,12 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useSharedValue } from "react-native-reanimated";
 import ZoomProvider from "./components/zoom-provider";
 import TimedEvents from "./components/timed-events";
-import useEventsLayout, { UpdateEvent } from "./hooks/use-events-layout";
 import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "./utils/globals";
-import moment from "moment-timezone";
+import moment, { type Moment } from "moment-timezone";
 import { useMemo, useRef } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
 import { IsEditingProvider } from "./hooks/use-is-editing";
-import useClonedEvents from "./hooks/use-cloned-events";
+import { EventsProvider, useEvents } from "src/hooks/use-events";
 import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
 
 export * from "./types";
@@ -39,55 +38,55 @@ type EventCalenderProps = {
   onZoomChange?: Config["onZoomChange"];
 };
 
-const EventCalendar = ({
-  events,
-  timeFormat = "HH:mm",
-  dayDate,
-  theme,
-  initialZoomLevel = DEFAULT_MINUTE_HEIGHT,
-  onCreateEvent,
-  timezone = "UTC",
-  renderEvent,
-  onPressEvent,
-  userCalendarId = "",
-  showTimeIndicator,
-  maxAllDayEvents = 2,
-  canCreateEvents = true,
-  renderNewEventContainer,
+type EventCalenderContentProps = {
+  canCreateEvents: boolean;
+  canEditEvent: Config["canEditEvent"];
+  startCalendarDate: Moment;
+  fiveMinuteInterval?: boolean;
+  initialZoomLevel: number;
+  maxAllDayEvents: number;
+  onCreateEvent?: onCreateEvent;
+  onEventEdit?: Config["onEventEdit"];
+  onPressEvent?: Config["onPressEvent"];
+  renderDragBars?: Config["renderDragBars"];
+  renderEvent: Config["renderEvent"];
+  renderNewEventContainer?: Config["renderNewEventContainer"];
+  showTimeIndicator?: boolean;
+  theme?: ThemeStyle;
+  timeFormat: string;
+  timezone: string;
+  updateLocalStateAfterEdit: boolean;
+  extraTimedComponents?: Config["extraTimedComponents"];
+  onZoomChange?: Config["onZoomChange"];
+};
+const EventCalendarContent = ({
+  canCreateEvents,
+  canEditEvent,
   fiveMinuteInterval,
-  canEditEvent = true,
+  initialZoomLevel,
+  maxAllDayEvents,
+  onCreateEvent,
   onEventEdit,
+  onPressEvent,
   renderDragBars,
-  updateLocalStateAfterEdit = true,
+  renderEvent,
+  renderNewEventContainer,
+  showTimeIndicator,
+  theme,
+  timeFormat,
+  timezone,
+  updateLocalStateAfterEdit,
   extraTimedComponents,
   onZoomChange,
-}: EventCalenderProps) => {
-  const startCalendarDate = useMemo(
-    () => moment.tz(dayDate, timezone).startOf("day"),
-    [dayDate, timezone]
-  );
-
-  const clonedEvents = useClonedEvents(events, updateLocalStateAfterEdit);
-
-  const memoizedProps = useMemo<UpdateEvent>(
-    () => ({
-      startCalendarDate: startCalendarDate.format("YYYY-MM-DD"),
-      calendarViewInterval: "1day",
-      endCalendarDate: startCalendarDate.format("YYYY-MM-DD"),
-      userCalendarId,
-      timezone,
-      startDayOfWeekOffset: 0,
-      events: clonedEvents,
-    }),
-    [startCalendarDate, userCalendarId, timezone, clonedEvents]
-  );
-
-  const layout = useEventsLayout(memoizedProps);
+  startCalendarDate,
+}: EventCalenderContentProps) => {
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
 
   const refNewEvent = useRef<GestureRef>(null);
+
+  const { eventsLayout } = useEvents();
 
   return (
     <View style={[styles.container, theme?.container]}>
@@ -95,7 +94,7 @@ const EventCalendar = ({
         value={{
           dayDate: startCalendarDate,
           timeFormat,
-          layout,
+          layout: eventsLayout,
           zoomLevel,
           createY,
           initialZoomLevel,
@@ -112,9 +111,9 @@ const EventCalendar = ({
           onEventEdit,
           renderDragBars,
           maximumHour,
-          updateLocalStateAfterEdit,
           extraTimedComponents,
           onZoomChange,
+          updateLocalStateAfterEdit,
         }}
       >
         <AllDayEvents />
@@ -132,6 +131,55 @@ const EventCalendar = ({
         </ScrollView>
       </ConfigProvider.Provider>
     </View>
+  );
+};
+
+/**
+ * Wraps `EventCalendarContent` inside `ClonedEventsProvider` to manage cloned events independently.
+ */
+const EventCalendar = ({
+  timeFormat = "HH:mm",
+  dayDate,
+  events,
+  initialZoomLevel = DEFAULT_MINUTE_HEIGHT,
+  timezone = "UTC",
+  userCalendarId = "",
+  maxAllDayEvents = 2,
+  updateLocalStateAfterEdit = true,
+  canCreateEvents = true,
+  canEditEvent = true,
+  ...props
+}: EventCalenderProps) => {
+  const startCalendarDate = useMemo(
+    () => moment.tz(dayDate, timezone).startOf("day"),
+    [dayDate, timezone]
+  );
+
+  return (
+    <EventsProvider
+      initialProps={{
+        startCalendarDate: startCalendarDate.format("YYYY-MM-DD"),
+        calendarViewInterval: "1day",
+        endCalendarDate: startCalendarDate.format("YYYY-MM-DD"),
+        userCalendarId,
+        timezone,
+        startDayOfWeekOffset: 0,
+        events,
+      }}
+      updateLocalStateAfterEdit={!!updateLocalStateAfterEdit}
+    >
+      <EventCalendarContent
+        {...props}
+        timeFormat={timeFormat}
+        initialZoomLevel={initialZoomLevel}
+        timezone={timezone}
+        maxAllDayEvents={maxAllDayEvents}
+        updateLocalStateAfterEdit={updateLocalStateAfterEdit}
+        startCalendarDate={startCalendarDate}
+        canCreateEvents={canCreateEvents}
+        canEditEvent={canEditEvent}
+      />
+    </EventsProvider>
   );
 };
 

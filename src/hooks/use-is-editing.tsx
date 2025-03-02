@@ -8,8 +8,8 @@ import React, {
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "../utils/globals";
 import { isFunction } from "lodash";
-import { updateClonedEvents } from "../hooks/use-cloned-events";
 import { EditStatus, PartDayEventLayoutType } from "../types";
+import { useEvents } from "src/hooks/use-events";
 
 interface IsEditingType {
   isEditing: null | PartDayEventLayoutType;
@@ -38,6 +38,7 @@ export const useIsEditing = () => {
 export const IsEditingProvider = ({ children }: { children: ReactNode }) => {
   const { canEditEvent, onEventEdit, updateLocalStateAfterEdit } =
     useContext(ConfigProvider);
+  const { updateClonedEvents } = useEvents();
   const [isEditing, baseSetIsEditing] = useState<null | PartDayEventLayoutType>(
     null
   );
@@ -98,7 +99,13 @@ export const IsEditingProvider = ({ children }: { children: ReactNode }) => {
 
       baseSetIsEditing(newValue);
     },
-    [canEditEvent, isEditing, onEventEdit, updateLocalStateAfterEdit]
+    [
+      canEditEvent,
+      isEditing,
+      onEventEdit,
+      updateClonedEvents,
+      updateLocalStateAfterEdit,
+    ]
   );
 
   return (
