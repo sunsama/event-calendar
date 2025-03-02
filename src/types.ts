@@ -65,12 +65,6 @@ export type ThemeStyle = {
   backgroundHoursLayoutContainer?: ViewStyle;
   // New event inner container, if you don't want to use the `renderNewEventContainer` prop
   newEventContainer?: ViewStyle;
-  // Event container title
-  eventTitle?: TextStyle;
-  // Event container subtitle
-  eventSubtitle?: TextStyle;
-  // Event container main container
-  eventContainer?: ViewStyle;
   // Style the time indicator
   timeIndicator?: ViewStyle;
   // All day main container

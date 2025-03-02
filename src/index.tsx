@@ -114,6 +114,7 @@ const EventCalendarContent = ({
           extraTimedComponents,
           onZoomChange,
           updateLocalStateAfterEdit,
+          theme,
         }}
       >
         <AllDayEvents />
