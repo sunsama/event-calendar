@@ -9,7 +9,7 @@ import moment, { type Moment } from "moment-timezone";
 import { useMemo, useRef } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
 import { IsEditingProvider } from "./hooks/use-is-editing";
-import { EventsProvider, useEvents } from "src/hooks/use-events";
+import { EventsProvider, useEvents } from "./hooks/use-events";
 import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
 
 export * from "./types";

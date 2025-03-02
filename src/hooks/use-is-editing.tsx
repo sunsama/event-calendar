@@ -9,7 +9,7 @@ import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "../utils/globals";
 import { isFunction } from "lodash";
 import { EditStatus, PartDayEventLayoutType } from "../types";
-import { useEvents } from "src/hooks/use-events";
+import { useEvents } from "./use-events";
 
 interface IsEditingType {
   isEditing: null | PartDayEventLayoutType;
