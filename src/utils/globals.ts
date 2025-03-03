@@ -1,7 +1,7 @@
 import { createContext } from "react";
 import { Config } from "../types";
 
-export const ConfigProvider = createContext<Config>(undefined as never);
+export const ConfigProvider = createContext<Config<any>>(undefined as never);
 
 export const DEFAULT_MINUTE_HEIGHT = 0.8;
 

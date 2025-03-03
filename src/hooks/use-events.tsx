@@ -1,6 +1,7 @@
 import {
   createContext,
   type Dispatch,
+  ReactNode,
   type SetStateAction,
   useCallback,
   useContext,
@@ -15,8 +16,8 @@ import {
   FullCalendarEventLayout,
 } from "../types";
 
-export type UpdateEvent = {
-  events: CalendarEvent[];
+export type UpdateEvent<T extends CalendarEvent> = {
+  events: T[];
   userCalendarId: string;
   timezone: string;
   startCalendarDate: string;
@@ -25,66 +26,64 @@ export type UpdateEvent = {
   calendarViewInterval?: CalendarViewIntervalType;
 };
 
-type EventsContextType = {
-  clonedEvents: CalendarEvent[];
-  updateClonedEvents: Dispatch<SetStateAction<CalendarEvent[]>>;
-  eventsLayout: FullCalendarEventLayout;
-  updateEventsLayout: (props: UpdateEvent) => void;
+type EventsContextType<T extends CalendarEvent> = {
+  clonedEvents: T[];
+  updateClonedEvents: Dispatch<SetStateAction<T[]>>;
+  eventsLayout: FullCalendarEventLayout<T>;
+  updateEventsLayout: (props: UpdateEvent<T>) => void;
 };
 
 // Context to store both cloned events & event layouts
-const EventsContext = createContext<EventsContextType | null>(null);
+const EventsContext = createContext<EventsContextType<any> | null>(null);
 
 /**
  * Provider that manages both cloned events & event layouts independently.
  */
-export const EventsProvider = ({
+export const EventsProvider = <T extends CalendarEvent>({
   children,
   initialProps,
   updateLocalStateAfterEdit = true,
 }: {
-  children: React.ReactNode;
-  initialProps: UpdateEvent;
+  children: ReactNode;
+  initialProps: UpdateEvent<T>;
   updateLocalStateAfterEdit?: boolean;
 }) => {
   // Cloned Events State
-  const [clonedEvents, setClonedEvents] = useState<CalendarEvent[]>(
-    initialProps.events
-  );
+  const [clonedEvents, setClonedEvents] = useState<T[]>(initialProps.events);
 
   // Event Layouts State
-  const [eventsLayout, setEventsLayout] = useState<FullCalendarEventLayout>({
+  const [eventsLayout, setEventsLayout] = useState<FullCalendarEventLayout<T>>({
     allDayEventsLayout: [],
     partDayEventsLayout: [],
   });
 
   // Function to update cloned events
   const updateClonedEvents = useCallback(
-    (events: CalendarEvent[]) => {
+    (events: T[]) => {
       setClonedEvents(updateLocalStateAfterEdit ? cloneDeep(events) : events);
     },
     [updateLocalStateAfterEdit]
   );
 
   // Function to update event layouts
-  const updateEventsLayout = (props: UpdateEvent) => {
+  const updateEventsLayout = useCallback((props: UpdateEvent<T>) => {
     setEventsLayout(
-      generateEventLayouts(props)[props.startCalendarDate] || {
+      generateEventLayouts<T>(props)[props.startCalendarDate] || {
         partDayEventsLayout: [],
         allDayEventsLayout: [],
       }
     );
-  };
+  }, []);
 
   // Update both states when initialProps change
   useEffect(() => {
     updateClonedEvents(initialProps.events);
     updateEventsLayout(initialProps);
-  }, [initialProps, updateClonedEvents]);
+  }, [initialProps, updateClonedEvents, updateEventsLayout]);
 
   useEffect(() => {
     updateEventsLayout({ ...initialProps, events: clonedEvents });
-  }, [initialProps, clonedEvents]);
+  }, [initialProps, clonedEvents, updateEventsLayout]);
 
   return (
     <EventsContext.Provider

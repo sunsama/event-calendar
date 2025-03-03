@@ -1,9 +1,9 @@
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, SharedValue } from "react-native-reanimated";
 import { RefObject } from "react";
-import { PartDayEventLayoutType } from "../types";
+import { type CalendarEvent, PartDayEventLayoutType } from "../types";
 
-const gesturePan = (
+const gesturePan = <T extends CalendarEvent>(
   startY: SharedValue<number>,
   top: SharedValue<number>,
   currentY: SharedValue<number>,
@@ -12,7 +12,7 @@ const gesturePan = (
   height: SharedValue<number>,
   refNewEvent: RefObject<any>,
   fiveMinuteInterval?: boolean,
-  isEditing?: null | PartDayEventLayoutType,
+  isEditing?: null | PartDayEventLayoutType<T>,
   startEditing?: () => void
 ) =>
   Gesture.Pan()

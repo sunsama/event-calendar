@@ -9,6 +9,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import type { AllDayEventLayoutType } from "src/types";
 
 const AllDayEvents = memo(
   () => {
@@ -62,6 +63,10 @@ const AllDayEvents = memo(
     // Apply the animated height to the wrapping container
     const animatedStyle = useAnimatedStyle(() => {
       return {
+        // so children get clipped during animation
+        overflow: "hidden",
+        backgroundColor: "lightgrey",
+        minHeight: 1,
         // This ensures the container’s height animates smoothly
         height: measuredHeight.value,
       };
@@ -70,18 +75,9 @@ const AllDayEvents = memo(
     return (
       <View style={[styles.container, theme?.allDayContainer]}>
         <View style={[styles.eventContainer, theme?.allDayEventContainer]}>
-          <Animated.View
-            style={[
-              animatedStyle,
-              {
-                overflow: "hidden", // so children get clipped during animation
-                backgroundColor: "lightgrey",
-                minHeight: 1,
-              },
-            ]}
-          >
+          <Animated.View style={animatedStyle}>
             <View onLayout={onContentLayout}>
-              {allDayEvents.map((allDayLayout) => (
+              {allDayEvents.map((allDayLayout: AllDayEventLayoutType<any>) => (
                 <EventContainer
                   key={allDayLayout.event.id}
                   layout={allDayLayout}

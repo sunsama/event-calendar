@@ -1,18 +1,18 @@
 import moment, { Moment } from "moment-timezone";
-import { CollisionObject, EventPosition } from "../types";
+import { type CalendarEvent, CollisionObject, EventPosition } from "../types";
 
-type ComputePositioning = {
+type ComputePositioning<T extends CalendarEvent> = {
   // We only need the collisions part of this type
-  collisionObject: CollisionObject;
+  collisionObject: CollisionObject<T>;
   startOfDayMoment: Moment;
   timezone: string;
 };
 
-const computePositioning = ({
+const computePositioning = <T extends CalendarEvent>({
   collisionObject,
   startOfDayMoment,
   timezone,
-}: ComputePositioning): EventPosition => {
+}: ComputePositioning<T>): EventPosition => {
   const startDateMoment = moment.tz(collisionObject.event.start, timezone);
   const durationMinutes = moment
     .tz(collisionObject.event.end, timezone)

@@ -12,16 +12,16 @@ export type CalendarEvent = {
   isAllDay?: boolean;
 };
 
-export type AllDayEventLayoutType = {
-  event: CalendarEvent;
+export type AllDayEventLayoutType<T extends CalendarEvent> = {
+  event: T;
   rowIndex?: number;
   visibleWidthDays?: number;
   extend: EventExtend;
   isPrimaryRendered?: boolean;
 };
 
-export type PartDayEventLayoutType = {
-  event: CalendarEvent;
+export type PartDayEventLayoutType<T extends CalendarEvent> = {
+  event: T;
   collisions?: {
     total: number;
     order: number;
@@ -29,8 +29,8 @@ export type PartDayEventLayoutType = {
   position: EventPosition;
 };
 
-export interface CollisionObject {
-  event: CalendarEvent;
+export interface CollisionObject<T extends CalendarEvent> {
+  event: T;
   collisions?: { total: number; order: number };
 }
 
@@ -41,9 +41,9 @@ export type EventPosition = {
   marginLeft: string;
 };
 
-export type FullCalendarEventLayout = {
-  allDayEventsLayout: AllDayEventLayoutType[];
-  partDayEventsLayout: PartDayEventLayoutType[];
+export type FullCalendarEventLayout<T extends CalendarEvent> = {
+  allDayEventsLayout: AllDayEventLayoutType<T>[];
+  partDayEventsLayout: PartDayEventLayoutType<T>[];
 };
 
 export type ThemeStyle = {
@@ -85,19 +85,19 @@ export type OnCreateEventProps = {
 
 export type onCreateEvent = (arg: OnCreateEventProps) => void;
 
-export type Config = {
+export type Config<T extends CalendarEvent> = {
   timezone: string;
   timeFormat: string;
   dayDate: Moment;
   theme?: ThemeStyle;
   zoomLevel: SharedValue<number>;
-  layout: FullCalendarEventLayout;
+  layout: FullCalendarEventLayout<T>;
   createY: SharedValue<number>;
   maximumHour: SharedValue<number>;
   onCreateEvent?: onCreateEvent;
   initialZoomLevel: number;
   renderEvent: (
-    event: CalendarEvent,
+    event: T,
     extended: EventExtend,
     eventHeight?: SharedValue<number>,
     updatedTimes?: {
@@ -106,18 +106,18 @@ export type Config = {
     }
   ) => ReactNode;
   onEventEdit?: (params: {
-    event: CalendarEvent;
+    event: T;
     status: EditStatus;
     updatedTimes?: {
       updatedStart: string;
       updatedEnd: string;
     };
   }) => void;
-  onPressEvent?: (event: CalendarEvent) => void;
+  onPressEvent?: (event: T) => void;
   showTimeIndicator?: boolean;
   maxAllDayEvents: number;
   canCreateEvents: boolean;
-  canEditEvent: boolean | ((event: CalendarEvent) => boolean);
+  canEditEvent: boolean | ((event: T) => boolean);
   renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
   fiveMinuteInterval?: boolean;
   renderDragBars?: { top?: () => ReactNode; bottom?: () => ReactNode };

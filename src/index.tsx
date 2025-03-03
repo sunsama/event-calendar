@@ -14,52 +14,52 @@ import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
 
 export * from "./types";
 
-type EventCalenderProps = {
+type EventCalenderProps<T extends CalendarEvent> = {
   canCreateEvents?: boolean;
-  canEditEvent?: Config["canEditEvent"];
+  canEditEvent?: Config<T>["canEditEvent"];
   dayDate: string;
-  events: CalendarEvent[];
+  events: T[];
   fiveMinuteInterval?: boolean;
   initialZoomLevel?: number;
   maxAllDayEvents?: number;
   onCreateEvent?: onCreateEvent;
-  onEventEdit?: Config["onEventEdit"];
-  onPressEvent?: Config["onPressEvent"];
-  renderDragBars?: Config["renderDragBars"];
-  renderEvent: Config["renderEvent"];
-  renderNewEventContainer?: Config["renderNewEventContainer"];
+  onEventEdit?: Config<T>["onEventEdit"];
+  onPressEvent?: Config<T>["onPressEvent"];
+  renderDragBars?: Config<T>["renderDragBars"];
+  renderEvent: Config<T>["renderEvent"];
+  renderNewEventContainer?: Config<T>["renderNewEventContainer"];
   showTimeIndicator?: boolean;
   theme?: ThemeStyle;
   timeFormat?: string;
   timezone?: string;
   updateLocalStateAfterEdit?: boolean;
   userCalendarId?: string;
-  extraTimedComponents?: Config["extraTimedComponents"];
-  onZoomChange?: Config["onZoomChange"];
+  extraTimedComponents?: Config<T>["extraTimedComponents"];
+  onZoomChange?: Config<T>["onZoomChange"];
 };
 
-type EventCalenderContentProps = {
+type EventCalenderContentProps<T extends CalendarEvent> = {
   canCreateEvents: boolean;
-  canEditEvent: Config["canEditEvent"];
+  canEditEvent: Config<T>["canEditEvent"];
   startCalendarDate: Moment;
   fiveMinuteInterval?: boolean;
   initialZoomLevel: number;
   maxAllDayEvents: number;
   onCreateEvent?: onCreateEvent;
-  onEventEdit?: Config["onEventEdit"];
-  onPressEvent?: Config["onPressEvent"];
-  renderDragBars?: Config["renderDragBars"];
-  renderEvent: Config["renderEvent"];
-  renderNewEventContainer?: Config["renderNewEventContainer"];
+  onEventEdit?: Config<T>["onEventEdit"];
+  onPressEvent?: Config<T>["onPressEvent"];
+  renderDragBars?: Config<T>["renderDragBars"];
+  renderEvent: Config<T>["renderEvent"];
+  renderNewEventContainer?: Config<T>["renderNewEventContainer"];
   showTimeIndicator?: boolean;
   theme?: ThemeStyle;
   timeFormat: string;
   timezone: string;
   updateLocalStateAfterEdit: boolean;
-  extraTimedComponents?: Config["extraTimedComponents"];
-  onZoomChange?: Config["onZoomChange"];
+  extraTimedComponents?: Config<T>["extraTimedComponents"];
+  onZoomChange?: Config<T>["onZoomChange"];
 };
-const EventCalendarContent = ({
+const EventCalendarContent = <T extends CalendarEvent>({
   canCreateEvents,
   canEditEvent,
   fiveMinuteInterval,
@@ -79,7 +79,7 @@ const EventCalendarContent = ({
   extraTimedComponents,
   onZoomChange,
   startCalendarDate,
-}: EventCalenderContentProps) => {
+}: EventCalenderContentProps<T>) => {
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
@@ -138,7 +138,7 @@ const EventCalendarContent = ({
 /**
  * Wraps `EventCalendarContent` inside `ClonedEventsProvider` to manage cloned events independently.
  */
-const EventCalendar = ({
+const EventCalendar = <T extends CalendarEvent>({
   timeFormat = "HH:mm",
   dayDate,
   events,
@@ -150,7 +150,7 @@ const EventCalendar = ({
   canCreateEvents = true,
   canEditEvent = true,
   ...props
-}: EventCalenderProps) => {
+}: EventCalenderProps<T>) => {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
     [dayDate, timezone]

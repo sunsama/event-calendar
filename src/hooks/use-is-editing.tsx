@@ -8,14 +8,18 @@ import React, {
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "../utils/globals";
 import { isFunction } from "lodash";
-import { EditStatus, PartDayEventLayoutType } from "../types";
+import {
+  type CalendarEvent,
+  EditStatus,
+  PartDayEventLayoutType,
+} from "../types";
 import { useEvents } from "./use-events";
 
-interface IsEditingType {
-  isEditing: null | PartDayEventLayoutType;
+interface IsEditingType<T extends CalendarEvent> {
+  isEditing: null | PartDayEventLayoutType<T>;
   currentY: SharedValue<number>;
   setIsEditing: (
-    newValue: PartDayEventLayoutType | null,
+    newValue: PartDayEventLayoutType<T> | null,
     updatedTimes?: {
       updatedStart: string;
       updatedEnd: string;
@@ -23,7 +27,7 @@ interface IsEditingType {
   ) => void;
 }
 
-const IsEditing = createContext<IsEditingType | undefined>(undefined);
+const IsEditing = createContext<IsEditingType<any> | undefined>(undefined);
 
 export const useIsEditing = () => {
   const context = useContext(IsEditing);
@@ -35,18 +39,21 @@ export const useIsEditing = () => {
 };
 
 // Provider component
-export const IsEditingProvider = ({ children }: { children: ReactNode }) => {
+export const IsEditingProvider = <T extends CalendarEvent>({
+  children,
+}: {
+  children: ReactNode;
+}) => {
   const { canEditEvent, onEventEdit, updateLocalStateAfterEdit } =
     useContext(ConfigProvider);
   const { updateClonedEvents } = useEvents();
-  const [isEditing, baseSetIsEditing] = useState<null | PartDayEventLayoutType>(
-    null
-  );
+  const [isEditing, baseSetIsEditing] =
+    useState<null | PartDayEventLayoutType<T>>(null);
   const currentY = useSharedValue(0);
 
   const setIsEditing = useCallback(
     (
-      newValue: PartDayEventLayoutType | null,
+      newValue: PartDayEventLayoutType<T> | null,
       updatedTimes?: {
         updatedStart: string;
         updatedEnd: string;

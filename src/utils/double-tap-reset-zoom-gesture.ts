@@ -1,11 +1,11 @@
 import { Gesture } from "react-native-gesture-handler";
 import { runOnJS, SharedValue } from "react-native-reanimated";
-import { Config } from "../types";
+import { type CalendarEvent, Config } from "../types";
 
-const doubleTapGesture = (
+const doubleTapGesture = <T extends CalendarEvent>(
   zoomLevel: SharedValue<number>,
   initialZoomLevel: number,
-  onZoomChange?: Config["onZoomChange"]
+  onZoomChange?: Config<T>["onZoomChange"]
 ) =>
   Gesture.Tap()
     .numberOfTaps(2)

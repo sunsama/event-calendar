@@ -2,13 +2,19 @@ import { ConfigProvider } from "../utils/globals";
 import { useCallback, useContext, useMemo } from "react";
 import { Pressable } from "react-native-gesture-handler";
 import { View } from "react-native";
-import { AllDayEventLayoutType, EventExtend } from "../types";
+import {
+  AllDayEventLayoutType,
+  type CalendarEvent,
+  EventExtend,
+} from "../types";
 
-type EventContainerProps = {
-  layout: AllDayEventLayoutType;
+type EventContainerProps<T extends CalendarEvent> = {
+  layout: AllDayEventLayoutType<T>;
 };
 
-const EventContainer = ({ layout }: EventContainerProps) => {
+const EventContainer = <T extends CalendarEvent>({
+  layout,
+}: EventContainerProps<T>) => {
   const { onPressEvent, renderEvent, initialZoomLevel } =
     useContext(ConfigProvider);
 
@@ -16,8 +22,8 @@ const EventContainer = ({ layout }: EventContainerProps) => {
     () =>
       renderEvent(
         layout.event,
-        (layout as AllDayEventLayoutType).extend
-          ? (layout as AllDayEventLayoutType).extend
+        (layout as AllDayEventLayoutType<T>).extend
+          ? (layout as AllDayEventLayoutType<T>).extend
           : EventExtend.None
       ),
     [layout, renderEvent]

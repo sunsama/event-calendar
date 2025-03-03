@@ -11,17 +11,21 @@ import { StyleSheet, View } from "react-native";
 import { useIsEditing } from "../hooks/use-is-editing";
 import gesturePan from "../utils/pan-edit-event-gesture";
 import doubleTapGesture from "../utils/double-tap-reset-zoom-gesture";
-import { EventExtend, PartDayEventLayoutType } from "../types";
+import {
+  type CalendarEvent,
+  EventExtend,
+  PartDayEventLayoutType,
+} from "../types";
 
-type TimedEventContainerProps = {
-  layout: PartDayEventLayoutType;
+type TimedEventContainerProps<T extends CalendarEvent> = {
+  layout: PartDayEventLayoutType<T>;
   refNewEvent: RefObject<any>;
 };
 
-const TimedEventContainer = ({
+const TimedEventContainer = <T extends CalendarEvent>({
   layout,
   refNewEvent,
-}: TimedEventContainerProps) => {
+}: TimedEventContainerProps<T>) => {
   const { currentY, setIsEditing, isEditing } = useIsEditing();
   const {
     onPressEvent,

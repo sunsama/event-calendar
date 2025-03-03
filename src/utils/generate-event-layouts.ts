@@ -23,8 +23,8 @@ import {
   PartDayEventLayoutType,
 } from "../types";
 
-interface GenerateEventLayouts {
-  events: CalendarEvent[];
+interface GenerateEventLayouts<T extends CalendarEvent> {
+  events: T[];
   userCalendarId: string;
   timezone: string;
   startCalendarDate: string;
@@ -33,7 +33,7 @@ interface GenerateEventLayouts {
   calendarViewInterval?: CalendarViewIntervalType;
 }
 
-export const generateEventLayouts = ({
+export const generateEventLayouts = <T extends CalendarEvent>({
   events,
   startCalendarDate,
   endCalendarDate,
@@ -41,7 +41,7 @@ export const generateEventLayouts = ({
   calendarViewInterval = "1day",
   startDayOfWeekOffset = 0,
   timezone,
-}: GenerateEventLayouts) => {
+}: GenerateEventLayouts<T>) => {
   // Calculate spacial layout for CalendarViewDay events
   // in month view, midnight-spanning part-day events are rendered as all-day multi-day
   const [allDayEvents, partDayEvents] = _partition([...events], (event) =>
@@ -99,7 +99,7 @@ export const generateEventLayouts = ({
   });
 
   const result: {
-    [day: string]: FullCalendarEventLayout;
+    [day: string]: FullCalendarEventLayout<T>;
   } = {};
 
   calendarViewDateRanges.forEach((date) => {
@@ -142,8 +142,8 @@ export const generateEventLayouts = ({
       const endDate = moment.tz(startDate, timezone).endOf("day").toDate();
       const showHours = !["month"].includes(calendarViewInterval);
       const dayId = calendarDate;
-      const allDayEventsLayout: AllDayEventLayoutType[] = [];
-      let partDayEventsLayout: PartDayEventLayoutType[] = [];
+      const allDayEventsLayout: AllDayEventLayoutType<T>[] = [];
+      let partDayEventsLayout: PartDayEventLayoutType<T>[] = [];
 
       const x = moment(startDate).diff(
         moment.tz(date.basisDate, timezone),
@@ -174,7 +174,7 @@ export const generateEventLayouts = ({
         partDayEventsLayout = partDayEventsLayout.concat(
           handleCollisions(
             events.filter(
-              (event) =>
+              (event: T) =>
                 !isAllDayOrSpansMidnight(event, timezone) &&
                 dateRangeIntersect(
                   {
@@ -201,11 +201,11 @@ export const generateEventLayouts = ({
   return result;
 };
 
-const combineEventPosition = (
+const combineEventPosition = <T extends CalendarEvent>(
   dayDate: Moment,
   timezone: string,
-  collisionObject: CollisionObject
-): PartDayEventLayoutType => {
+  collisionObject: CollisionObject<T>
+): PartDayEventLayoutType<T> => {
   const position = computePositioning({
     timezone,
     collisionObject: collisionObject,
@@ -218,12 +218,12 @@ const combineEventPosition = (
   };
 };
 
-const handleCollisions = (
-  allEvents: CalendarEvent[],
+const handleCollisions = <T extends CalendarEvent>(
+  allEvents: T[],
   userCalendarId: string,
   dayDate: Moment,
   timezone: string
-): PartDayEventLayoutType[] => {
+): PartDayEventLayoutType<T>[] => {
   let stackableEvents = _sortBy(allEvents, (event) => event.id);
   stackableEvents = _sortBy(stackableEvents, (event) => {
     // current user's primary calendar should always be leftmost option
@@ -233,8 +233,8 @@ const handleCollisions = (
     new Date(event.start).valueOf()
   );
   // calculate overlap stack properties
-  const stackedEvtsByPos: Record<string, PartDayEventLayoutType[]> = {};
-  let curStack: (CollisionObject | null)[] = [];
+  const stackedEvtsByPos: Record<string, PartDayEventLayoutType<T>[]> = {};
+  let curStack: (CollisionObject<T> | null)[] = [];
 
   for (const evt of stackableEvents) {
     // already sorted by startDate
@@ -302,7 +302,7 @@ const handleCollisions = (
   }
 
   // always draw position 0 stack elements first.
-  let stackedEvents: PartDayEventLayoutType[] = [];
+  let stackedEvents: PartDayEventLayoutType<T>[] = [];
 
   Object.keys(stackedEvtsByPos).forEach(
     (pos) => (stackedEvents = stackedEvents.concat(stackedEvtsByPos[pos]))

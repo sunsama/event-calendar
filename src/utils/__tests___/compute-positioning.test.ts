@@ -4,7 +4,7 @@ import { PartDayEventLayoutType } from "../../types";
 
 describe("computePositioning", () => {
   it("should compute positioning correctly without collisions", () => {
-    const layout: PartDayEventLayoutType = {
+    const layout: PartDayEventLayoutType<any> = {
       event: {
         start: "2023-10-01T09:00:00Z",
         end: "2023-10-01T10:00:00Z",
