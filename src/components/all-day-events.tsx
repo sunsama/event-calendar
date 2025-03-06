@@ -43,7 +43,6 @@ const AllDayEvents = memo(
     const restEventAmount =
       layout.allDayEventsLayout.length - allDayEvents.length;
 
-    // Called whenever the content inside changes layout
     const onContentLayout = useCallback(
       (e: LayoutChangeEvent) => {
         const { height } = e.nativeEvent.layout;
@@ -54,20 +53,15 @@ const AllDayEvents = memo(
           return;
         }
 
-        // Animate from the old height to the new height
         measuredHeight.value = withTiming(height, { duration: 250 });
       },
       [measuredHeight, originalHeight]
     );
 
-    // Apply the animated height to the wrapping container
     const animatedStyle = useAnimatedStyle(() => {
       return {
-        // so children get clipped during animation
         overflow: "hidden",
-        backgroundColor: "lightgrey",
         minHeight: 1,
-        // This ensures the container’s height animates smoothly
         height: measuredHeight.value,
       };
     });
