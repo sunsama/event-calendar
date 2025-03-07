@@ -52,8 +52,8 @@ export const startOfUserWeek = (
     .isoWeekday(startDayOfWeekOffset);
 };
 
-export const isAllDayOrSpansMidnight = (
-  calendarEvent: CalendarEvent,
+export const isAllDayOrSpansMidnight = <T extends CalendarEvent>(
+  calendarEvent: T,
   timezone: string
 ) => {
   const { start, end, isAllDay } = calendarEvent;
@@ -74,8 +74,8 @@ export const isAllDayOrSpansMidnight = (
 };
 
 // Returns the count of unique dates in the provided timezone
-export const getDurationInDays = (
-  calendarEvent: CalendarEvent,
+export const getDurationInDays = <T extends CalendarEvent>(
+  calendarEvent: T,
   timezone: string
 ) => {
   // the event duration in days calculation depends on if the event is all day
@@ -124,8 +124,8 @@ export const daysInRange = ({
   return days;
 };
 
-export const getDuration = (
-  calendarEvent: CalendarEvent,
+export const getDuration = <T extends CalendarEvent>(
+  calendarEvent: T,
   trueDuration?: boolean
 ) => {
   const minDiff =

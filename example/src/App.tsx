@@ -1,4 +1,6 @@
-import EventCalendar from "@sunsama/event-calendar";
+import EventCalendar, {
+  type EventCalendarMethods,
+} from "@sunsama/event-calendar";
 import { StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
@@ -11,7 +13,7 @@ import Animated, {
   useAnimatedReaction,
   useAnimatedStyle,
 } from "react-native-reanimated";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Toast from "react-native-toast-message";
 import {
   CalendarEvent,
@@ -262,7 +264,7 @@ const RenderEvent = ({
   updatedTimes,
 }: {
   // The raw CalendarEvent
-  event: CalendarEvent;
+  event: ExtendedCalendarEvent;
   // If this event has started in the past, extends into the future, both or none
   extend: EventExtend;
   // The height of the event, if there is no height, this is an all-day event
@@ -448,7 +450,25 @@ const formatTime = (hour: number, minute: number) => {
   return `${start.format(timeFormat)} - ${end.format(timeFormat)}`;
 };
 
+type ExtendedCalendarEvent = CalendarEvent & {
+  bla: boolean;
+};
+
 export default function App() {
+  const refEventCalendar = useRef<EventCalendarMethods>(null);
+
+  useEffect(() => {
+    // Scroll to the current minutes
+    const scrollDate = new Date();
+
+    // setTimeout is needed to make sure the ref is set
+    setTimeout(() => {
+      refEventCalendar.current?.scrollToTime(
+        scrollDate.getHours() * 60 + scrollDate.getMinutes()
+      );
+    }, 0);
+  }, []);
+
   return (
     <SafeAreaProvider>
       <GestureHandlerRootView style={styles.container}>
@@ -464,7 +484,7 @@ export default function App() {
               console.log("onCreateEvent", params);
             }}
             // Triggered when pressed on an event
-            onPressEvent={(event: CalendarEvent) => {
+            onPressEvent={(event: ExtendedCalendarEvent) => {
               console.log("onPressEvent", event);
             }}
             // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
@@ -503,9 +523,11 @@ export default function App() {
               top: () => <View style={styles.dragBarTop} />,
               bottom: () => <View style={styles.dragBarBottom} />,
             }}
+            // If you want to access the EventCalendarMethods, you can use this ref
+            ref={refEventCalendar}
             // Render the main event component, timed and all day events
             renderEvent={(
-              event: CalendarEvent,
+              event: ExtendedCalendarEvent,
               extend: EventExtend,
               height?: SharedValue<number>,
               updatedTimes?: {

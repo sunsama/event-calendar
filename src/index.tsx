@@ -6,7 +6,13 @@ import ZoomProvider from "./components/zoom-provider";
 import TimedEvents from "./components/timed-events";
 import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "./utils/globals";
 import moment, { type Moment } from "moment-timezone";
-import { useMemo, useRef } from "react";
+import React, {
+  forwardRef,
+  type Ref,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+} from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
 import { IsEditingProvider } from "./hooks/use-is-editing";
 import { EventsProvider, useEvents } from "./hooks/use-events";
@@ -59,32 +65,59 @@ type EventCalenderContentProps<T extends CalendarEvent> = {
   extraTimedComponents?: Config<T>["extraTimedComponents"];
   onZoomChange?: Config<T>["onZoomChange"];
 };
-const EventCalendarContent = <T extends CalendarEvent>({
-  canCreateEvents,
-  canEditEvent,
-  fiveMinuteInterval,
-  initialZoomLevel,
-  maxAllDayEvents,
-  onCreateEvent,
-  onEventEdit,
-  onPressEvent,
-  renderDragBars,
-  renderEvent,
-  renderNewEventContainer,
-  showTimeIndicator,
-  theme,
-  timeFormat,
-  timezone,
-  updateLocalStateAfterEdit,
-  extraTimedComponents,
-  onZoomChange,
-  startCalendarDate,
-}: EventCalenderContentProps<T>) => {
+
+export type EventCalendarMethods = {
+  scrollToTime: (minutes: number, animated?: boolean) => void;
+};
+
+function EventCalendarContentInner<T extends CalendarEvent>(
+  {
+    canCreateEvents,
+    canEditEvent,
+    fiveMinuteInterval,
+    initialZoomLevel,
+    maxAllDayEvents,
+    onCreateEvent,
+    onEventEdit,
+    onPressEvent,
+    renderDragBars,
+    renderEvent,
+    renderNewEventContainer,
+    showTimeIndicator,
+    theme,
+    timeFormat,
+    timezone,
+    updateLocalStateAfterEdit,
+    extraTimedComponents,
+    onZoomChange,
+    startCalendarDate,
+  }: EventCalenderContentProps<T>,
+  refMethods: Ref<EventCalendarMethods>
+) {
   const zoomLevel = useSharedValue(initialZoomLevel);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
 
   const refNewEvent = useRef<GestureRef>(null);
+  const refScrollView = useRef<ScrollView>(null);
+
+  useImperativeHandle(
+    refMethods,
+    () => ({
+      scrollToTime: (time: number, animated = true) => {
+        console.info("scrollToTime called with:", {
+          time,
+          animated,
+          zoomLevel: zoomLevel.value,
+        });
+        refScrollView.current?.scrollTo({
+          y: time * zoomLevel.value,
+          animated,
+        });
+      },
+    }),
+    [zoomLevel]
+  );
 
   const { eventsLayout } = useEvents();
 
@@ -122,6 +155,7 @@ const EventCalendarContent = <T extends CalendarEvent>({
           bounces={false}
           keyboardShouldPersistTaps="always"
           style={[styles.scrollView, theme?.scrollView]}
+          ref={refScrollView}
         >
           <IsEditingProvider>
             <ZoomProvider ref={refNewEvent}>
@@ -133,24 +167,30 @@ const EventCalendarContent = <T extends CalendarEvent>({
       </ConfigProvider.Provider>
     </View>
   );
-};
+}
 
-/**
- * Wraps `EventCalendarContent` inside `ClonedEventsProvider` to manage cloned events independently.
- */
-const EventCalendar = <T extends CalendarEvent>({
-  timeFormat = "HH:mm",
-  dayDate,
-  events,
-  initialZoomLevel = DEFAULT_MINUTE_HEIGHT,
-  timezone = "UTC",
-  userCalendarId = "",
-  maxAllDayEvents = 2,
-  updateLocalStateAfterEdit = true,
-  canCreateEvents = true,
-  canEditEvent = true,
-  ...props
-}: EventCalenderProps<T>) => {
+const EventCalendarContent = forwardRef(EventCalendarContentInner) as <
+  T extends CalendarEvent,
+>(
+  props: EventCalenderContentProps<T> & { ref?: Ref<EventCalendarMethods> }
+) => ReturnType<typeof EventCalendarContentInner>;
+
+function EventCalendarInner<T extends CalendarEvent>(
+  {
+    timeFormat = "HH:mm",
+    dayDate,
+    events,
+    initialZoomLevel = DEFAULT_MINUTE_HEIGHT,
+    timezone = "UTC",
+    userCalendarId = "",
+    maxAllDayEvents = 2,
+    updateLocalStateAfterEdit = true,
+    canCreateEvents = true,
+    canEditEvent = true,
+    ...props
+  }: EventCalenderProps<T>,
+  ref: Ref<EventCalendarMethods>
+) {
   const startCalendarDate = useMemo(
     () => moment.tz(dayDate, timezone).startOf("day"),
     [dayDate, timezone]
@@ -170,6 +210,7 @@ const EventCalendar = <T extends CalendarEvent>({
       updateLocalStateAfterEdit={!!updateLocalStateAfterEdit}
     >
       <EventCalendarContent
+        ref={ref} // <--- CHANGED: pass forwarded ref down
         {...props}
         timeFormat={timeFormat}
         initialZoomLevel={initialZoomLevel}
@@ -182,7 +223,15 @@ const EventCalendar = <T extends CalendarEvent>({
       />
     </EventsProvider>
   );
-};
+}
+
+const EventCalendar = forwardRef(EventCalendarInner) as <
+  T extends CalendarEvent,
+>(
+  props: EventCalenderProps<T> & { ref?: Ref<EventCalendarMethods> }
+) => ReturnType<typeof EventCalendarInner>;
+
+export default EventCalendar;
 
 const styles = StyleSheet.create({
   container: {
@@ -207,5 +256,3 @@ const styles = StyleSheet.create({
     borderColor: "black",
   },
 });
-
-export default EventCalendar;

@@ -88,6 +88,13 @@ Edit mode:
 | `extraTimedComponents`      | `Function`              | No       |         | Allows rendering extra components in the calendar. These will be rendered before all the timed events.                             |
 | `onZoomChange`              | `Function`              | No       |         | Callback triggered when the zoom level changes.                                                                                    |
 
+## Methods
+The Event Calendar component exposes the following methods through the reference:
+
+| Method         | Arguments                                   | Description                                                                                   |
+|----------------|---------------------------------------------|-----------------------------------------------------------------------------------------------|
+| `scrollToTime` | `timeInMinutes: number, animated?: boolean` | Scrolls the calendar to the specified time (in minutes since midnight). Animating by default. |
+
 ## Dependencies
 Ensure you have the following dependencies installed for proper functionality:
 - `react-native-reanimated`
