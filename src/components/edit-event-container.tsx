@@ -129,6 +129,7 @@ const EditEventContainer = memo(
           })}
           {renderDragBars?.top ? (
             <DragBar
+              event={editingEvent.event}
               top={currentY}
               height={height}
               render={renderDragBars.top}
@@ -140,6 +141,7 @@ const EditEventContainer = memo(
           ) : null}
           {renderDragBars?.bottom ? (
             <DragBar
+              event={editingEvent.event}
               height={height}
               render={renderDragBars.bottom}
               refMainContainer={refMainContainer}

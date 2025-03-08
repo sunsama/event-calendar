@@ -1,19 +1,22 @@
 import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
-import { ReactNode, useMemo } from "react";
+import { ReactNode, type RefObject, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { StyleSheet } from "react-native";
+import type { CalendarEvent } from "src/types";
 
-type DragBarProps = {
+type DragBarProps<T extends CalendarEvent> = {
   top?: SharedValue<number>;
   height: SharedValue<number>;
-  render: () => ReactNode;
-  refMainContainer: React.RefObject<any>;
+  render: (event: T) => ReactNode;
+  refMainContainer: RefObject<any>;
   fiveMinuteInterval?: boolean;
   zoomLevel: SharedValue<number>;
   maximumHour: SharedValue<number>;
+  event: T;
 };
 
-const DragBar = ({
+const DragBar = <T extends CalendarEvent>({
+  event,
   top,
   height,
   render,
@@ -21,7 +24,7 @@ const DragBar = ({
   fiveMinuteInterval,
   zoomLevel,
   maximumHour,
-}: DragBarProps) => {
+}: DragBarProps<T>) => {
   const startY = useSharedValue(0);
 
   const gesturePan = Gesture.Pan()
@@ -98,7 +101,7 @@ const DragBar = ({
     [top]
   );
 
-  const renderedComponent = useMemo(render, [render]);
+  const renderedComponent = useMemo(() => render(event), [render, event]);
 
   return (
     <GestureDetector gesture={gesturePan}>

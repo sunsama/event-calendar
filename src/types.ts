@@ -126,7 +126,10 @@ export type Config<T extends CalendarEvent> = {
   canEditEvent: boolean | ((event: T) => boolean);
   renderNewEventContainer?: (hour: number, minute: number) => ReactNode;
   fiveMinuteInterval?: boolean;
-  renderDragBars?: { top?: () => ReactNode; bottom?: () => ReactNode };
+  renderDragBars?: {
+    top?: (event: T) => ReactNode;
+    bottom?: (event: T) => ReactNode;
+  };
   updateLocalStateAfterEdit: boolean;
   extraTimedComponents?: (zoomLevel: SharedValue<number>) => ReactNode;
   onZoomChange?: (zoomLevel: number) => void;

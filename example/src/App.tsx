@@ -527,8 +527,12 @@ export default function App() {
             // supply will be shown in the event when editing. If not supplied the user cannot use that part of the event
             // to change the height.
             renderDragBars={{
-              top: () => <View style={styles.dragBarTop} />,
-              bottom: () => <View style={styles.dragBarBottom} />,
+              top: (_event: ExtendedCalendarEvent) => (
+                <View style={styles.dragBarTop} />
+              ),
+              bottom: (_event: ExtendedCalendarEvent) => (
+                <View style={styles.dragBarBottom} />
+              ),
             }}
             // If you want to access the EventCalendarMethods, you can use this ref
             ref={refEventCalendar}
