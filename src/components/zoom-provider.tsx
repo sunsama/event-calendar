@@ -27,6 +27,7 @@ const ZoomProvider = forwardRef<any, ZoomProviderProps>(
       onCreateEvent,
       maximumHour,
       onZoomChange,
+      fiveMinuteInterval,
     } = useContext(ConfigProvider);
     const previewScale = useSharedValue(-1);
 
@@ -84,12 +85,25 @@ const ZoomProvider = forwardRef<any, ZoomProviderProps>(
           return;
         }
 
-        createY.value = Math.max(
-          0,
-          event.allTouches[0].y -
+        if (!fiveMinuteInterval) {
+          createY.value = Math.max(
+            0,
+            event.allTouches[0].y -
+              TOP_MARGIN_PIXEL_OFFSET -
+              (zoomLevel.value * 60) / 2
+          );
+        } else {
+          const normalizedY =
+            event.allTouches[0].y -
             TOP_MARGIN_PIXEL_OFFSET -
-            (zoomLevel.value * 60) / 2
-        );
+            (zoomLevel.value * 60) / 2;
+          const time = Math.floor(normalizedY / zoomLevel.value);
+          const hour = Math.floor(time / 60);
+          const minute = time - hour * 60;
+          const minuteInterval = Math.floor(minute / 5) * 5;
+
+          createY.value = (hour * 60 + minuteInterval) * zoomLevel.value;
+        }
       })
       .onEnd((event, success) => {
         "worklet";
@@ -114,12 +128,24 @@ const ZoomProvider = forwardRef<any, ZoomProviderProps>(
         const hour = Math.floor(time / 60);
         const minute = time - hour * 60;
 
-        if (onCreateEvent) {
+        if (!onCreateEvent) {
+          return;
+        }
+
+        if (fiveMinuteInterval) {
+          const minuteInterval = Math.floor(minute / 5) * 5;
+
           runOnJS(onCreateEvent)({
             hour,
-            minute,
+            minute: minuteInterval,
           });
+          return;
         }
+
+        runOnJS(onCreateEvent)({
+          hour,
+          minute,
+        });
       });
 
     const combinedGesture = Gesture.Simultaneous(
