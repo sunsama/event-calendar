@@ -122,11 +122,6 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     refMethods,
     () => ({
       scrollToTime: (time: number, animated = true) => {
-        console.info("scrollToTime called with:", {
-          time,
-          animated,
-          zoomLevel: zoomLevel.value,
-        });
         refScrollView.current?.scrollTo({
           y: time * zoomLevel.value,
           animated,
