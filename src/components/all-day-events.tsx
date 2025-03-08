@@ -1,5 +1,5 @@
 import { memo, useCallback, useContext, useState } from "react";
-import { ConfigProvider } from "../utils/globals";
+import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "../utils/globals";
 import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import EventContainer from "../components/event-container";
 import { Pressable } from "react-native-gesture-handler";
@@ -13,13 +13,14 @@ import type { AllDayEventLayoutType } from "src/types";
 
 const AllDayEvents = memo(
   () => {
-    const { layout, theme, maxAllDayEvents } = useContext(ConfigProvider);
+    const { layout, theme, maxAllDayEvents, onCreateEvent, canCreateEvents } =
+      useContext(ConfigProvider);
     const [showAllDayEvents, setShowAllDayEvents] = useState(false);
 
     const measuredHeight = useSharedValue(0);
     const originalHeight = useSharedValue(0);
 
-    const onPress = useCallback(() => {
+    const onPressShowMore = useCallback(() => {
       const newState = !showAllDayEvents;
 
       if (!newState) {
@@ -36,6 +37,12 @@ const AllDayEvents = memo(
         setShowAllDayEvents(newState);
       }
     }, [measuredHeight, originalHeight, showAllDayEvents]);
+
+    const onPressCreateEvent = useCallback(() => {
+      if (canCreateEvents && onCreateEvent) {
+        onCreateEvent({ isAllDay: true });
+      }
+    }, [canCreateEvents, onCreateEvent]);
 
     const allDayEvents = showAllDayEvents
       ? layout.allDayEventsLayout
@@ -80,7 +87,7 @@ const AllDayEvents = memo(
             </View>
           </Animated.View>
           {layout.allDayEventsLayout.length > maxAllDayEvents ? (
-            <Pressable onPress={onPress}>
+            <Pressable onPress={onPressShowMore}>
               <View
                 style={[styles.moreContainer, theme?.allDayShowMoreContainer]}
               >
@@ -91,7 +98,11 @@ const AllDayEvents = memo(
                 </Text>
               </View>
             </Pressable>
-          ) : null}
+          ) : (
+            <Pressable onPress={onPressCreateEvent}>
+              <View style={[styles.deadSpace, theme?.allDayDeadSpace]} />
+            </Pressable>
+          )}
         </View>
       </View>
     );
@@ -120,5 +131,8 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: "bold",
     color: "grey",
+  },
+  deadSpace: {
+    height: DEFAULT_MINUTE_HEIGHT * 24,
   },
 });

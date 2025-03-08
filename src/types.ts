@@ -75,6 +75,9 @@ export type ThemeStyle = {
   allDayShowMoreContainer?: ViewStyle;
   // Text showing when there are too many all day events to show
   allDayShowMoreText?: TextStyle;
+  // Dead space container, this is shown when there are too few all day events to show
+  // so the user can still create an event
+  allDayDeadSpace?: ViewStyle;
 };
 
 export type OnCreateEventProps = {
