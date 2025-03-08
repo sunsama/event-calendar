@@ -4,7 +4,15 @@ import { ScrollView } from "react-native-gesture-handler";
 import { useSharedValue } from "react-native-reanimated";
 import ZoomProvider from "./components/zoom-provider";
 import TimedEvents from "./components/timed-events";
-import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "./utils/globals";
+import {
+  ConfigProvider,
+  DEFAULT_MAX_ALL_DAY_EVENTS,
+  DEFAULT_MAX_ZOOM,
+  DEFAULT_MIN_ZOOM,
+  DEFAULT_MINUTE_HEIGHT,
+  DEFAULT_TIME_FORMAT,
+  DEFAULT_TIMEZONE,
+} from "./utils/globals";
 import moment, { type Moment } from "moment-timezone";
 import React, {
   forwardRef,
@@ -27,6 +35,9 @@ type EventCalenderProps<T extends CalendarEvent> = {
   events: T[];
   fiveMinuteInterval?: boolean;
   initialZoomLevel?: number;
+  defaultZoomLevel?: number;
+  maxZoomLevel?: number;
+  minZoomLevel?: number;
   maxAllDayEvents?: number;
   onCreateEvent?: onCreateEvent;
   onEventEdit?: Config<T>["onEventEdit"];
@@ -49,7 +60,10 @@ type EventCalenderContentProps<T extends CalendarEvent> = {
   canEditEvent: Config<T>["canEditEvent"];
   startCalendarDate: Moment;
   fiveMinuteInterval?: boolean;
-  initialZoomLevel: number;
+  initialZoomLevel?: number;
+  defaultZoomLevel: number;
+  maxZoomLevel: number;
+  minZoomLevel: number;
   maxAllDayEvents: number;
   onCreateEvent?: onCreateEvent;
   onEventEdit?: Config<T>["onEventEdit"];
@@ -76,6 +90,9 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     canEditEvent,
     fiveMinuteInterval,
     initialZoomLevel,
+    defaultZoomLevel,
+    minZoomLevel,
+    maxZoomLevel,
     maxAllDayEvents,
     onCreateEvent,
     onEventEdit,
@@ -94,7 +111,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
   }: EventCalenderContentProps<T>,
   refMethods: Ref<EventCalendarMethods>
 ) {
-  const zoomLevel = useSharedValue(initialZoomLevel);
+  const zoomLevel = useSharedValue(initialZoomLevel || defaultZoomLevel);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
 
@@ -129,8 +146,11 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           timeFormat,
           layout: eventsLayout,
           zoomLevel,
+          initialZoomLevel: initialZoomLevel || defaultZoomLevel,
+          defaultZoomLevel,
+          maxZoomLevel,
+          minZoomLevel,
           createY,
-          initialZoomLevel,
           onCreateEvent,
           timezone,
           renderEvent,
@@ -177,13 +197,15 @@ const EventCalendarContent = forwardRef(EventCalendarContentInner) as <
 
 function EventCalendarInner<T extends CalendarEvent>(
   {
-    timeFormat = "HH:mm",
+    timeFormat = DEFAULT_TIME_FORMAT,
     dayDate,
     events,
-    initialZoomLevel = DEFAULT_MINUTE_HEIGHT,
-    timezone = "UTC",
+    defaultZoomLevel = DEFAULT_MINUTE_HEIGHT,
+    timezone = DEFAULT_TIMEZONE,
     userCalendarId = "",
-    maxAllDayEvents = 2,
+    maxAllDayEvents = DEFAULT_MAX_ALL_DAY_EVENTS,
+    minZoomLevel = DEFAULT_MIN_ZOOM,
+    maxZoomLevel = DEFAULT_MAX_ZOOM,
     updateLocalStateAfterEdit = true,
     canCreateEvents = true,
     canEditEvent = true,
@@ -210,16 +232,18 @@ function EventCalendarInner<T extends CalendarEvent>(
       updateLocalStateAfterEdit={!!updateLocalStateAfterEdit}
     >
       <EventCalendarContent
-        ref={ref} // <--- CHANGED: pass forwarded ref down
+        ref={ref}
         {...props}
         timeFormat={timeFormat}
-        initialZoomLevel={initialZoomLevel}
+        defaultZoomLevel={defaultZoomLevel}
         timezone={timezone}
         maxAllDayEvents={maxAllDayEvents}
         updateLocalStateAfterEdit={updateLocalStateAfterEdit}
         startCalendarDate={startCalendarDate}
         canCreateEvents={canCreateEvents}
         canEditEvent={canEditEvent}
+        maxZoomLevel={maxZoomLevel}
+        minZoomLevel={minZoomLevel}
       />
     </EventsProvider>
   );

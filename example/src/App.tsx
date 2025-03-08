@@ -21,6 +21,14 @@ import {
   EventExtend,
   OnCreateEventProps,
 } from "src/types";
+import {
+  DEFAULT_MAX_ALL_DAY_EVENTS,
+  DEFAULT_MAX_ZOOM,
+  DEFAULT_MIN_ZOOM,
+  DEFAULT_MINUTE_HEIGHT,
+  DEFAULT_TIME_FORMAT,
+  DEFAULT_TIMEZONE,
+} from "src/utils/globals";
 
 const events: any[] = [
   {
@@ -254,8 +262,7 @@ const eventColor = (calendarId: string) => {
   }
 };
 
-const timeFormat = "HH:mm";
-// const timeFormat = "h a";
+const timeFormat = DEFAULT_TIME_FORMAT;
 
 const RenderEvent = ({
   event,
@@ -556,11 +563,19 @@ export default function App() {
             // The theme of the calendar, overrides the default theme
             theme={undefined}
             // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar
-            initialZoomLevel={undefined}
+            initialZoomLevel={DEFAULT_MINUTE_HEIGHT}
+            // The default zoom level of the calendar, this is the zoom level the calendar will start at and can restore at
+            // This is different from the initial zoom level, as the initial zoom level is the zoom level you can save and restore
+            // to the default zoom level is the zoom level the calendar starts at. This affects the height of the all-day events.
+            defaultZoomLevel={DEFAULT_MINUTE_HEIGHT}
+            // The minimum zoom level of the calendar
+            minZoomLevel={DEFAULT_MIN_ZOOM}
+            // The maximum zoom level of the calendar
+            maxZoomLevel={DEFAULT_MAX_ZOOM}
             // Maximum number of all day events to display before showing a "show more" button
-            maxAllDayEvents={2}
+            maxAllDayEvents={DEFAULT_MAX_ALL_DAY_EVENTS}
             // The timezone of the calendar
-            timezone="UTC"
+            timezone={DEFAULT_TIMEZONE}
             // Renders the new event container, this is the component that shows up when the user is creating a new event
             // The time is already formatted in the timeFormat given
             renderNewEventContainer={(hour: number, minute: number) => (

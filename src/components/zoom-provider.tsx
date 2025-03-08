@@ -22,9 +22,11 @@ const ZoomProvider = forwardRef<any, ZoomProviderProps>(
     const {
       canCreateEvents,
       zoomLevel,
-      initialZoomLevel,
+      defaultZoomLevel,
       createY,
       onCreateEvent,
+      maxZoomLevel,
+      minZoomLevel,
       maximumHour,
       onZoomChange,
       fiveMinuteInterval,
@@ -42,7 +44,10 @@ const ZoomProvider = forwardRef<any, ZoomProviderProps>(
         const newScale =
           previewScale.value * (1 + fraction * (event.scale - 1));
 
-        zoomLevel.value = Math.min(3, Math.max(0.54, newScale));
+        zoomLevel.value = Math.min(
+          maxZoomLevel,
+          Math.max(minZoomLevel, newScale)
+        );
         previewScale.value = zoomLevel.value;
       })
       .onEnd(() => {
@@ -151,7 +156,7 @@ const ZoomProvider = forwardRef<any, ZoomProviderProps>(
     const combinedGesture = Gesture.Simultaneous(
       pinchGesture,
       longPressGesture,
-      doubleTapGesture(zoomLevel, initialZoomLevel, onZoomChange)
+      doubleTapGesture(zoomLevel, defaultZoomLevel, onZoomChange)
     );
 
     return (

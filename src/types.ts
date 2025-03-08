@@ -98,6 +98,9 @@ export type Config<T extends CalendarEvent> = {
   createY: SharedValue<number>;
   maximumHour: SharedValue<number>;
   onCreateEvent?: onCreateEvent;
+  defaultZoomLevel: number;
+  maxZoomLevel: number;
+  minZoomLevel: number;
   initialZoomLevel: number;
   renderEvent: (
     event: T,
