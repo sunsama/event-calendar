@@ -17,6 +17,7 @@ import moment, { type Moment } from "moment-timezone";
 import React, {
   forwardRef,
   type Ref,
+  useCallback,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -25,6 +26,7 @@ import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers
 import { IsEditingProvider } from "./hooks/use-is-editing";
 import { EventsProvider, useEvents } from "./hooks/use-events";
 import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
+import { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
 
 export * from "./types";
 
@@ -81,7 +83,7 @@ type EventCalenderContentProps<T extends CalendarEvent> = {
 };
 
 export type EventCalendarMethods = {
-  scrollToTime: (minutes: number, animated?: boolean) => void;
+  scrollToTime: (minutes: number, animated?: boolean, offset?: number) => void;
 };
 
 function EventCalendarContentInner<T extends CalendarEvent>(
@@ -117,13 +119,18 @@ function EventCalendarContentInner<T extends CalendarEvent>(
 
   const refNewEvent = useRef<GestureRef>(null);
   const refScrollView = useRef<ScrollView>(null);
+  const refScrollViewHeight = useRef<number>(0);
+
+  const onLayoutScrollView = useCallback((event: LayoutChangeEvent) => {
+    refScrollViewHeight.current = event.nativeEvent.layout.height;
+  }, []);
 
   useImperativeHandle(
     refMethods,
     () => ({
-      scrollToTime: (time: number, animated = true) => {
+      scrollToTime: (time: number, animated = true, offset = 2.5) => {
         refScrollView.current?.scrollTo({
-          y: time * zoomLevel.value,
+          y: time * zoomLevel.value - refScrollViewHeight.current / offset,
           animated,
         });
       },
@@ -167,6 +174,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
       >
         <AllDayEvents />
         <ScrollView
+          onLayout={onLayoutScrollView}
           bounces={false}
           keyboardShouldPersistTaps="always"
           style={[styles.scrollView, theme?.scrollView]}

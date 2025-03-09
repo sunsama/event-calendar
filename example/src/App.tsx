@@ -466,12 +466,12 @@ export default function App() {
 
   useEffect(() => {
     // Scroll to the current minutes
-    const scrollDate = new Date();
+    const scrollDate = moment.tz(DEFAULT_TIMEZONE);
 
     // setTimeout is needed to make sure the ref is set
     setTimeout(() => {
       refEventCalendar.current?.scrollToTime(
-        scrollDate.getHours() * 60 + scrollDate.getMinutes()
+        scrollDate.minutes() + scrollDate.hours() * 60
       );
     }, 0);
   }, []);

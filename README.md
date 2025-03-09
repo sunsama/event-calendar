@@ -94,9 +94,9 @@ Edit mode:
 ## Methods
 The Event Calendar component exposes the following methods through the reference:
 
-| Method         | Arguments                                   | Description                                                                                   |
-|----------------|---------------------------------------------|-----------------------------------------------------------------------------------------------|
-| `scrollToTime` | `timeInMinutes: number, animated?: boolean` | Scrolls the calendar to the specified time (in minutes since midnight). Animating by default. |
+| Method         | Description                                                             |
+|----------------|-------------------------------------------------------------------------|
+| `scrollToTime` | Scrolls the calendar to the specified time (in minutes since midnight). |
 
 ## Dependencies
 Ensure you have the following dependencies installed for proper functionality:
