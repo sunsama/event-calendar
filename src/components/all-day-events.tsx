@@ -67,7 +67,6 @@ const AllDayEvents = memo(
 
     const animatedStyle = useAnimatedStyle(() => {
       return {
-        overflow: "hidden",
         minHeight: 1,
         height: measuredHeight.value,
       };
@@ -116,7 +115,6 @@ const styles = StyleSheet.create({
   container: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: "black",
-    overflow: "hidden",
   },
   eventContainer: {
     marginLeft: 50,
