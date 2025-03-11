@@ -491,129 +491,131 @@ export default function App() {
       <GestureHandlerRootView style={styles.container}>
         <StatusBar style="auto" />
         <SafeAreaView style={styles.container}>
-          <EventCalendar
-            // Events to display on the calendar
-            events={events}
-            // The current date of the calendar
-            dayDate={date}
-            // Triggered when a new event is created
-            onCreateEvent={(params: OnCreateEventProps) => {
-              console.log("onCreateEvent", params);
-            }}
-            // Triggered when pressed on an event
-            onPressEvent={(event: ExtendedCalendarEvent) => {
-              console.log("onPressEvent", event);
-            }}
-            // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
-            // always show up at the beginning of the stack if reasonably possible
-            userCalendarId="primary-calendar"
-            // How the time should be formatted
-            timeFormat={timeFormat}
-            // Shows a line on the calendar indicating the current time
-            showTimeIndicator
-            // Can the user create new events
-            canCreateEvents
-            // Can the user this SPECIFIC event (in combination with canEditEvents).
-            // Can either be a function or a boolean in general to allow/block all event editing.
-            // The library will NOT let the user know if it is editable or not, that's up to you.
-            // - By default, all events are editable.
-            // - Currently all day events are not editable.
-            canEditEvent={(event: { calendarId: string }) => {
-              const allowed = event.calendarId !== "tertiary-calendar";
+          <View style={styles.main}>
+            <EventCalendar
+              // Events to display on the calendar
+              events={events}
+              // The current date of the calendar
+              dayDate={date}
+              // Triggered when a new event is created
+              onCreateEvent={(params: OnCreateEventProps) => {
+                console.log("onCreateEvent", params);
+              }}
+              // Triggered when pressed on an event
+              onPressEvent={(event: ExtendedCalendarEvent) => {
+                console.log("onPressEvent", event);
+              }}
+              // The user's primary calendar, this is used in sorting the calendar events making the primary calendar
+              // always show up at the beginning of the stack if reasonably possible
+              userCalendarId="primary-calendar"
+              // How the time should be formatted
+              timeFormat={timeFormat}
+              // Shows a line on the calendar indicating the current time
+              showTimeIndicator
+              // Can the user create new events
+              canCreateEvents
+              // Can the user this SPECIFIC event (in combination with canEditEvents).
+              // Can either be a function or a boolean in general to allow/block all event editing.
+              // The library will NOT let the user know if it is editable or not, that's up to you.
+              // - By default, all events are editable.
+              // - Currently all day events are not editable.
+              canEditEvent={(event: { calendarId: string }) => {
+                const allowed = event.calendarId !== "tertiary-calendar";
 
-              if (!allowed) {
-                Toast.show({
-                  type: "error",
-                  autoHide: true,
-                  position: "top",
-                  text1: "You cannot edit this event.",
-                });
-              }
+                if (!allowed) {
+                  Toast.show({
+                    type: "error",
+                    autoHide: true,
+                    position: "top",
+                    text1: "You cannot edit this event.",
+                  });
+                }
 
-              return allowed;
-            }}
-            // When editing this is shown in the edited event to indicate the user can change the height of the event
-            // You can either give nothing, a top and bottom component or just a top or bottom component. Whatever you
-            // supply will be shown in the event when editing. If not supplied the user cannot use that part of the event
-            // to change the height.
-            renderDragBars={{
-              top: (_event: ExtendedCalendarEvent) => (
-                <View style={styles.dragBarTop} />
-              ),
-              bottom: (_event: ExtendedCalendarEvent) => (
-                <View style={styles.dragBarBottom} />
-              ),
-            }}
-            // If you want to access the EventCalendarMethods, you can use this ref
-            ref={refEventCalendar}
-            // Render the main event component, timed and all day events
-            renderEvent={(
-              event: ExtendedCalendarEvent,
-              extend: EventExtend,
-              height?: SharedValue<number>,
-              updatedTimes?: {
-                updatedStart: DerivedValue<number>;
-                updatedEnd: DerivedValue<number>;
-              }
-            ) => (
-              <RenderEvent
-                event={event}
-                height={height}
-                extend={extend}
-                updatedTimes={updatedTimes}
-              />
-            )}
-            // This callback is triggered when an event is edited, at the start and when the user is done editing
-            onEventEdit={(params: {
-              event: any;
-              status: EditStatus;
-              updatedTimes?: {
-                updatedStart: string;
-                updatedEnd: string;
-              };
-            }) => {
-              console.info("onEventEdit", params);
-            }}
-            // The theme of the calendar, overrides the default theme
-            theme={undefined}
-            // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar
-            initialZoomLevel={DEFAULT_MINUTE_HEIGHT}
-            // The default zoom level of the calendar, this is the zoom level the calendar will start at and can restore at
-            // This is different from the initial zoom level, as the initial zoom level is the zoom level you can save and restore
-            // to the default zoom level is the zoom level the calendar starts at. This affects the height of the all-day events.
-            defaultZoomLevel={DEFAULT_MINUTE_HEIGHT}
-            // The minimum zoom level of the calendar
-            minZoomLevel={DEFAULT_MIN_ZOOM}
-            // The maximum zoom level of the calendar
-            maxZoomLevel={DEFAULT_MAX_ZOOM}
-            // Maximum number of all day events to display before showing a "show more" button
-            maxAllDayEvents={DEFAULT_MAX_ALL_DAY_EVENTS}
-            // The timezone of the calendar
-            timezone={DEFAULT_TIMEZONE}
-            // Renders the new event container, this is the component that shows up when the user is creating a new event
-            // The time is already formatted in the timeFormat given
-            renderNewEventContainer={(hour: number, minute: number) => (
-              <View style={styles.eventContainer}>
-                <View style={styles.newEventContainer}>
-                  <Text style={styles.eventTextTitle}>New event</Text>
-                  <Text style={styles.eventTextTime}>
-                    {formatTime(hour, minute)}
-                  </Text>
+                return allowed;
+              }}
+              // When editing this is shown in the edited event to indicate the user can change the height of the event
+              // You can either give nothing, a top and bottom component or just a top or bottom component. Whatever you
+              // supply will be shown in the event when editing. If not supplied the user cannot use that part of the event
+              // to change the height.
+              renderDragBars={{
+                top: (_event: ExtendedCalendarEvent) => (
+                  <View style={styles.dragBarTop} />
+                ),
+                bottom: (_event: ExtendedCalendarEvent) => (
+                  <View style={styles.dragBarBottom} />
+                ),
+              }}
+              // If you want to access the EventCalendarMethods, you can use this ref
+              ref={refEventCalendar}
+              // Render the main event component, timed and all day events
+              renderEvent={(
+                event: ExtendedCalendarEvent,
+                extend: EventExtend,
+                height?: SharedValue<number>,
+                updatedTimes?: {
+                  updatedStart: DerivedValue<number>;
+                  updatedEnd: DerivedValue<number>;
+                }
+              ) => (
+                <RenderEvent
+                  event={event}
+                  height={height}
+                  extend={extend}
+                  updatedTimes={updatedTimes}
+                />
+              )}
+              // This callback is triggered when an event is edited, at the start and when the user is done editing
+              onEventEdit={(params: {
+                event: any;
+                status: EditStatus;
+                updatedTimes?: {
+                  updatedStart: string;
+                  updatedEnd: string;
+                };
+              }) => {
+                console.info("onEventEdit", params);
+              }}
+              // The theme of the calendar, overrides the default theme
+              theme={undefined}
+              // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar
+              initialZoomLevel={DEFAULT_MINUTE_HEIGHT}
+              // The default zoom level of the calendar, this is the zoom level the calendar will start at and can restore at
+              // This is different from the initial zoom level, as the initial zoom level is the zoom level you can save and restore
+              // to the default zoom level is the zoom level the calendar starts at. This affects the height of the all-day events.
+              defaultZoomLevel={DEFAULT_MINUTE_HEIGHT}
+              // The minimum zoom level of the calendar
+              minZoomLevel={DEFAULT_MIN_ZOOM}
+              // The maximum zoom level of the calendar
+              maxZoomLevel={DEFAULT_MAX_ZOOM}
+              // Maximum number of all day events to display before showing a "show more" button
+              maxAllDayEvents={DEFAULT_MAX_ALL_DAY_EVENTS}
+              // The timezone of the calendar
+              timezone={DEFAULT_TIMEZONE}
+              // Renders the new event container, this is the component that shows up when the user is creating a new event
+              // The time is already formatted in the timeFormat given
+              renderNewEventContainer={(hour: number, minute: number) => (
+                <View style={styles.eventContainer}>
+                  <View style={styles.newEventContainer}>
+                    <Text style={styles.eventTextTitle}>New event</Text>
+                    <Text style={styles.eventTextTime}>
+                      {formatTime(hour, minute)}
+                    </Text>
+                  </View>
                 </View>
-              </View>
-            )}
-            // When editing an event or creating a new one this is making sure that it isn't granular per minute
-            fiveMinuteInterval
-            // Determines if the library should optimistically update the local state when editing has finished
-            // Defaults to true
-            updateLocalStateAfterEdit
-            // Extra components to render in the timed section of the calendar
-            extraTimedComponents={extraTimedComponents}
-            // Called when the zoom value changes
-            onZoomChange={(newZoom: number) => {
-              console.info("onZoomChange", newZoom);
-            }}
-          />
+              )}
+              // When editing an event or creating a new one this is making sure that it isn't granular per minute
+              fiveMinuteInterval
+              // Determines if the library should optimistically update the local state when editing has finished
+              // Defaults to true
+              updateLocalStateAfterEdit
+              // Extra components to render in the timed section of the calendar
+              extraTimedComponents={extraTimedComponents}
+              // Called when the zoom value changes
+              onZoomChange={(newZoom: number) => {
+                console.info("onZoomChange", newZoom);
+              }}
+            />
+          </View>
           <Toast />
         </SafeAreaView>
       </GestureHandlerRootView>
@@ -622,6 +624,9 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+  main: {
+    marginTop: 8,
+  },
   container: {
     backgroundColor: "white",
     flex: 1,

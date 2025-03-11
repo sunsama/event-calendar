@@ -263,7 +263,6 @@ export default EventCalendar;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginTop: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: "#F0F0F0",
     overflow: "hidden",
