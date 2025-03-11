@@ -7,7 +7,7 @@ import {
   useRef,
 } from "react";
 import { useIsEditing } from "../hooks/use-is-editing";
-import { ConfigProvider } from "../utils/globals";
+import { ConfigProvider, MIN_EVENT_HEIGHT_PX } from "../utils/globals";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
@@ -47,7 +47,7 @@ const EditEventContainer = memo(
 
         // We can't use the position.height as that has a minimum time of 30 minutes, which might not be relevant to
         // our actual duration, meaning we'll have to calculate the height based on the start and end times
-        height.value = ((end.valueOf() - start.valueOf()) / 60000) * zoom;
+        height.value = ((end.valueOf() - start.valueOf()) / 60_000) * zoom;
       },
       [height]
     );
@@ -80,7 +80,7 @@ const EditEventContainer = memo(
       return {
         marginLeft: StyleSheet.hairlineWidth,
         position: "absolute",
-        height: height.value,
+        height: Math.max(MIN_EVENT_HEIGHT_PX, height.value),
         top: currentY.value,
         opacity: 1,
         width: "100%",

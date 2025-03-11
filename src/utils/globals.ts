@@ -11,3 +11,4 @@ export const DEFAULT_TIME_FORMAT = "HH:mm";
 export const DEFAULT_TIMEZONE = "UTC";
 
 export const TOP_MARGIN_PIXEL_OFFSET = 5;
+export const MIN_EVENT_HEIGHT_PX = 24;

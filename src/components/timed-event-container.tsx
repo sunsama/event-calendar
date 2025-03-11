@@ -4,7 +4,7 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import { ConfigProvider } from "../utils/globals";
+import { ConfigProvider, MIN_EVENT_HEIGHT_PX } from "../utils/globals";
 import { RefObject, useCallback, useContext, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { StyleSheet, View } from "react-native";
@@ -74,9 +74,13 @@ const TimedEventContainer = <T extends CalendarEvent>({
   useAnimatedReaction(
     () => zoomLevel.value,
     (newZoomLevel) => {
-      height.value = newZoomLevel * layout.position.height;
+      const start = new Date(layout.event.start);
+      const end = new Date(layout.event.end);
+      const diff = (end.valueOf() - start.valueOf()) / 60_000;
+
+      height.value = Math.max(MIN_EVENT_HEIGHT_PX, newZoomLevel * diff);
     },
-    [layout.position.height]
+    [layout.event]
   );
 
   useAnimatedReaction(
