@@ -16,7 +16,7 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
-import { EventExtend } from "../types";
+import { type CalendarEvent, EventExtend } from "../types";
 import gesturePan from "../utils/pan-edit-event-gesture";
 import DragBar from "../components/drag-bar";
 import { StyleSheet } from "react-native";
@@ -40,18 +40,32 @@ const EditEventContainer = memo(
     } = useContext(ConfigProvider);
     const height = useSharedValue(0);
 
+    const calculateHeight = useCallback(
+      (event: CalendarEvent, zoom: number) => {
+        const start = new Date(event.start);
+        const end = new Date(event.end);
+
+        // We can't use the position.height as that has a minimum time of 30 minutes, which might not be relevant to
+        // our actual duration, meaning we'll have to calculate the height based on the start and end times
+        height.value = ((end.valueOf() - start.valueOf()) / 60000) * zoom;
+      },
+      [height]
+    );
+
     useEffect(() => {
-      if (editingEvent) {
-        height.value = editingEvent.position.height * zoomLevel.value;
-        currentY.value = editingEvent.position.top * zoomLevel.value;
+      if (!editingEvent) {
+        return;
       }
-    }, [height, editingEvent, currentY, zoomLevel]);
+
+      calculateHeight(editingEvent.event, zoomLevel.value);
+      currentY.value = editingEvent.position.top * zoomLevel.value;
+    }, [height, editingEvent, currentY, zoomLevel, timezone, calculateHeight]);
 
     useAnimatedReaction(
       () => zoomLevel.value,
       (zoom) => {
         if (editingEvent) {
-          height.value = editingEvent.position.height * zoom;
+          runOnJS(calculateHeight)(editingEvent.event, zoom);
           currentY.value = editingEvent.position.top * zoom;
         }
       },
