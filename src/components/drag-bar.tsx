@@ -15,6 +15,86 @@ type DragBarProps<T extends CalendarEvent> = {
   event: T;
 };
 
+const handleTopDrag = (
+  top: SharedValue<number>,
+  fiveMinuteInterval: boolean | undefined,
+  startY: SharedValue<number>,
+  translationY: number,
+  zoomLevel: SharedValue<number>,
+  maximumHour: SharedValue<number>,
+  height: SharedValue<number>
+) => {
+  "worklet";
+
+  const originalY = top.value;
+
+  let freshUpdatedStartTime;
+
+  if (fiveMinuteInterval) {
+    // Set the updated time in 15 minute increments but make sure we never go lower
+    // than the first minute of the day
+    freshUpdatedStartTime = Math.max(
+      0,
+      startY.value +
+        Math.floor(translationY / zoomLevel.value / 5) * (zoomLevel.value * 5)
+    );
+  } else {
+    // Set the updated time in 1 minute increments but make sure we never go lower
+    // than the first minute of the day
+    freshUpdatedStartTime = Math.max(
+      0,
+      startY.value +
+        Math.floor(translationY / zoomLevel.value) * zoomLevel.value
+    );
+  }
+
+  // Make sure the event does not span after midnight, and if so make sure it
+  // is limited to exactly midnight
+  if (freshUpdatedStartTime > maximumHour.value - height.value) {
+    freshUpdatedStartTime = maximumHour.value - height.value;
+  }
+
+  top.value = freshUpdatedStartTime;
+
+  // Make sure to have a minimum of 5 minutes
+  height.value = Math.max(
+    height.value + (originalY - top.value),
+    5 * zoomLevel.value
+  );
+};
+
+const handleBottomDrag = (
+  fiveMinuteInterval: boolean | undefined,
+  startY: SharedValue<number>,
+  translationY: number,
+  zoomLevel: SharedValue<number>,
+  height: SharedValue<number>
+) => {
+  "worklet";
+
+  let freshUpdatedEndTime;
+
+  if (fiveMinuteInterval) {
+    // Set the updated time in 15 minute increments but make sure we never go lower
+    // than the first minute of the day
+    freshUpdatedEndTime = Math.max(
+      0,
+      startY.value +
+        Math.floor(translationY / zoomLevel.value / 5) * (zoomLevel.value * 5)
+    );
+  } else {
+    // Set the updated time in 1 minute increments but make sure we never go lower
+    // than the first minute of the day
+    freshUpdatedEndTime = Math.max(
+      0,
+      startY.value +
+        Math.floor(translationY / zoomLevel.value) * zoomLevel.value
+    );
+  }
+
+  height.value = Math.max(freshUpdatedEndTime, 5 * zoomLevel.value);
+};
+
 const DragBar = <T extends CalendarEvent>({
   event,
   top,
@@ -34,63 +114,26 @@ const DragBar = <T extends CalendarEvent>({
     })
     .onUpdate(({ translationY }) => {
       if (top) {
-        const originalY = top.value;
-
-        let freshUpdatedStartTime;
-
-        if (fiveMinuteInterval) {
-          // Set the updated time in 15 minute increments but make sure we never go lower
-          // than the first minute of the day
-          freshUpdatedStartTime = Math.max(
-            0,
-            startY.value +
-              Math.floor(translationY / zoomLevel.value / 5) *
-                (zoomLevel.value * 5)
-          );
-        } else {
-          // Set the updated time in 1 minute increments but make sure we never go lower
-          // than the first minute of the day
-          freshUpdatedStartTime = Math.max(
-            0,
-            startY.value +
-              Math.floor(translationY / zoomLevel.value) * zoomLevel.value
-          );
-        }
-
-        // Make sure the event does not span after midnight, and if so make sure it
-        // is limited to exactly midnight
-        if (freshUpdatedStartTime > maximumHour.value - height.value) {
-          freshUpdatedStartTime = maximumHour.value - height.value;
-        }
-
-        top.value = freshUpdatedStartTime;
-        height.value = height.value + (originalY - top.value);
+        handleTopDrag(
+          top,
+          fiveMinuteInterval,
+          startY,
+          translationY,
+          zoomLevel,
+          maximumHour,
+          height
+        );
 
         return;
       }
 
-      let freshUpdatedEndTime;
-
-      if (fiveMinuteInterval) {
-        // Set the updated time in 15 minute increments but make sure we never go lower
-        // than the first minute of the day
-        freshUpdatedEndTime = Math.max(
-          0,
-          startY.value +
-            Math.floor(translationY / zoomLevel.value / 5) *
-              (zoomLevel.value * 5)
-        );
-      } else {
-        // Set the updated time in 1 minute increments but make sure we never go lower
-        // than the first minute of the day
-        freshUpdatedEndTime = Math.max(
-          0,
-          startY.value +
-            Math.floor(translationY / zoomLevel.value) * zoomLevel.value
-        );
-      }
-
-      height.value = freshUpdatedEndTime;
+      handleBottomDrag(
+        fiveMinuteInterval,
+        startY,
+        translationY,
+        zoomLevel,
+        height
+      );
     });
 
   const styleDragBar = useMemo(

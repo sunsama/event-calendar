@@ -122,8 +122,8 @@ const events: any[] = [
   {
     id: "12",
     title: "Event 12",
-    start: "2023-10-10T13:30:00Z",
-    end: "2023-10-10T14:30:00Z",
+    start: "2023-10-10T14:30:00Z",
+    end: "2023-10-10T14:35:00Z",
     isAllDay: false,
     calendarId: "secondary-calendar",
   },
@@ -294,6 +294,16 @@ const RenderEvent = ({
   const [end, setEnd] = useState(
     moment.tz(event.end, "UTC").format(timeFormat)
   );
+
+  useEffect(() => {
+    if (updatedTimes) {
+      // Don't override the start and end times if they are being edited
+      return;
+    }
+
+    setStart(moment.tz(event.start, "UTC").format(timeFormat));
+    setEnd(moment.tz(event.end, "UTC").format(timeFormat));
+  }, [event.start, event.end, updatedTimes]);
 
   const setFormattedStart = useCallback(
     (freshStart: number) => {
