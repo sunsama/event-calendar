@@ -4,7 +4,9 @@ import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import EventContainer from "../components/event-container";
 import { Pressable } from "react-native-gesture-handler";
 import Animated, {
+  measure,
   runOnJS,
+  useAnimatedRef,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
@@ -50,6 +52,9 @@ const AllDayEvents = memo(
     const restEventAmount =
       layout.allDayEventsLayout.length - allDayEvents.length;
 
+    const moreAvailable = layout.allDayEventsLayout.length > maxAllDayEvents;
+
+    const refView = useAnimatedRef();
     const onContentLayout = useCallback(
       (e: LayoutChangeEvent) => {
         const { height } = e.nativeEvent.layout;
@@ -60,9 +65,21 @@ const AllDayEvents = memo(
           return;
         }
 
-        measuredHeight.value = withTiming(height, { duration: 250 });
+        measuredHeight.value = withTiming(height, { duration: 250 }, () => {
+          if (!moreAvailable) {
+            return;
+          }
+
+          // Once we have done the animation we need to measure the height as
+          // the height might have changed due to the amount of events
+          const measured = measure(refView);
+
+          if (measured?.height && measured.height !== originalHeight.value) {
+            originalHeight.value = measured.height;
+          }
+        });
       },
-      [measuredHeight, originalHeight]
+      [originalHeight, measuredHeight, refView, moreAvailable]
     );
 
     const animatedStyle = useAnimatedStyle(() => {
@@ -75,7 +92,7 @@ const AllDayEvents = memo(
     return (
       <View style={[styles.container, theme?.allDayContainer]}>
         <View style={[styles.eventContainer, theme?.allDayEventContainer]}>
-          <Animated.View style={animatedStyle}>
+          <Animated.View style={animatedStyle} ref={refView}>
             <View onLayout={onContentLayout}>
               {allDayEvents.map((allDayLayout: AllDayEventLayoutType<any>) => (
                 <EventContainer
@@ -85,7 +102,7 @@ const AllDayEvents = memo(
               ))}
             </View>
           </Animated.View>
-          {layout.allDayEventsLayout.length > maxAllDayEvents ? (
+          {moreAvailable ? (
             <Pressable onPress={onPressShowMore}>
               <View
                 style={[styles.moreContainer, theme?.allDayShowMoreContainer]}
