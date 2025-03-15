@@ -1,7 +1,7 @@
 import { memo, useContext } from "react";
 import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { StyleSheet, Text, View } from "react-native";
-import { ConfigProvider } from "../utils/globals";
+import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
 import { PrefabHour } from "../types";
 
 type BackgroundHoursLayoutProps = {
@@ -48,6 +48,7 @@ const styles = StyleSheet.create({
   },
   hourInnerContainer: {
     marginTop: -12,
+    paddingTop: TOP_MARGIN_PIXEL_OFFSET,
     marginBottom: 12,
     marginRight: 0,
   },

@@ -79,6 +79,7 @@ const styles = StyleSheet.create({
     left: 51,
     right: 10,
     height: 50,
+    zIndex: 1000,
   },
   defaultContainer: {
     flex: 1,

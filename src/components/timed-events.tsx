@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { RefObject, useContext, useMemo } from "react";
-import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
+import { ConfigProvider } from "../utils/globals";
 import BackgroundHoursLayout from "../components/background-hours-layout";
 import { generatePrefabHours } from "../utils/date-utils";
 import BackgroundHoursContent from "../components/background-hours-content";
@@ -36,7 +36,6 @@ const TimedEvents = ({ refNewEvent }: TimedEventsProps) => {
       <BackgroundHoursLayout hours={hours} />
       <View style={styles.backgroundContainer}>
         <BackgroundHoursContent hours={hours} />
-        {extraRender}
         {layout.partDayEventsLayout.map((partDayLayout) => (
           <TimedEventContainer
             key={partDayLayout.event.id}
@@ -47,6 +46,7 @@ const TimedEvents = ({ refNewEvent }: TimedEventsProps) => {
         {showTimeIndicator ? <TimeIndicator /> : null}
         {canEditEvent ? <EditEventContainer refNewEvent={refNewEvent} /> : null}
       </View>
+      {extraRender}
       {canCreateEvents ? <NewEventContainer /> : null}
     </View>
   );
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   },
   backgroundContainer: {
     position: "relative",
-    marginTop: -TOP_MARGIN_PIXEL_OFFSET,
+    // marginTop: -TOP_MARGIN_PIXEL_OFFSET,
     flexDirection: "column",
     flex: 1,
     paddingRight: 10,
