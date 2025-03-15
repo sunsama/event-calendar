@@ -1,5 +1,5 @@
 import { memo, useContext, useMemo, useState } from "react";
-import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
+import { ConfigProvider } from "../utils/globals";
 import Animated, {
   runOnJS,
   useAnimatedReaction,
@@ -25,7 +25,7 @@ const NewEventContainer = memo(
         opacity: !isEditing && createY.value >= 0 ? 1 : 0,
         transform: [
           {
-            translateY: createY.value - TOP_MARGIN_PIXEL_OFFSET,
+            translateY: createY.value,
           },
         ],
         height: zoomLevel.value * 60,
