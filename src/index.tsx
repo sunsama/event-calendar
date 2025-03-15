@@ -26,11 +26,16 @@ import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers
 import { IsEditingProvider } from "./hooks/use-is-editing";
 import { EventsProvider, useEvents } from "./hooks/use-events";
 import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
-import { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
+import {
+  LayoutChangeEvent,
+  NativeSyntheticEvent,
+} from "react-native/Libraries/Types/CoreEventTypes";
+import type { NativeScrollEvent } from "react-native/Libraries/Components/ScrollView/ScrollView";
 
 export * from "./types";
 
 type EventCalenderProps<T extends CalendarEvent> = {
+  onScroll?: (minutes: number) => void;
   canCreateEvents?: boolean;
   canEditEvent?: Config<T>["canEditEvent"];
   dayDate: string;
@@ -58,6 +63,7 @@ type EventCalenderProps<T extends CalendarEvent> = {
 };
 
 type EventCalenderContentProps<T extends CalendarEvent> = {
+  onScroll?: (minutes: number) => void;
   canCreateEvents: boolean;
   canEditEvent: Config<T>["canEditEvent"];
   startCalendarDate: Moment;
@@ -110,6 +116,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     extraTimedComponents,
     onZoomChange,
     startCalendarDate,
+    onScroll,
   }: EventCalenderContentProps<T>,
   refMethods: Ref<EventCalendarMethods>
 ) {
@@ -136,6 +143,13 @@ function EventCalendarContentInner<T extends CalendarEvent>(
       },
     }),
     [zoomLevel]
+  );
+
+  const onScrollFeedback = useCallback(
+    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+      onScroll && onScroll(event.nativeEvent.contentOffset.y / zoomLevel.value);
+    },
+    [zoomLevel, onScroll]
   );
 
   const { eventsLayout } = useEvents();
@@ -179,6 +193,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           keyboardShouldPersistTaps="always"
           style={[styles.scrollView, theme?.scrollView]}
           ref={refScrollView}
+          onScroll={onScrollFeedback}
         >
           <IsEditingProvider>
             <ZoomProvider ref={refNewEvent}>

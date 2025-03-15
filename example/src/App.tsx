@@ -29,6 +29,7 @@ import {
   DEFAULT_TIME_FORMAT,
   DEFAULT_TIMEZONE,
 } from "src/utils/globals";
+import { debounce } from "lodash";
 
 const events: any[] = [
   {
@@ -614,6 +615,16 @@ export default function App() {
               onZoomChange={(newZoom: number) => {
                 console.info("onZoomChange", newZoom);
               }}
+              onScroll={debounce(
+                (minutes) => {
+                  const hours = Math.floor(minutes / 60);
+                  const minute = minutes - hours * 60;
+
+                  console.info("onScroll", hours, minute);
+                },
+                1000,
+                { trailing: true }
+              )}
             />
           </View>
           <Toast />
@@ -625,6 +636,7 @@ export default function App() {
 
 const styles = StyleSheet.create({
   main: {
+    flex: 1,
     marginTop: 8,
   },
   container: {
