@@ -1,5 +1,10 @@
 import EventCalendar, {
+  type CalendarEvent,
+  EditStatus,
   type EventCalendarMethods,
+  EventExtend,
+  type OnCreateEventProps,
+  type OnEventEditParams,
 } from "@sunsama/event-calendar";
 import { StyleSheet, Text, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
@@ -15,12 +20,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Toast from "react-native-toast-message";
-import {
-  CalendarEvent,
-  EditStatus,
-  EventExtend,
-  OnCreateEventProps,
-} from "src/types";
 import {
   DEFAULT_MAX_ALL_DAY_EVENTS,
   DEFAULT_MAX_ZOOM,
@@ -475,6 +474,38 @@ type ExtendedCalendarEvent = CalendarEvent & {
 export default function App() {
   const refEventCalendar = useRef<EventCalendarMethods>(null);
 
+  const [sanitizedEvents, setSanitizedEvents] =
+    useState<ExtendedCalendarEvent[]>(events);
+
+  const onEventEdit = useCallback(
+    ({
+      event,
+      updatedTimes,
+      status,
+    }: OnEventEditParams<ExtendedCalendarEvent>) => {
+      console.info("onEventEdit");
+
+      switch (status) {
+        case EditStatus.Finish:
+          if (updatedTimes) {
+            setSanitizedEvents((currentEvents) =>
+              currentEvents.map((currentEvent) =>
+                currentEvent.id === event.id
+                  ? {
+                      ...currentEvent,
+                      start: updatedTimes?.updatedStart,
+                      end: updatedTimes?.updatedEnd,
+                    }
+                  : currentEvent
+              )
+            );
+          }
+          break;
+      }
+    },
+    []
+  );
+
   useEffect(() => {
     // Scroll to the current minutes
     const scrollDate = moment.tz(DEFAULT_TIMEZONE);
@@ -495,7 +526,7 @@ export default function App() {
           <View style={styles.main}>
             <EventCalendar
               // Events to display on the calendar
-              events={events}
+              events={sanitizedEvents}
               // The current date of the calendar
               dayDate={date}
               // Triggered when a new event is created
@@ -566,16 +597,7 @@ export default function App() {
                 />
               )}
               // This callback is triggered when an event is edited, at the start and when the user is done editing
-              onEventEdit={(params: {
-                event: any;
-                status: EditStatus;
-                updatedTimes?: {
-                  updatedStart: string;
-                  updatedEnd: string;
-                };
-              }) => {
-                console.info("onEventEdit", params);
-              }}
+              onEventEdit={onEventEdit}
               // The theme of the calendar, overrides the default theme
               theme={undefined}
               // The initial zoom level of the calendar, you can use this to restore the zoom level of the calendar

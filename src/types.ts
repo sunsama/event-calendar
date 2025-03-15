@@ -88,6 +88,15 @@ export type OnCreateEventProps = {
 
 export type onCreateEvent = (arg: OnCreateEventProps) => void;
 
+export interface OnEventEditParams<T extends CalendarEvent> {
+  event: T;
+  status: EditStatus;
+  updatedTimes?: {
+    updatedStart: string;
+    updatedEnd: string;
+  };
+}
+
 export type Config<T extends CalendarEvent> = {
   timezone: string;
   timeFormat: string;
@@ -111,14 +120,7 @@ export type Config<T extends CalendarEvent> = {
       updatedEnd: DerivedValue<number>;
     }
   ) => ReactNode;
-  onEventEdit?: (params: {
-    event: T;
-    status: EditStatus;
-    updatedTimes?: {
-      updatedStart: string;
-      updatedEnd: string;
-    };
-  }) => void;
+  onEventEdit?: (params: OnEventEditParams<T>) => void;
   onPressEvent?: (event: T) => void;
   showTimeIndicator?: boolean;
   maxAllDayEvents: number;
@@ -163,4 +165,5 @@ export enum EventExtend {
 export enum EditStatus {
   Start,
   Finish,
+  Delete,
 }

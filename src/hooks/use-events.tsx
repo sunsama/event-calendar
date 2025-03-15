@@ -8,7 +8,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isEqual } from "lodash";
 import generateEventLayouts from "../utils/generate-event-layouts";
 import {
   CalendarEvent,
@@ -67,12 +67,21 @@ export const EventsProvider = <T extends CalendarEvent>({
 
   // Function to update event layouts
   const updateEventsLayout = useCallback((props: UpdateEvent<T>) => {
-    setEventsLayout(
-      generateEventLayouts<T>(props)[props.startCalendarDate] || {
-        partDayEventsLayout: [],
-        allDayEventsLayout: [],
+    const freshLayout = generateEventLayouts<T>(props)[
+      props.startCalendarDate
+    ] || {
+      partDayEventsLayout: [],
+      allDayEventsLayout: [],
+    };
+
+    setEventsLayout((currentLayout) => {
+      if (isEqual(freshLayout, currentLayout)) {
+        // Don't update if the layout is the same, otherwise we'll just get a glitching
+        return currentLayout;
       }
-    );
+
+      return freshLayout;
+    });
   }, []);
 
   // Update both states when initialProps change

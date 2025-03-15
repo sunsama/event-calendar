@@ -99,7 +99,7 @@ export const IsEditingProvider = <T extends CalendarEvent>({
 
         onEventEdit?.({
           event: isEditing.event,
-          status: EditStatus.Finish,
+          status: !updatedTimes ? EditStatus.Delete : EditStatus.Finish,
           updatedTimes,
         });
       }
