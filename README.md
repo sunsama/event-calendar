@@ -90,14 +90,15 @@ Edit mode:
 | `updateLocalStateAfterEdit` | `Boolean`               | No       | True    | Optimistically updates local state after event editing.                                                                                                     |
 | `extraTimedComponents`      | `Function`              | No       |         | Allows rendering extra components in the calendar. These will be rendered before all the timed events.                                                      |
 | `onZoomChange`              | `Function`              | No       |         | Callback triggered when the zoom level changes.                                                                                                             |
-| `onScroll`                  | `Function`              | No       |         | Callback returning the current minutes the user has scrolled to.                                                                                            |
+| `onScroll`                  | `Function`              | No       |         | Callback returning the current Y position the user has scrolled to.                                                                                         |
 
 ## Methods
 The Event Calendar component exposes the following methods through the reference:
 
-| Method         | Description                                                             |
-|----------------|-------------------------------------------------------------------------|
-| `scrollToTime` | Scrolls the calendar to the specified time (in minutes since midnight). |
+| Method           | Description                                                                               |
+|------------------|-------------------------------------------------------------------------------------------|
+| `scrollToTime`   | Scrolls the calendar to the specified time (in minutes since midnight).                   |
+| `scrollToOffset` | Scrolls the calendar to the specified Y position (useful in combination with `onScroll`). |
 
 ## Dependencies
 Ensure you have the following dependencies installed for proper functionality:

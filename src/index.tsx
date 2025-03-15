@@ -35,7 +35,7 @@ import type { NativeScrollEvent } from "react-native/Libraries/Components/Scroll
 export * from "./types";
 
 type EventCalenderProps<T extends CalendarEvent> = {
-  onScroll?: (minutes: number) => void;
+  onScroll?: (y: number) => void;
   canCreateEvents?: boolean;
   canEditEvent?: Config<T>["canEditEvent"];
   dayDate: string;
@@ -63,7 +63,7 @@ type EventCalenderProps<T extends CalendarEvent> = {
 };
 
 type EventCalenderContentProps<T extends CalendarEvent> = {
-  onScroll?: (minutes: number) => void;
+  onScroll?: (y: number) => void;
   canCreateEvents: boolean;
   canEditEvent: Config<T>["canEditEvent"];
   startCalendarDate: Moment;
@@ -90,6 +90,7 @@ type EventCalenderContentProps<T extends CalendarEvent> = {
 
 export type EventCalendarMethods = {
   scrollToTime: (minutes: number, animated?: boolean, offset?: number) => void;
+  scrollToOffset: (y: number, animated?: boolean) => void;
 };
 
 function EventCalendarContentInner<T extends CalendarEvent>(
@@ -141,15 +142,21 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           animated,
         });
       },
+      scrollToOffset: (y: number, animated = true) => {
+        refScrollView.current?.scrollTo({
+          y,
+          animated,
+        });
+      },
     }),
     [zoomLevel]
   );
 
   const onScrollFeedback = useCallback(
     (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      onScroll && onScroll(event.nativeEvent.contentOffset.y / zoomLevel.value);
+      onScroll && onScroll(event.nativeEvent.contentOffset.y);
     },
-    [zoomLevel, onScroll]
+    [onScroll]
   );
 
   const { eventsLayout } = useEvents();

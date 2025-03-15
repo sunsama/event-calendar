@@ -616,11 +616,8 @@ export default function App() {
                 console.info("onZoomChange", newZoom);
               }}
               onScroll={debounce(
-                (minutes) => {
-                  const hours = Math.floor(minutes / 60);
-                  const minute = minutes - hours * 60;
-
-                  console.info("onScroll", hours, minute);
+                (y: number) => {
+                  console.info("onScroll", y);
                 },
                 1000,
                 { trailing: true }
