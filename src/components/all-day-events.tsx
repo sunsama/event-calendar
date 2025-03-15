@@ -31,8 +31,10 @@ const AllDayEvents = memo(
           {
             duration: 250,
           },
-          () => {
-            runOnJS(setShowAllDayEvents)(newState);
+          (finished) => {
+            if (finished) {
+              runOnJS(setShowAllDayEvents)(newState);
+            }
           }
         );
       } else {
@@ -66,7 +68,7 @@ const AllDayEvents = memo(
         }
 
         measuredHeight.value = withTiming(height, { duration: 250 }, () => {
-          if (!moreAvailable) {
+          if (moreAvailable) {
             return;
           }
 
@@ -82,17 +84,27 @@ const AllDayEvents = memo(
       [originalHeight, measuredHeight, refView, moreAvailable]
     );
 
-    const animatedStyle = useAnimatedStyle(() => {
+    const animatedStyleRight = useAnimatedStyle(() => {
       return {
         minHeight: 1,
         height: measuredHeight.value,
       };
     });
 
+    const animatedStyleLeft = useAnimatedStyle(() => {
+      return {
+        width: 50,
+        height: measuredHeight.value + DEFAULT_MINUTE_HEIGHT * 24,
+      };
+    });
+
     return (
       <View style={[styles.container, theme?.allDayContainer]}>
+        <Pressable onPress={onPressCreateEvent}>
+          <Animated.View style={[animatedStyleLeft]} />
+        </Pressable>
         <View style={[styles.eventContainer, theme?.allDayEventContainer]}>
-          <Animated.View style={animatedStyle} ref={refView}>
+          <Animated.View style={animatedStyleRight} ref={refView}>
             <View onLayout={onContentLayout}>
               {allDayEvents.map((allDayLayout: AllDayEventLayoutType<any>) => (
                 <EventContainer
@@ -130,11 +142,12 @@ export default AllDayEvents;
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: "row",
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderColor: "black",
   },
   eventContainer: {
-    marginLeft: 50,
+    flex: 1,
     marginRight: 10,
     borderLeftWidth: StyleSheet.hairlineWidth,
     borderColor: "black",
