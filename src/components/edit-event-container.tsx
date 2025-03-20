@@ -10,8 +10,10 @@ import { useIsEditing } from "../hooks/use-is-editing";
 import { ConfigProvider, MIN_EVENT_HEIGHT_PX } from "../utils/globals";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
+  measure,
   runOnJS,
   useAnimatedReaction,
+  useAnimatedRef,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -28,7 +30,7 @@ type EditEventContainerProps = {
 
 const EditEventContainer = memo(
   ({ refNewEvent }: EditEventContainerProps) => {
-    const { currentY, isEditing: editingEvent, setIsEditing } = useIsEditing();
+    const { isEditing: editingEvent, setIsEditing } = useIsEditing();
     const {
       maximumHour,
       fiveMinuteInterval,
@@ -37,6 +39,8 @@ const EditEventContainer = memo(
       renderEvent,
       timezone,
       dayDate,
+      createY,
+      editingContainerHeight,
     } = useContext(ConfigProvider);
     const height = useSharedValue(0);
 
@@ -58,18 +62,18 @@ const EditEventContainer = memo(
       }
 
       calculateHeight(editingEvent.event, zoomLevel.value);
-      currentY.value = editingEvent.position.top * zoomLevel.value;
-    }, [height, editingEvent, currentY, zoomLevel, timezone, calculateHeight]);
+      createY.value = editingEvent.position.top * zoomLevel.value;
+    }, [height, editingEvent, createY, zoomLevel, timezone, calculateHeight]);
 
     useAnimatedReaction(
       () => zoomLevel.value,
       (zoom) => {
         if (editingEvent) {
           runOnJS(calculateHeight)(editingEvent.event, zoom);
-          currentY.value = editingEvent.position.top * zoom;
+          createY.value = editingEvent.position.top * zoom;
         }
       },
-      [height, currentY, zoomLevel, editingEvent]
+      [height, createY, zoomLevel, editingEvent]
     );
 
     const styleAnimatedPosition = useAnimatedStyle(() => {
@@ -81,7 +85,7 @@ const EditEventContainer = memo(
         marginLeft: StyleSheet.hairlineWidth,
         position: "absolute",
         height: Math.max(MIN_EVENT_HEIGHT_PX, height.value),
-        top: currentY.value,
+        top: createY.value,
         opacity: 1,
         width: "100%",
       };
@@ -90,11 +94,11 @@ const EditEventContainer = memo(
     const startY = useSharedValue(0);
 
     const updatedStart = useDerivedValue(() => {
-      return currentY.value / zoomLevel.value;
+      return createY.value / zoomLevel.value;
     }, []);
 
     const updatedEnd = useDerivedValue(() => {
-      return (currentY.value + height.value) / zoomLevel.value;
+      return (createY.value + height.value) / zoomLevel.value;
     }, []);
 
     const endEventEditing = useCallback(
@@ -116,6 +120,21 @@ const EditEventContainer = memo(
 
     const refMainContainer = useRef();
 
+    const refView = useAnimatedRef();
+
+    useAnimatedReaction(
+      () => createY.value > 0 && editingEvent,
+      (isEditing, _previous) => {
+        if (isEditing) {
+          //} && isEditing !== previous) {
+          const measured = measure(refView);
+          console.info("---- measured", measured);
+          editingContainerHeight.value = measured?.height || 0;
+        }
+      },
+      [editingEvent, editingContainerHeight]
+    );
+
     if (!editingEvent) {
       return null;
     }
@@ -126,8 +145,8 @@ const EditEventContainer = memo(
           gestureTap,
           gesturePan(
             startY,
-            currentY,
-            currentY,
+            createY,
+            createY,
             zoomLevel,
             maximumHour,
             height,
@@ -136,7 +155,7 @@ const EditEventContainer = memo(
           ).withRef(refMainContainer)
         )}
       >
-        <Animated.View style={styleAnimatedPosition}>
+        <Animated.View ref={refView} style={styleAnimatedPosition}>
           {renderEvent(editingEvent.event, EventExtend.None, height, {
             updatedEnd,
             updatedStart,
@@ -144,7 +163,7 @@ const EditEventContainer = memo(
           {renderDragBars?.top ? (
             <DragBar
               event={editingEvent.event}
-              top={currentY}
+              top={createY}
               height={height}
               render={renderDragBars.top}
               refMainContainer={refMainContainer}

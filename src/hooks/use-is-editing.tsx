@@ -5,7 +5,6 @@ import React, {
   useContext,
   useState,
 } from "react";
-import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "../utils/globals";
 import { isFunction } from "lodash";
 import {
@@ -17,7 +16,6 @@ import { useEvents } from "./use-events";
 
 interface IsEditingType<T extends CalendarEvent> {
   isEditing: null | PartDayEventLayoutType<T>;
-  currentY: SharedValue<number>;
   setIsEditing: (
     newValue: PartDayEventLayoutType<T> | null,
     updatedTimes?: {
@@ -49,7 +47,6 @@ export const IsEditingProvider = <T extends CalendarEvent>({
   const { updateClonedEvents } = useEvents();
   const [isEditing, baseSetIsEditing] =
     useState<null | PartDayEventLayoutType<T>>(null);
-  const currentY = useSharedValue(0);
 
   const setIsEditing = useCallback(
     (
@@ -116,7 +113,7 @@ export const IsEditingProvider = <T extends CalendarEvent>({
   );
 
   return (
-    <IsEditing.Provider value={{ currentY, isEditing, setIsEditing }}>
+    <IsEditing.Provider value={{ isEditing, setIsEditing }}>
       {children}
     </IsEditing.Provider>
   );
