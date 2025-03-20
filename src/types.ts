@@ -110,6 +110,7 @@ export type Config<T extends CalendarEvent> = {
   defaultZoomLevel: number;
   maxZoomLevel: number;
   minZoomLevel: number;
+  editingContainerHeight: SharedValue<number>;
   initialZoomLevel: number;
   renderEvent: (
     event: T,

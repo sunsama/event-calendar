@@ -1,12 +1,14 @@
-import { memo, useContext, useMemo, useState } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
 import { ConfigProvider } from "../utils/globals";
 import Animated, {
   runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
+  useSharedValue,
 } from "react-native-reanimated";
 import { StyleSheet, View } from "react-native";
 import { useIsEditing } from "../hooks/use-is-editing";
+import type { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
 
 const NewEventContainer = memo(
   () => {
@@ -15,6 +17,7 @@ const NewEventContainer = memo(
       renderNewEventContainer,
       zoomLevel,
       createY,
+      editingContainerHeight,
       theme,
     } = useContext(ConfigProvider);
 
@@ -57,8 +60,30 @@ const NewEventContainer = memo(
       []
     );
 
+    const currentContainerHeight = useSharedValue(0);
+
+    useAnimatedReaction(
+      () => createY.value > 0,
+      (fresh, previous) => {
+        if (!isEditing && fresh !== previous) {
+          // We should
+          editingContainerHeight.value = currentContainerHeight.value;
+        }
+      }
+    );
+
+    const onLayout = useCallback(
+      (event: LayoutChangeEvent) => {
+        currentContainerHeight.value = event.nativeEvent.layout.height;
+      },
+      [currentContainerHeight]
+    );
+
     return (
-      <Animated.View style={[styles.container, styleVisible]}>
+      <Animated.View
+        style={[styles.container, styleVisible]}
+        onLayout={onLayout}
+      >
         {renderNewEventContainer ? (
           renderNewEventContainer(hour, minute)
         ) : (

@@ -26,7 +26,7 @@ const TimedEventContainer = <T extends CalendarEvent>({
   layout,
   refNewEvent,
 }: TimedEventContainerProps<T>) => {
-  const { currentY, setIsEditing, isEditing } = useIsEditing();
+  const { setIsEditing, isEditing } = useIsEditing();
   const {
     onPressEvent,
     maximumHour,
@@ -35,6 +35,7 @@ const TimedEventContainer = <T extends CalendarEvent>({
     renderEvent,
     initialZoomLevel,
     onZoomChange,
+    createY,
   } = useContext(ConfigProvider);
 
   const height = useSharedValue(0);
@@ -60,7 +61,7 @@ const TimedEventContainer = <T extends CalendarEvent>({
     gesturePan(
       startY,
       top,
-      currentY,
+      createY,
       zoomLevel,
       maximumHour,
       height,
