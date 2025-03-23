@@ -91,6 +91,7 @@ Edit mode:
 | `extraTimedComponents`      | `Function`              | No       |         | Allows rendering extra components in the calendar. These will be rendered before all the timed events.                                                      |
 | `onZoomChange`              | `Function`              | No       |         | Callback triggered when the zoom level changes.                                                                                                             |
 | `onScroll`                  | `Function`              | No       |         | Callback returning the current Y position the user has scrolled to.                                                                                         |
+| `initialEventEdit`          | `String`                | No       |         | The ID of the event that should be in edit mode when the calendar is first rendered.                                                                        |
 
 ## Methods
 The Event Calendar component exposes the following methods through the reference:

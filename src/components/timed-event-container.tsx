@@ -5,7 +5,14 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { ConfigProvider, MIN_EVENT_HEIGHT_PX } from "../utils/globals";
-import { RefObject, useCallback, useContext, useMemo } from "react";
+import {
+  RefObject,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { StyleSheet, View } from "react-native";
 import { useIsEditing } from "../hooks/use-is-editing";
@@ -35,6 +42,7 @@ const TimedEventContainer = <T extends CalendarEvent>({
     renderEvent,
     initialZoomLevel,
     onZoomChange,
+    initialEventEdit,
   } = useContext(ConfigProvider);
 
   const height = useSharedValue(0);
@@ -53,6 +61,22 @@ const TimedEventContainer = <T extends CalendarEvent>({
     });
 
   const startY = useSharedValue(0);
+
+  const initialRender = useRef(true);
+
+  useEffect(() => {
+    if (!initialRender.current) {
+      return;
+    }
+
+    initialRender.current = false;
+
+    if (!initialEventEdit || initialEventEdit !== layout.event.id) {
+      return;
+    }
+
+    startEditing();
+  }, [initialEventEdit, layout.event.id, startEditing]);
 
   const gestures = Gesture.Exclusive(
     doubleTapGesture(zoomLevel, initialZoomLevel, onZoomChange),

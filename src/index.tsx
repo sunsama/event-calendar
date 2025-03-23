@@ -35,6 +35,7 @@ import type { NativeScrollEvent } from "react-native/Libraries/Components/Scroll
 export * from "./types";
 
 type EventCalenderProps<T extends CalendarEvent> = {
+  initialEventEdit?: string;
   onScroll?: (y: number) => void;
   canCreateEvents?: boolean;
   canEditEvent?: Config<T>["canEditEvent"];
@@ -63,6 +64,7 @@ type EventCalenderProps<T extends CalendarEvent> = {
 };
 
 type EventCalenderContentProps<T extends CalendarEvent> = {
+  initialEventEdit?: string;
   onScroll?: (y: number) => void;
   canCreateEvents: boolean;
   canEditEvent: Config<T>["canEditEvent"];
@@ -95,6 +97,7 @@ export type EventCalendarMethods = {
 
 function EventCalendarContentInner<T extends CalendarEvent>(
   {
+    initialEventEdit,
     canCreateEvents,
     canEditEvent,
     fiveMinuteInterval,
@@ -191,6 +194,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           onZoomChange,
           updateLocalStateAfterEdit,
           theme,
+          initialEventEdit,
         }}
       >
         <AllDayEvents />

@@ -577,6 +577,8 @@ export default function App() {
                   <View style={styles.dragBarBottom} />
                 ),
               }}
+              // If you want the calendar to start in edit mode for a specific event, you can use this
+              initialEventEdit="17"
               // If you want to access the EventCalendarMethods, you can use this ref
               ref={refEventCalendar}
               // Render the main event component, timed and all day events

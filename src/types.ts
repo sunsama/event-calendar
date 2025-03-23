@@ -98,6 +98,7 @@ export interface OnEventEditParams<T extends CalendarEvent> {
 }
 
 export type Config<T extends CalendarEvent> = {
+  initialEventEdit?: string;
   timezone: string;
   timeFormat: string;
   dayDate: Moment;
