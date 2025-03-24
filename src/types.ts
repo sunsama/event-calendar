@@ -165,6 +165,7 @@ export enum EventExtend {
 
 export enum EditStatus {
   Start,
+  Update,
   Finish,
   Delete,
 }

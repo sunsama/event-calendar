@@ -23,7 +23,10 @@ import React, {
   useRef,
 } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
-import { IsEditingProvider } from "./hooks/use-is-editing";
+import {
+  IsEditingProvider,
+  type IsEditingProviderInnerMethods,
+} from "./hooks/use-is-editing";
 import { EventsProvider, useEvents } from "./hooks/use-events";
 import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
 import {
@@ -93,6 +96,8 @@ type EventCalenderContentProps<T extends CalendarEvent> = {
 export type EventCalendarMethods = {
   scrollToTime: (minutes: number, animated?: boolean, offset?: number) => void;
   scrollToOffset: (y: number, animated?: boolean) => void;
+  startEditMode: (eventId: string) => void;
+  endEditMode: () => void;
 };
 
 function EventCalendarContentInner<T extends CalendarEvent>(
@@ -131,10 +136,13 @@ function EventCalendarContentInner<T extends CalendarEvent>(
   const refNewEvent = useRef<GestureRef>(null);
   const refScrollView = useRef<ScrollView>(null);
   const refScrollViewHeight = useRef<number>(0);
+  const refEditingProvider = useRef<IsEditingProviderInnerMethods<T>>(null);
 
   const onLayoutScrollView = useCallback((event: LayoutChangeEvent) => {
     refScrollViewHeight.current = event.nativeEvent.layout.height;
   }, []);
+
+  const { eventsLayout } = useEvents();
 
   useImperativeHandle(
     refMethods,
@@ -151,8 +159,22 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           animated,
         });
       },
+      endEditMode: () => {
+        refEditingProvider.current?.endEditing();
+      },
+      startEditMode: (eventId: string) => {
+        const layout = eventsLayout.partDayEventsLayout.find(
+          (item) => item.event.id === eventId
+        );
+
+        if (!layout) {
+          return;
+        }
+
+        refEditingProvider.current?.startEditing(layout);
+      },
     }),
-    [zoomLevel]
+    [zoomLevel, eventsLayout]
   );
 
   const onScrollFeedback = useCallback(
@@ -161,8 +183,6 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     },
     [onScroll]
   );
-
-  const { eventsLayout } = useEvents();
 
   return (
     <View style={[styles.container, theme?.container]}>
@@ -206,7 +226,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           ref={refScrollView}
           onScroll={onScrollFeedback}
         >
-          <IsEditingProvider>
+          <IsEditingProvider ref={refEditingProvider}>
             <ZoomProvider ref={refNewEvent}>
               <View style={[styles.borderContainer, theme?.borderContainer]} />
               <TimedEvents refNewEvent={refNewEvent} />

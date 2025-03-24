@@ -1,22 +1,27 @@
 import React, {
   createContext,
+  forwardRef,
   ReactNode,
+  type Ref,
   useCallback,
   useContext,
+  useImperativeHandle,
   useState,
 } from "react";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
 import { ConfigProvider } from "../utils/globals";
-import { isFunction } from "lodash";
+import { debounce, isFunction } from "lodash";
 import {
   type CalendarEvent,
   EditStatus,
   PartDayEventLayoutType,
 } from "../types";
 import { useEvents } from "./use-events";
+import moment from "moment-timezone";
 
 interface IsEditingType<T extends CalendarEvent> {
   isEditing: null | PartDayEventLayoutType<T>;
+  updateEditing: (top: number, height: number) => void;
   currentY: SharedValue<number>;
   setIsEditing: (
     newValue: PartDayEventLayoutType<T> | null,
@@ -38,18 +43,53 @@ export const useIsEditing = () => {
   return context;
 };
 
-// Provider component
-export const IsEditingProvider = <T extends CalendarEvent>({
-  children,
-}: {
+type IsEditingProviderInnerProps = {
   children: ReactNode;
-}) => {
-  const { canEditEvent, onEventEdit, updateLocalStateAfterEdit } =
+};
+
+export type IsEditingProviderInnerMethods<T extends CalendarEvent> = {
+  startEditing: (layout: PartDayEventLayoutType<T>) => void;
+  endEditing: () => void;
+};
+
+const IsEditingProviderInner = <T extends CalendarEvent>(
+  { children }: IsEditingProviderInnerProps,
+  refMethods: Ref<IsEditingProviderInnerMethods<T>>
+) => {
+  const { canEditEvent, onEventEdit, updateLocalStateAfterEdit, timezone } =
     useContext(ConfigProvider);
   const { updateClonedEvents } = useEvents();
   const [isEditing, baseSetIsEditing] =
     useState<null | PartDayEventLayoutType<T>>(null);
   const currentY = useSharedValue(0);
+
+  const updateEditing = debounce(
+    (start: number, end: number) => {
+      if (!isEditing) {
+        return;
+      }
+
+      const newStart = moment
+        .tz(isEditing.event.start, timezone)
+        .startOf("day")
+        .add(start, "minutes");
+      const newEnd = moment
+        .tz(isEditing.event.start, timezone)
+        .startOf("day")
+        .add(end, "minutes");
+
+      onEventEdit?.({
+        event: isEditing.event,
+        status: EditStatus.Update,
+        updatedTimes: {
+          updatedStart: newStart.format(),
+          updatedEnd: newEnd.format(),
+        },
+      });
+    },
+    500,
+    { trailing: true }
+  );
 
   const setIsEditing = useCallback(
     (
@@ -115,9 +155,51 @@ export const IsEditingProvider = <T extends CalendarEvent>({
     ]
   );
 
+  useImperativeHandle(
+    refMethods,
+    () => ({
+      endEditing: () => {
+        if (!isEditing) {
+          return;
+        }
+
+        onEventEdit?.({
+          event: isEditing?.event,
+          status: EditStatus.Finish,
+        });
+        baseSetIsEditing(null);
+      },
+      startEditing: (layout) => {
+        if (isEditing) {
+          onEventEdit?.({
+            event: isEditing.event,
+            status: EditStatus.Finish,
+          });
+        }
+
+        onEventEdit?.({
+          event: layout.event,
+          status: EditStatus.Start,
+        });
+        baseSetIsEditing(layout);
+      },
+    }),
+    [baseSetIsEditing, isEditing, onEventEdit]
+  );
+
   return (
-    <IsEditing.Provider value={{ currentY, isEditing, setIsEditing }}>
+    <IsEditing.Provider
+      value={{ currentY, isEditing, setIsEditing, updateEditing }}
+    >
       {children}
     </IsEditing.Provider>
   );
 };
+
+export const IsEditingProvider = forwardRef(IsEditingProviderInner) as <
+  T extends CalendarEvent,
+>(
+  props: IsEditingProviderInnerProps & {
+    ref?: Ref<IsEditingProviderInnerMethods<T>>;
+  }
+) => ReturnType<typeof IsEditingProviderInner>;

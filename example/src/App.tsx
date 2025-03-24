@@ -483,7 +483,7 @@ export default function App() {
       updatedTimes,
       status,
     }: OnEventEditParams<ExtendedCalendarEvent>) => {
-      console.info("onEventEdit");
+      console.info("onEventEdit", event, updatedTimes, status);
 
       switch (status) {
         case EditStatus.Finish:
@@ -516,6 +516,16 @@ export default function App() {
         scrollDate.minutes() + scrollDate.hours() * 60
       );
     }, 0);
+
+    // Uncomment this to see how you can programmatically start and end edit mode
+    // setTimeout(() => {
+    //   refEventCalendar.current?.scrollToTime(12 * 60);
+    //   refEventCalendar.current?.startEditMode("10");
+    // }, 5000);
+    //
+    // setTimeout(() => {
+    //   refEventCalendar.current?.endEditMode();
+    // }, 10000);
   }, []);
 
   return (
@@ -578,7 +588,7 @@ export default function App() {
                 ),
               }}
               // If you want the calendar to start in edit mode for a specific event, you can use this
-              initialEventEdit="17"
+              // initialEventEdit="17"
               // If you want to access the EventCalendarMethods, you can use this ref
               ref={refEventCalendar}
               // Render the main event component, timed and all day events

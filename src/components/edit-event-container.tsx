@@ -28,7 +28,12 @@ type EditEventContainerProps = {
 
 const EditEventContainer = memo(
   ({ refNewEvent }: EditEventContainerProps) => {
-    const { currentY, isEditing: editingEvent, setIsEditing } = useIsEditing();
+    const {
+      currentY,
+      isEditing: editingEvent,
+      setIsEditing,
+      updateEditing,
+    } = useIsEditing();
     const {
       maximumHour,
       fiveMinuteInterval,
@@ -96,6 +101,19 @@ const EditEventContainer = memo(
     const updatedEnd = useDerivedValue(() => {
       return (currentY.value + height.value) / zoomLevel.value;
     }, []);
+
+    useAnimatedReaction(
+      () => ({
+        start: updatedStart.value,
+        end: updatedEnd.value,
+      }),
+      ({ start, end }) => {
+        if (updateEditing) {
+          runOnJS(updateEditing)(start, end);
+        }
+      },
+      [updateEditing]
+    );
 
     const endEventEditing = useCallback(
       (newStart: number, newEnd: number) => {
