@@ -37,7 +37,7 @@ import type { NativeScrollEvent } from "react-native/Libraries/Components/Scroll
 
 export * from "./types";
 
-type EventCalenderProps<T extends CalendarEvent> = {
+export type EventCalenderProps<T extends CalendarEvent> = {
   initialEventEdit?: string;
   onScroll?: (y: number) => void;
   canCreateEvents?: boolean;
