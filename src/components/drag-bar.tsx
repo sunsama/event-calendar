@@ -33,12 +33,10 @@ const handleTopDrag = (
   if (fiveMinuteInterval) {
     // Set the updated time in 15 minute increments but make sure we never go lower
     // than the first minute of the day
-    freshUpdatedStartTime = Math.max(
-      0,
-      Math.round((startY.value + translationY / zoomLevel.value) / 5) *
-        5 *
-        zoomLevel.value
-    );
+    const rawMinutes = startY.value + translationY / zoomLevel.value;
+    const snappedMinutes = Math.round(rawMinutes / 5) * 5;
+
+    freshUpdatedStartTime = Math.max(0, snappedMinutes);
   } else {
     // Set the updated time in 1 minute increments but make sure we never go lower
     // than the first minute of the day
@@ -78,12 +76,10 @@ const handleBottomDrag = (
   if (fiveMinuteInterval) {
     // Set the updated time in 15 minute increments but make sure we never go lower
     // than the first minute of the day
-    freshUpdatedEndTime = Math.max(
-      0,
-      Math.round((startY.value + translationY / zoomLevel.value) / 5) *
-        5 *
-        zoomLevel.value
-    );
+    const rawMinutes = startY.value + translationY / zoomLevel.value;
+    const snappedMinutes = Math.round(rawMinutes / 5) * 5;
+
+    freshUpdatedEndTime = Math.max(0, snappedMinutes);
   } else {
     // Set the updated time in 1 minute increments but make sure we never go lower
     // than the first minute of the day

@@ -34,7 +34,7 @@ const gesturePan = <T extends CalendarEvent>(
       let freshUpdatedStartTime;
 
       if (fiveMinuteInterval) {
-        // Set the updated time in 15 minute increments but make sure we never go lower
+        // Set the updated time in 5 minute increments but make sure we never go lower
         // than the first minute of the day
         freshUpdatedStartTime = Math.max(
           0,

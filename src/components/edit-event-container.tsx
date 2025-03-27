@@ -95,12 +95,24 @@ const EditEventContainer = memo(
     const startY = useSharedValue(0);
 
     const updatedStart = useDerivedValue(() => {
-      return currentY.value / zoomLevel.value;
-    }, []);
+      const rawMinutes = currentY.value / zoomLevel.value;
+
+      if (!fiveMinuteInterval) {
+        return Math.round(rawMinutes);
+      }
+
+      return Math.round(rawMinutes / 5) * 5;
+    }, [fiveMinuteInterval]);
 
     const updatedEnd = useDerivedValue(() => {
-      return (currentY.value + height.value) / zoomLevel.value;
-    }, []);
+      const rawMinutes = (currentY.value + height.value) / zoomLevel.value;
+
+      if (!fiveMinuteInterval) {
+        return Math.round(rawMinutes);
+      }
+
+      return Math.round(rawMinutes / 5) * 5;
+    }, [fiveMinuteInterval]);
 
     useAnimatedReaction(
       () => ({
