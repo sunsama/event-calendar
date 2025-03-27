@@ -35,8 +35,9 @@ const handleTopDrag = (
     // than the first minute of the day
     freshUpdatedStartTime = Math.max(
       0,
-      startY.value +
-        Math.floor(translationY / zoomLevel.value / 5) * (zoomLevel.value * 5)
+      Math.round((startY.value + translationY / zoomLevel.value) / 5) *
+        5 *
+        zoomLevel.value
     );
   } else {
     // Set the updated time in 1 minute increments but make sure we never go lower
@@ -79,8 +80,9 @@ const handleBottomDrag = (
     // than the first minute of the day
     freshUpdatedEndTime = Math.max(
       0,
-      startY.value +
-        Math.floor(translationY / zoomLevel.value / 5) * (zoomLevel.value * 5)
+      Math.round((startY.value + translationY / zoomLevel.value) / 5) *
+        5 *
+        zoomLevel.value
     );
   } else {
     // Set the updated time in 1 minute increments but make sure we never go lower
