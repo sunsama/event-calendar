@@ -5,7 +5,6 @@ import React, {
   type Ref,
   useCallback,
   useContext,
-  useImperativeHandle,
   useState,
 } from "react";
 import { SharedValue, useSharedValue } from "react-native-reanimated";
@@ -14,12 +13,13 @@ import { debounce, isFunction } from "lodash";
 import {
   type CalendarEvent,
   EditStatus,
+  type IsEditingProviderInnerMethods,
   PartDayEventLayoutType,
 } from "../types";
 import { useEvents } from "./use-events";
 import moment from "moment-timezone";
 
-interface IsEditingType<T extends CalendarEvent> {
+interface IsEditingType<T extends CalendarEvent = CalendarEvent> {
   isEditing: null | PartDayEventLayoutType<T>;
   updateEditing: (top: number, height: number) => void;
   currentY: SharedValue<number>;
@@ -30,6 +30,7 @@ interface IsEditingType<T extends CalendarEvent> {
       updatedEnd: string;
     }
   ) => void;
+  refMethods: Ref<IsEditingProviderInnerMethods<T>>;
 }
 
 const IsEditing = createContext<IsEditingType<any> | undefined>(undefined);
@@ -45,11 +46,6 @@ export const useIsEditing = () => {
 
 type IsEditingProviderInnerProps = {
   children: ReactNode;
-};
-
-export type IsEditingProviderInnerMethods<T extends CalendarEvent> = {
-  startEditing: (layout: PartDayEventLayoutType<T>) => void;
-  endEditing: () => void;
 };
 
 const IsEditingProviderInner = <T extends CalendarEvent>(
@@ -155,41 +151,9 @@ const IsEditingProviderInner = <T extends CalendarEvent>(
     ]
   );
 
-  useImperativeHandle(
-    refMethods,
-    () => ({
-      endEditing: () => {
-        if (!isEditing) {
-          return;
-        }
-
-        onEventEdit?.({
-          event: isEditing?.event,
-          status: EditStatus.Finish,
-        });
-        baseSetIsEditing(null);
-      },
-      startEditing: (layout) => {
-        if (isEditing) {
-          onEventEdit?.({
-            event: isEditing.event,
-            status: EditStatus.Finish,
-          });
-        }
-
-        onEventEdit?.({
-          event: layout.event,
-          status: EditStatus.Start,
-        });
-        baseSetIsEditing(layout);
-      },
-    }),
-    [baseSetIsEditing, isEditing, onEventEdit]
-  );
-
   return (
     <IsEditing.Provider
-      value={{ currentY, isEditing, setIsEditing, updateEditing }}
+      value={{ currentY, isEditing, setIsEditing, updateEditing, refMethods }}
     >
       {children}
     </IsEditing.Provider>

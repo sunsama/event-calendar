@@ -97,7 +97,7 @@ export interface OnEventEditParams<T extends CalendarEvent> {
   };
 }
 
-export type Config<T extends CalendarEvent> = {
+export interface Config<T extends CalendarEvent> {
   initialEventEdit?: string;
   timezone: string;
   timeFormat: string;
@@ -136,7 +136,7 @@ export type Config<T extends CalendarEvent> = {
   updateLocalStateAfterEdit: boolean;
   extraTimedComponents?: (zoomLevel: SharedValue<number>) => ReactNode;
   onZoomChange?: (zoomLevel: number) => void;
-};
+}
 
 export type PrefabHour = {
   increment: number;
@@ -168,4 +168,11 @@ export enum EditStatus {
   Update,
   Finish,
   Delete,
+}
+
+export interface IsEditingProviderInnerMethods<
+  T extends CalendarEvent = CalendarEvent,
+> {
+  startEditing: (layout: PartDayEventLayoutType<T>) => void;
+  endEditing: () => void;
 }

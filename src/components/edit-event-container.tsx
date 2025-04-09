@@ -4,6 +4,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useImperativeHandle,
   useRef,
 } from "react";
 import { useIsEditing } from "../hooks/use-is-editing";
@@ -33,6 +34,7 @@ const EditEventContainer = memo(
       isEditing: editingEvent,
       setIsEditing,
       updateEditing,
+      refMethods,
     } = useIsEditing();
     const {
       maximumHour,
@@ -129,7 +131,6 @@ const EditEventContainer = memo(
 
     const endEventEditing = useCallback(
       (newStart: number, newEnd: number) => {
-        // Format the new start and end times
         setIsEditing(null, {
           updatedStart: moment.tz(dayDate, timezone).minutes(newStart).format(),
           updatedEnd: moment.tz(dayDate, timezone).minutes(newEnd).format(),
@@ -145,6 +146,45 @@ const EditEventContainer = memo(
       });
 
     const refMainContainer = useRef();
+
+    useImperativeHandle(
+      refMethods,
+      () => ({
+        endEditing: () => {
+          if (!editingEvent) {
+            return;
+          }
+
+          setIsEditing(null, {
+            updatedStart: moment
+              .tz(dayDate, timezone)
+              .minutes(updatedStart.value)
+              .format(),
+            updatedEnd: moment
+              .tz(dayDate, timezone)
+              .minutes(updatedEnd.value)
+              .format(),
+          });
+        },
+        startEditing: (layout) => {
+          if (editingEvent) {
+            setIsEditing(null, {
+              updatedStart: moment
+                .tz(dayDate, timezone)
+                .minutes(updatedStart.value)
+                .format(),
+              updatedEnd: moment
+                .tz(dayDate, timezone)
+                .minutes(updatedEnd.value)
+                .format(),
+            });
+          }
+
+          setIsEditing(layout);
+        },
+      }),
+      [dayDate, editingEvent, setIsEditing, timezone, updatedEnd, updatedStart]
+    );
 
     if (!editingEvent) {
       return null;

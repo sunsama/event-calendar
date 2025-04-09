@@ -23,12 +23,15 @@ import React, {
   useRef,
 } from "react";
 import { GestureRef } from "react-native-gesture-handler/lib/typescript/handlers/gestures/gesture";
-import {
-  IsEditingProvider,
-  type IsEditingProviderInnerMethods,
-} from "./hooks/use-is-editing";
+import { IsEditingProvider } from "./hooks/use-is-editing";
 import { EventsProvider, useEvents } from "./hooks/use-events";
-import type { CalendarEvent, Config, onCreateEvent, ThemeStyle } from "./types";
+import type {
+  CalendarEvent,
+  Config,
+  IsEditingProviderInnerMethods,
+  onCreateEvent,
+  ThemeStyle,
+} from "./types";
 import {
   LayoutChangeEvent,
   NativeSyntheticEvent,
@@ -37,68 +40,59 @@ import type { NativeScrollEvent } from "react-native/Libraries/Components/Scroll
 
 export * from "./types";
 
-export type EventCalenderProps<T extends CalendarEvent> = {
+interface BaseProps<T extends CalendarEvent = CalendarEvent> {
   initialEventEdit?: string;
   onScroll?: (y: number) => void;
-  canCreateEvents?: boolean;
-  canEditEvent?: Config<T>["canEditEvent"];
-  dayDate: string;
-  events: T[];
   fiveMinuteInterval?: boolean;
   initialZoomLevel?: number;
+  onCreateEvent?: onCreateEvent;
+  onEventEdit?: Config<T>["onEventEdit"];
+  onPressEvent?: Config<T>["onPressEvent"];
+  renderDragBars?: Config<T>["renderDragBars"];
+  renderEvent: Config<T>["renderEvent"];
+  renderNewEventContainer?: Config<T>["renderNewEventContainer"];
+  showTimeIndicator?: boolean;
+  theme?: ThemeStyle;
+  extraTimedComponents?: Config<T>["extraTimedComponents"];
+  onZoomChange?: Config<T>["onZoomChange"];
+  canCreateEvents?: boolean;
+  canEditEvent?: Config<T>["canEditEvent"];
   defaultZoomLevel?: number;
   maxZoomLevel?: number;
   minZoomLevel?: number;
   maxAllDayEvents?: number;
-  onCreateEvent?: onCreateEvent;
-  onEventEdit?: Config<T>["onEventEdit"];
-  onPressEvent?: Config<T>["onPressEvent"];
-  renderDragBars?: Config<T>["renderDragBars"];
-  renderEvent: Config<T>["renderEvent"];
-  renderNewEventContainer?: Config<T>["renderNewEventContainer"];
-  showTimeIndicator?: boolean;
-  theme?: ThemeStyle;
   timeFormat?: string;
   timezone?: string;
   updateLocalStateAfterEdit?: boolean;
-  userCalendarId?: string;
-  extraTimedComponents?: Config<T>["extraTimedComponents"];
-  onZoomChange?: Config<T>["onZoomChange"];
-};
+}
 
-type EventCalenderContentProps<T extends CalendarEvent> = {
-  initialEventEdit?: string;
-  onScroll?: (y: number) => void;
+export interface EventCalenderProps<T extends CalendarEvent = CalendarEvent>
+  extends BaseProps<T> {
+  dayDate: string;
+  events: T[];
+  userCalendarId?: string;
+}
+
+interface EventCalenderContentProps<T extends CalendarEvent = CalendarEvent>
+  extends BaseProps<T> {
   canCreateEvents: boolean;
   canEditEvent: Config<T>["canEditEvent"];
   startCalendarDate: Moment;
-  fiveMinuteInterval?: boolean;
-  initialZoomLevel?: number;
   defaultZoomLevel: number;
   maxZoomLevel: number;
   minZoomLevel: number;
   maxAllDayEvents: number;
-  onCreateEvent?: onCreateEvent;
-  onEventEdit?: Config<T>["onEventEdit"];
-  onPressEvent?: Config<T>["onPressEvent"];
-  renderDragBars?: Config<T>["renderDragBars"];
-  renderEvent: Config<T>["renderEvent"];
-  renderNewEventContainer?: Config<T>["renderNewEventContainer"];
-  showTimeIndicator?: boolean;
-  theme?: ThemeStyle;
   timeFormat: string;
   timezone: string;
   updateLocalStateAfterEdit: boolean;
-  extraTimedComponents?: Config<T>["extraTimedComponents"];
-  onZoomChange?: Config<T>["onZoomChange"];
-};
+}
 
-export type EventCalendarMethods = {
+export interface EventCalendarMethods {
   scrollToTime: (minutes: number, animated?: boolean, offset?: number) => void;
   scrollToOffset: (y: number, animated?: boolean) => void;
   startEditMode: (eventId: string) => void;
   endEditMode: () => void;
-};
+}
 
 function EventCalendarContentInner<T extends CalendarEvent>(
   {
