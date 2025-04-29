@@ -102,6 +102,7 @@ The Event Calendar component exposes the following methods through the reference
 | `scrollToOffset` | Scrolls the calendar to the specified Y position (useful in combination with `onScroll`). |
 | `startEditMode`  | Starts the edit mode for the specified event.                                             |
 | `endEditMode`    | Ends the edit mode for the currently edited event.                                        |
+| `setZoomLevel`   | Sets the zoom level of the calendar.                                                      |
 
 ## Dependencies
 Ensure you have the following dependencies installed for proper functionality:

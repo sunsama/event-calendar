@@ -92,6 +92,7 @@ export interface EventCalendarMethods {
   scrollToOffset: (y: number, animated?: boolean) => void;
   startEditMode: (eventId: string) => void;
   endEditMode: () => void;
+  setZoomLevel: (newZoomLevel: number) => void;
 }
 
 function EventCalendarContentInner<T extends CalendarEvent>(
@@ -166,6 +167,9 @@ function EventCalendarContentInner<T extends CalendarEvent>(
         }
 
         refEditingProvider.current?.startEditing(layout);
+      },
+      setZoomLevel: (newZoomLevel: number) => {
+        zoomLevel.value = newZoomLevel;
       },
     }),
     [zoomLevel, eventsLayout]
