@@ -3,7 +3,7 @@ import Animated, { useAnimatedStyle } from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 import { ConfigProvider } from "../utils/globals";
 import { PrefabHour } from "../types";
-import useLongPressNewEvent from "src/hooks/use-long-press-new-event";
+import useLongPressNewEvent from "../hooks/use-long-press-new-event";
 import { GestureDetector } from "react-native-gesture-handler";
 
 type BackgroundHoursContentProps = {

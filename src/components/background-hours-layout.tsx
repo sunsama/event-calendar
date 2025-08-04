@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
 import { PrefabHour } from "../types";
 import { GestureDetector } from "react-native-gesture-handler";
-import useLongPressNewEvent from "src/hooks/use-long-press-new-event";
+import useLongPressNewEvent from "../hooks/use-long-press-new-event";
 
 type BackgroundHoursLayoutProps = {
   hours: PrefabHour[];
