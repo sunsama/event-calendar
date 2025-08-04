@@ -33,9 +33,9 @@ const TimedEvents = ({ refNewEvent }: TimedEventsProps) => {
 
   return (
     <View style={[styles.container, theme?.timedEventsContainer]}>
-      <BackgroundHoursLayout hours={hours} />
+      <BackgroundHoursLayout refNewEvent={refNewEvent} hours={hours} />
       <View style={styles.backgroundContainer}>
-        <BackgroundHoursContent hours={hours} />
+        <BackgroundHoursContent refNewEvent={refNewEvent} hours={hours} />
         {layout.partDayEventsLayout.map((partDayLayout) => (
           <TimedEventContainer
             key={partDayLayout.event.id}

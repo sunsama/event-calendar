@@ -225,7 +225,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           onScroll={onScrollFeedback}
         >
           <IsEditingProvider ref={refEditingProvider}>
-            <ZoomProvider ref={refNewEvent}>
+            <ZoomProvider>
               <View style={[styles.borderContainer, theme?.borderContainer]} />
               <TimedEvents refNewEvent={refNewEvent} />
             </ZoomProvider>
