@@ -1,7 +1,7 @@
 import { Gesture } from "react-native-gesture-handler";
-import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "src/utils/globals";
+import { ConfigProvider, TOP_MARGIN_PIXEL_OFFSET } from "../utils/globals";
 import { runOnJS, useSharedValue } from "react-native-reanimated";
-import { useIsEditing } from "src/hooks/use-is-editing";
+import { useIsEditing } from "./use-is-editing";
 import { type RefObject, useContext } from "react";
 
 export default function useLongPressNewEvent(refNewEvent: RefObject<any>) {
