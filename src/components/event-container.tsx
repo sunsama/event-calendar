@@ -1,7 +1,7 @@
 import { ConfigProvider } from "../utils/globals";
 import { useCallback, useContext, useMemo } from "react";
 import { Pressable } from "react-native-gesture-handler";
-import { View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import {
   AllDayEventLayoutType,
   type CalendarEvent,
@@ -15,8 +15,7 @@ type EventContainerProps<T extends CalendarEvent> = {
 const EventContainer = <T extends CalendarEvent>({
   layout,
 }: EventContainerProps<T>) => {
-  const { onPressEvent, renderEvent, initialZoomLevel } =
-    useContext(ConfigProvider);
+  const { onPressEvent, renderEvent } = useContext(ConfigProvider);
 
   const render = useMemo(
     () =>
@@ -29,22 +28,21 @@ const EventContainer = <T extends CalendarEvent>({
     [layout, renderEvent]
   );
 
-  const stylePosition = useMemo(
-    () => ({
-      height: Math.max(28, 24 * initialZoomLevel),
-    }),
-    [initialZoomLevel]
-  );
-
   const onPress = useCallback(() => {
     onPressEvent && onPressEvent(layout.event);
   }, [layout.event, onPressEvent]);
 
   return (
     <Pressable onPress={onPress}>
-      <View style={stylePosition}>{render}</View>
+      <View style={styles.position}>{render}</View>
     </Pressable>
   );
 };
 
 export default EventContainer;
+
+const styles = StyleSheet.create({
+  position: {
+    height: 28,
+  },
+});
