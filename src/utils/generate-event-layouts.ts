@@ -224,14 +224,19 @@ const handleCollisions = <T extends CalendarEvent>(
   dayDate: Moment,
   timezone: string
 ): PartDayEventLayoutType<T>[] => {
-  let stackableEvents = _sortBy(allEvents, (event) => event.id);
-  stackableEvents = _sortBy(stackableEvents, (event) => {
-    // current user's primary calendar should always be leftmost option
-    return event.calendarId && !event.calendarId.includes(userCalendarId);
-  });
-  stackableEvents = _sortBy(stackableEvents, (event) =>
-    new Date(event.start).valueOf()
+  // Sort by start asc (primary), then primary calendar flag, then duration asc,
+  // then id (stable tiebreaker)
+  const sortById = (event: T) => event.id;
+  const sortByDuration = (event: T) => getDuration(event);
+  const sortByStartDate = (event: T) => new Date(event.start).valueOf();
+  const sortByPrimaryCalendar = (event: T) =>
+    event.calendarId && event.calendarId !== userCalendarId;
+
+  const stackableEvents = _sortBy(
+    [...allEvents],
+    [sortByStartDate, sortByPrimaryCalendar, sortByDuration, sortById]
   );
+
   // calculate overlap stack properties
   const stackedEvtsByPos: Record<string, PartDayEventLayoutType<T>[]> = {};
   let curStack: (CollisionObject<T> | null)[] = [];
@@ -243,16 +248,12 @@ const handleCollisions = <T extends CalendarEvent>(
 
       if (stackEvt) {
         const stackEvtEnd = new Date(stackEvt.event.end).valueOf();
-        const stackEvtStart = new Date(stackEvt.event.start).valueOf();
         const eventStart = new Date(evt.start).valueOf();
 
-        // events shorter than 15 minutes behave as if they had 15 minute duration.
-        // matches behavior in calendar view, where the shortest 'height' an event is given matches the height of a 15 minute event.
-        const duration = (stackEvtEnd - stackEvtStart) / (1000 * 60);
-        const endDate =
-          duration < 15 ? stackEvtStart + 15 * 60 * 1000 : stackEvtEnd;
-
-        if (endDate <= eventStart) {
+        // Use half-open interval semantics [start, end):
+        // an active event is removed when its end is less than or equal to the next start.
+        // Do not pad short events when determining overlap/collision.
+        if (stackEvtEnd <= eventStart) {
           // null out this event's position in stack
           curStack[idx] = null;
 

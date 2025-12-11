@@ -107,6 +107,118 @@ describe("generateEventLayouts", () => {
     expect(partDayEventsLayout[1].collisions).toBe(undefined);
   });
 
+  it("should treat touching events as non-overlapping: [09:00,10:00) and [10:00,11:00)", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "1",
+        calendarId: "primary-calendar",
+        title: "Event A",
+        start: "2023-10-10T09:00:00Z",
+        end: "2023-10-10T10:00:00Z",
+      },
+      {
+        id: "2",
+        calendarId: "primary-calendar",
+        title: "Event B",
+        start: "2023-10-10T10:00:00Z",
+        end: "2023-10-10T11:00:00Z",
+      },
+    ];
+
+    const layouts = generateEventLayouts({
+      startCalendarDate: "2023-10-10",
+      endCalendarDate: "2023-10-10",
+      events,
+      timezone: "UTC",
+      userCalendarId: "primary-calendar",
+    });
+
+    const dayLayout = layouts["2023-10-10"];
+    expect(dayLayout).toBeDefined();
+    const { partDayEventsLayout } = dayLayout;
+    expect(partDayEventsLayout.length).toBe(2);
+    // Touching at boundary should not collide
+    expect(partDayEventsLayout[0].collisions).toBeUndefined();
+    expect(partDayEventsLayout[1].collisions).toBeUndefined();
+    // Both should have full width
+    expect(partDayEventsLayout[0].position.width).toBe("100%");
+    expect(partDayEventsLayout[1].position.width).toBe("100%");
+  });
+
+  it("should treat touching events as non-overlapping: reversed order [10:00,11:00) then [09:00,10:00)", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "1",
+        calendarId: "primary-calendar",
+        title: "Event A",
+        start: "2023-10-10T10:00:00Z",
+        end: "2023-10-10T11:00:00Z",
+      },
+      {
+        id: "0",
+        calendarId: "primary-calendar",
+        title: "Event B",
+        start: "2023-10-10T09:00:00Z",
+        end: "2023-10-10T10:00:00Z",
+      },
+    ];
+
+    const layouts = generateEventLayouts({
+      startCalendarDate: "2023-10-10",
+      endCalendarDate: "2023-10-10",
+      events,
+      timezone: "UTC",
+      userCalendarId: "primary-calendar",
+    });
+
+    const dayLayout = layouts["2023-10-10"];
+    expect(dayLayout).toBeDefined();
+    const { partDayEventsLayout } = dayLayout;
+    expect(partDayEventsLayout.length).toBe(2);
+    expect(partDayEventsLayout[0].collisions).toBeUndefined();
+    expect(partDayEventsLayout[1].collisions).toBeUndefined();
+    expect(partDayEventsLayout[0].position.width).toBe("100%");
+    expect(partDayEventsLayout[1].position.width).toBe("100%");
+  });
+
+  it("should not collide zero-duration event with an event starting at the same time", () => {
+    const events: CalendarEvent[] = [
+      {
+        id: "1",
+        calendarId: "primary-calendar",
+        title: "Instant",
+        start: "2023-10-10T10:00:00Z",
+        end: "2023-10-10T10:00:00Z",
+      },
+      {
+        id: "2",
+        calendarId: "primary-calendar",
+        title: "One hour",
+        start: "2023-10-10T10:00:00Z",
+        end: "2023-10-10T11:00:00Z",
+      },
+    ];
+
+    const layouts = generateEventLayouts({
+      startCalendarDate: "2023-10-10",
+      endCalendarDate: "2023-10-10",
+      events,
+      timezone: "UTC",
+      userCalendarId: "primary-calendar",
+    });
+
+    const dayLayout = layouts["2023-10-10"];
+    expect(dayLayout).toBeDefined();
+    const { partDayEventsLayout } = dayLayout;
+    expect(partDayEventsLayout.length).toBe(2);
+    // Neither should have collisions
+    expect(partDayEventsLayout[0].collisions).toBeUndefined();
+    expect(partDayEventsLayout[1].collisions).toBeUndefined();
+    // Both should be full width
+    expect(partDayEventsLayout[0].position.width).toBe("100%");
+    expect(partDayEventsLayout[1].position.width).toBe("100%");
+  });
+
   it("should handle an empty event list", () => {
     const events: CalendarEvent[] = [];
 

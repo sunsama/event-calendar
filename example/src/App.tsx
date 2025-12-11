@@ -88,6 +88,14 @@ const events: any[] = [
     calendarId: "primary-calendar",
   },
   {
+    id: "5a",
+    title: "Event 5a",
+    start: "2023-10-10T08:00:00Z",
+    end: "2023-10-10T08:00:00Z",
+    isAllDay: false,
+    calendarId: "primary-calendar",
+  },
+  {
     id: "8",
     title: "Event 8",
     start: "2023-10-10T11:30:00Z",
