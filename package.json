@@ -1,6 +1,6 @@
 {
   "name": "@sunsama/event-calendar",
-  "version": "0.11.4",
+  "version": "0.11.5",
   "description": "Event calendar.",
   "source": "./src/index.tsx",
   "main": "./lib/commonjs/index.js",
