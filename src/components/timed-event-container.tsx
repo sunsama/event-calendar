@@ -52,12 +52,16 @@ const TimedEventContainer = <T extends CalendarEvent>({
     setIsEditing(layout);
   }, [layout, setIsEditing]);
 
+  const onPressOverride = useCallback(() => {
+    if (onPressEvent) {
+      onPressEvent(layout.event);
+    }
+  }, [layout, onPressEvent]);
+
   const gestureTap = Gesture.Tap()
     .enabled(!isEditing)
     .onStart(() => {
-      if (onPressEvent) {
-        runOnJS(onPressEvent)(layout.event);
-      }
+      runOnJS(onPressOverride)();
     });
 
   const startY = useSharedValue(0);
