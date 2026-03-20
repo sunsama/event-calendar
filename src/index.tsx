@@ -51,6 +51,7 @@ interface BaseProps<T extends CalendarEvent = CalendarEvent> {
   renderDragBars?: Config<T>["renderDragBars"];
   renderEvent: Config<T>["renderEvent"];
   renderNewEventContainer?: Config<T>["renderNewEventContainer"];
+  initialScrollTime?: number;
   showTimeIndicator?: boolean;
   theme?: ThemeStyle;
   extraTimedComponents?: Config<T>["extraTimedComponents"];
@@ -121,6 +122,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     onZoomChange,
     startCalendarDate,
     onScroll,
+    initialScrollTime,
   }: EventCalenderContentProps<T>,
   refMethods: Ref<EventCalendarMethods>
 ) {
@@ -133,9 +135,22 @@ function EventCalendarContentInner<T extends CalendarEvent>(
   const refScrollViewHeight = useRef<number>(0);
   const refEditingProvider = useRef<IsEditingProviderInnerMethods<T>>(null);
 
-  const onLayoutScrollView = useCallback((event: LayoutChangeEvent) => {
-    refScrollViewHeight.current = event.nativeEvent.layout.height;
-  }, []);
+  const hasScrolledToInitialTime = useRef(false);
+
+  const onLayoutScrollView = useCallback(
+    (event: LayoutChangeEvent) => {
+      refScrollViewHeight.current = event.nativeEvent.layout.height;
+
+      if (initialScrollTime != null && !hasScrolledToInitialTime.current) {
+        hasScrolledToInitialTime.current = true;
+        refScrollView.current?.scrollTo({
+          y: initialScrollTime * zoomLevel.value,
+          animated: false,
+        });
+      }
+    },
+    [initialScrollTime, zoomLevel]
+  );
 
   const { eventsLayout } = useEvents();
 
