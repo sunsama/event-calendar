@@ -237,18 +237,29 @@ const handleCollisions = <T extends CalendarEvent>(
     [sortByStartDate, sortByPrimaryCalendar, sortByDuration, sortById]
   );
 
+  // Pre-compute timestamps to avoid repeated Date parsing in the inner loop
+  const startTsCache = new Map<string, number>();
+  const endTsCache = new Map<string, number>();
+  for (const evt of stackableEvents) {
+    startTsCache.set(evt.id, new Date(evt.start).valueOf());
+    endTsCache.set(evt.id, new Date(evt.end).valueOf());
+  }
+
   // calculate overlap stack properties
   const stackedEvtsByPos: Record<string, PartDayEventLayoutType<T>[]> = {};
   let curStack: (CollisionObject<T> | null)[] = [];
+  let activeCount = 0;
+  let maxActiveIdx = -1;
 
   for (const evt of stackableEvents) {
+    const eventStart = startTsCache.get(evt.id)!;
+
     // already sorted by startDate
-    for (let idx = 0; idx < curStack.length; idx++) {
+    for (let idx = 0; idx <= maxActiveIdx; idx++) {
       const stackEvt = curStack[idx];
 
       if (stackEvt) {
-        const stackEvtEnd = new Date(stackEvt.event.end).valueOf();
-        const eventStart = new Date(evt.start).valueOf();
+        const stackEvtEnd = endTsCache.get(stackEvt.event.id)!;
 
         // Use half-open interval semantics [start, end):
         // an active event is removed when its end is less than or equal to the next start.
@@ -256,6 +267,7 @@ const handleCollisions = <T extends CalendarEvent>(
         if (stackEvtEnd <= eventStart) {
           // null out this event's position in stack
           curStack[idx] = null;
+          activeCount--;
 
           if (curStack.length > 1) {
             stackEvt.collisions = { total: curStack.length, order: idx };
@@ -269,8 +281,13 @@ const handleCollisions = <T extends CalendarEvent>(
                 combineEventPosition(dayDate, timezone, stackEvt),
               ]);
 
-          if (!curStack.some((el) => el)) {
+          if (activeCount === 0) {
             curStack = [];
+            maxActiveIdx = -1;
+          } else if (idx === maxActiveIdx) {
+            while (maxActiveIdx >= 0 && !curStack[maxActiveIdx]) {
+              maxActiveIdx--;
+            }
           }
         }
       }
@@ -278,9 +295,16 @@ const handleCollisions = <T extends CalendarEvent>(
 
     // plop evt into first null placeholder we find, or just push if we don't have any.
     const spliceIdx = curStack.findIndex((stackEvt) => !stackEvt);
-    spliceIdx > -1
-      ? curStack.splice(spliceIdx, 1, { event: evt })
-      : curStack.splice(curStack.length, 0, { event: evt });
+    const insertIdx = spliceIdx > -1 ? spliceIdx : curStack.length;
+    if (spliceIdx > -1) {
+      curStack.splice(spliceIdx, 1, { event: evt });
+    } else {
+      curStack.splice(curStack.length, 0, { event: evt });
+    }
+    activeCount++;
+    if (insertIdx > maxActiveIdx) {
+      maxActiveIdx = insertIdx;
+    }
   }
 
   // clean up stack if we've exhausted allEvents and it's unpopped.

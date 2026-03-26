@@ -84,11 +84,10 @@ export const EventsProvider = <T extends CalendarEvent>({
     });
   }, []);
 
-  // Update both states when initialProps change
+  // Sync clonedEvents when initialProps change
   useEffect(() => {
     updateClonedEvents(initialProps.events);
-    updateEventsLayout(initialProps);
-  }, [initialProps, updateClonedEvents, updateEventsLayout]);
+  }, [initialProps, updateClonedEvents]);
 
   useEffect(() => {
     updateEventsLayout({ ...initialProps, events: clonedEvents });
