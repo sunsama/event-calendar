@@ -1,5 +1,8 @@
 import Animated, {
+  type AnimatedRef,
+  type SharedValue,
   runOnJS,
+  scrollTo,
   useAnimatedReaction,
   useSharedValue,
 } from "react-native-reanimated";
@@ -11,12 +14,20 @@ import doubleTapGesture from "../utils/double-tap-reset-zoom-gesture";
 
 type ZoomProviderProps = {
   children: any;
+  scrollY: SharedValue<number>;
+  scrollRef: AnimatedRef<Animated.ScrollView>;
+  scrollViewHeight: SharedValue<number>;
 };
 
 // This fraction determines how quickly zoom grows
 const fraction = 0.1;
 
-export default function ZoomProvider({ children }: ZoomProviderProps) {
+export default function ZoomProvider({
+  children,
+  scrollY,
+  scrollRef,
+  scrollViewHeight,
+}: ZoomProviderProps) {
   const {
     zoomLevel,
     defaultZoomLevel,
@@ -35,13 +46,25 @@ export default function ZoomProvider({ children }: ZoomProviderProps) {
     .onUpdate((event) => {
       "worklet";
 
+      const oldZoom = zoomLevel.value;
       const newScale = previewScale.value * (1 + fraction * (event.scale - 1));
+      const newZoom = Math.min(maxZoomLevel, Math.max(minZoomLevel, newScale));
 
-      zoomLevel.value = Math.min(
-        maxZoomLevel,
-        Math.max(minZoomLevel, newScale)
-      );
-      previewScale.value = zoomLevel.value;
+      if (newZoom !== oldZoom) {
+        const ratio = newZoom / oldZoom;
+        const viewportFocalY = event.focalY - scrollY.value;
+        const maxScrollY = newZoom * 1440 - scrollViewHeight.value;
+        const newScrollY = Math.min(
+          Math.max(0, maxScrollY),
+          Math.max(0, (scrollY.value + viewportFocalY) * ratio - viewportFocalY)
+        );
+
+        scrollTo(scrollRef, 0, newScrollY, false);
+        scrollY.value = newScrollY;
+      }
+
+      zoomLevel.value = newZoom;
+      previewScale.value = newZoom;
     })
     .onEnd(() => {
       if (onZoomChange) {
@@ -59,7 +82,14 @@ export default function ZoomProvider({ children }: ZoomProviderProps) {
 
   const combinedGesture = Gesture.Simultaneous(
     pinchGesture,
-    doubleTapGesture(zoomLevel, defaultZoomLevel, onZoomChange)
+    doubleTapGesture(
+      zoomLevel,
+      defaultZoomLevel,
+      onZoomChange,
+      scrollY,
+      scrollRef,
+      scrollViewHeight
+    )
   );
 
   return (
