@@ -6,6 +6,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { ConfigProvider, MIN_EVENT_HEIGHT_PX } from "../utils/globals";
 import {
+  memo,
   RefObject,
   useCallback,
   useContext,
@@ -29,7 +30,7 @@ type TimedEventContainerProps<T extends CalendarEvent> = {
   refNewEvent: RefObject<any>;
 };
 
-const TimedEventContainer = <T extends CalendarEvent>({
+const TimedEventContainerInner = <T extends CalendarEvent>({
   layout,
   refNewEvent,
 }: TimedEventContainerProps<T>) => {
@@ -156,5 +157,33 @@ const TimedEventContainer = <T extends CalendarEvent>({
 const styles = StyleSheet.create({
   hairline: { marginHorizontal: StyleSheet.hairlineWidth, flex: 1 },
 });
+
+const arePropsEqual = <T extends CalendarEvent>(
+  prev: TimedEventContainerProps<T>,
+  next: TimedEventContainerProps<T>
+) => {
+  if (prev.refNewEvent !== next.refNewEvent) return false;
+
+  const pl = prev.layout;
+  const nl = next.layout;
+
+  return (
+    pl.event.id === nl.event.id &&
+    pl.event.start === nl.event.start &&
+    pl.event.end === nl.event.end &&
+    pl.position.top === nl.position.top &&
+    pl.position.height === nl.position.height &&
+    pl.position.width === nl.position.width &&
+    pl.position.marginLeft === nl.position.marginLeft &&
+    pl.collisions?.total === nl.collisions?.total &&
+    pl.collisions?.order === nl.collisions?.order
+  );
+};
+
+const TimedEventContainer = memo(TimedEventContainerInner, arePropsEqual) as <
+  T extends CalendarEvent,
+>(
+  props: TimedEventContainerProps<T>
+) => React.JSX.Element;
 
 export default TimedEventContainer;
