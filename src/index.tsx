@@ -1,7 +1,13 @@
 import { StyleSheet, View } from "react-native";
 import AllDayEvents from "./components/all-day-events";
 import { ScrollView } from "react-native-gesture-handler";
-import { useSharedValue } from "react-native-reanimated";
+import Animated, {
+  runOnJS,
+  useAnimatedRef,
+  useAnimatedReaction,
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import ZoomProvider from "./components/zoom-provider";
 import TimedEvents from "./components/timed-events";
 import {
@@ -32,11 +38,9 @@ import type {
   onCreateEvent,
   ThemeStyle,
 } from "./types";
-import {
-  LayoutChangeEvent,
-  NativeSyntheticEvent,
-} from "react-native/Libraries/Types/CoreEventTypes";
-import type { NativeScrollEvent } from "react-native/Libraries/Components/ScrollView/ScrollView";
+import { LayoutChangeEvent } from "react-native/Libraries/Types/CoreEventTypes";
+
+const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export * from "./types";
 
@@ -51,6 +55,7 @@ interface BaseProps<T extends CalendarEvent = CalendarEvent> {
   renderDragBars?: Config<T>["renderDragBars"];
   renderEvent: Config<T>["renderEvent"];
   renderNewEventContainer?: Config<T>["renderNewEventContainer"];
+  initialScrollTime?: number;
   showTimeIndicator?: boolean;
   theme?: ThemeStyle;
   extraTimedComponents?: Config<T>["extraTimedComponents"];
@@ -121,21 +126,36 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     onZoomChange,
     startCalendarDate,
     onScroll,
+    initialScrollTime,
   }: EventCalenderContentProps<T>,
   refMethods: Ref<EventCalendarMethods>
 ) {
   const zoomLevel = useSharedValue(initialZoomLevel || defaultZoomLevel);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
+  const scrollY = useSharedValue(0);
+  const scrollViewHeight = useSharedValue(0);
 
   const refNewEvent = useRef<GestureRef>(null);
-  const refScrollView = useRef<ScrollView>(null);
-  const refScrollViewHeight = useRef<number>(0);
+  const refScrollView = useAnimatedRef<Animated.ScrollView>();
   const refEditingProvider = useRef<IsEditingProviderInnerMethods<T>>(null);
 
-  const onLayoutScrollView = useCallback((event: LayoutChangeEvent) => {
-    refScrollViewHeight.current = event.nativeEvent.layout.height;
-  }, []);
+  const hasScrolledToInitialTime = useRef(false);
+
+  const onLayoutScrollView = useCallback(
+    (event: LayoutChangeEvent) => {
+      scrollViewHeight.value = event.nativeEvent.layout.height;
+
+      if (initialScrollTime != null && !hasScrolledToInitialTime.current) {
+        hasScrolledToInitialTime.current = true;
+        (refScrollView.current as any)?.scrollTo({
+          y: initialScrollTime * zoomLevel.value,
+          animated: false,
+        });
+      }
+    },
+    [initialScrollTime, zoomLevel, scrollViewHeight, refScrollView]
+  );
 
   const { eventsLayout } = useEvents();
 
@@ -143,13 +163,13 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     refMethods,
     () => ({
       scrollToTime: (time: number, animated = true, offset = 2.5) => {
-        refScrollView.current?.scrollTo({
-          y: time * zoomLevel.value - refScrollViewHeight.current / offset,
+        (refScrollView.current as any)?.scrollTo({
+          y: time * zoomLevel.value - scrollViewHeight.value / offset,
           animated,
         });
       },
       scrollToOffset: (y: number, animated = true) => {
-        refScrollView.current?.scrollTo({
+        (refScrollView.current as any)?.scrollTo({
           y,
           animated,
         });
@@ -172,14 +192,22 @@ function EventCalendarContentInner<T extends CalendarEvent>(
         zoomLevel.value = newZoomLevel;
       },
     }),
-    [zoomLevel, eventsLayout]
+    [zoomLevel, eventsLayout, refScrollView, scrollViewHeight]
   );
 
-  const onScrollFeedback = useCallback(
-    (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      onScroll && onScroll(event.nativeEvent.contentOffset.y);
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollY.value = event.contentOffset.y;
     },
-    [onScroll]
+  });
+
+  useAnimatedReaction(
+    () => scrollY.value,
+    (y) => {
+      if (onScroll) {
+        runOnJS(onScroll)(y);
+      }
+    }
   );
 
   return (
@@ -216,21 +244,26 @@ function EventCalendarContentInner<T extends CalendarEvent>(
         }}
       >
         <AllDayEvents />
-        <ScrollView
+        <AnimatedScrollView
           onLayout={onLayoutScrollView}
           bounces={false}
           keyboardShouldPersistTaps="always"
           style={[styles.scrollView, theme?.scrollView]}
           ref={refScrollView}
-          onScroll={onScrollFeedback}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
         >
           <IsEditingProvider ref={refEditingProvider}>
-            <ZoomProvider>
+            <ZoomProvider
+              scrollY={scrollY}
+              scrollRef={refScrollView}
+              scrollViewHeight={scrollViewHeight}
+            >
               <View style={[styles.borderContainer, theme?.borderContainer]} />
               <TimedEvents refNewEvent={refNewEvent} />
             </ZoomProvider>
           </IsEditingProvider>
-        </ScrollView>
+        </AnimatedScrollView>
       </ConfigProvider.Provider>
     </View>
   );

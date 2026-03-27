@@ -514,27 +514,20 @@ export default function App() {
     []
   );
 
-  useEffect(() => {
-    // Scroll to the current minutes
-    const scrollDate = moment.tz(DEFAULT_TIMEZONE);
+  // Scroll to 8:00 AM on initial render
+  const initialScrollTime = 13 * 60;
 
-    // setTimeout is needed to make sure the ref is set
-    setTimeout(() => {
-      refEventCalendar.current?.scrollToTime(
-        scrollDate.minutes() + scrollDate.hours() * 60
-      );
-    }, 0);
-
-    // Uncomment this to see how you can programmatically start and end edit mode
-    // setTimeout(() => {
-    //   refEventCalendar.current?.scrollToTime(12 * 60);
-    //   refEventCalendar.current?.startEditMode("10");
-    // }, 5000);
-    //
-    // setTimeout(() => {
-    //   refEventCalendar.current?.endEditMode();
-    // }, 10000);
-  }, []);
+  // Uncomment this to see how you can programmatically start and end edit mode
+  // useEffect(() => {
+  //   setTimeout(() => {
+  //     refEventCalendar.current?.scrollToTime(12 * 60);
+  //     refEventCalendar.current?.startEditMode("10");
+  //   }, 5000);
+  //
+  //   setTimeout(() => {
+  //     refEventCalendar.current?.endEditMode();
+  //   }, 10000);
+  // }, []);
 
   return (
     <SafeAreaProvider>
@@ -595,6 +588,9 @@ export default function App() {
                   <View style={styles.dragBarBottom} />
                 ),
               }}
+              // If you want the calendar to scroll to a specific time on initial render, you can use this
+              // The value is in minutes from midnight, e.g. 480 = 8:00 AM
+              initialScrollTime={initialScrollTime}
               // If you want the calendar to start in edit mode for a specific event, you can use this
               // initialEventEdit="17"
               // If you want to access the EventCalendarMethods, you can use this ref
