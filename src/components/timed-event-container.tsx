@@ -34,7 +34,8 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
   layout,
   refNewEvent,
 }: TimedEventContainerProps<T>) => {
-  const { currentY, setIsEditing, isEditing } = useIsEditing();
+  const { currentY, isDragging, autoScrollOffset, setIsEditing, isEditing } =
+    useIsEditing();
   const {
     onPressEvent,
     maximumHour,
@@ -96,7 +97,9 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
       refNewEvent,
       fiveMinuteInterval,
       isEditing,
-      startEditing
+      startEditing,
+      isDragging,
+      autoScrollOffset
     ).activateAfterLongPress(500)
   );
 

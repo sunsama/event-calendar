@@ -1,10 +1,14 @@
 import { memo, type RefObject, useContext } from "react";
-import Animated, { useAnimatedStyle } from "react-native-reanimated";
+import Animated, {
+  useAnimatedStyle,
+  useDerivedValue,
+} from "react-native-reanimated";
 import { StyleSheet } from "react-native";
 import { ConfigProvider } from "../utils/globals";
 import { PrefabHour } from "../types";
 import useLongPressNewEvent from "../hooks/use-long-press-new-event";
 import { GestureDetector } from "react-native-gesture-handler";
+import useAutoScroll from "../hooks/use-auto-scroll";
 
 type BackgroundHoursContentProps = {
   hours: PrefabHour[];
@@ -13,13 +17,37 @@ type BackgroundHoursContentProps = {
 
 const BackgroundHoursContent = memo(
   ({ refNewEvent, hours }: BackgroundHoursContentProps) => {
-    const { theme, zoomLevel } = useContext(ConfigProvider);
+    const {
+      theme,
+      zoomLevel,
+      createY,
+      maximumHour,
+      scrollY,
+      scrollRef,
+      scrollViewHeight,
+    } = useContext(ConfigProvider);
 
     const styleHourSize = useAnimatedStyle(() => {
       return { height: zoomLevel.value * 60 };
     }, []);
 
-    const longPressNewEvent = useLongPressNewEvent(refNewEvent);
+    const { gesture: longPressNewEvent, isDragging } =
+      useLongPressNewEvent(refNewEvent);
+
+    const bottomEdgeY = useDerivedValue(
+      () => createY.value + zoomLevel.value * 60
+    );
+
+    useAutoScroll({
+      scrollRef,
+      scrollY,
+      scrollViewHeight,
+      maximumHour,
+      topEdgeY: createY,
+      bottomEdgeY,
+      isActive: isDragging,
+      positionY: createY,
+    });
 
     return (
       <GestureDetector gesture={longPressNewEvent}>

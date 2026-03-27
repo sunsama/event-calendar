@@ -1,8 +1,15 @@
-import Animated, { SharedValue, useSharedValue } from "react-native-reanimated";
-import { ReactNode, type RefObject, useMemo } from "react";
+import Animated, {
+  SharedValue,
+  useDerivedValue,
+  useSharedValue,
+} from "react-native-reanimated";
+import { ReactNode, type RefObject, useContext, useMemo } from "react";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import { StyleSheet } from "react-native";
 import type { CalendarEvent } from "src/types";
+import { useIsEditing } from "../hooks/use-is-editing";
+import { ConfigProvider } from "../utils/globals";
+import useAutoScroll from "../hooks/use-auto-scroll";
 
 type DragBarProps<T extends CalendarEvent> = {
   top?: SharedValue<number>;
@@ -103,20 +110,47 @@ const DragBar = <T extends CalendarEvent>({
   zoomLevel,
   maximumHour,
 }: DragBarProps<T>) => {
+  const { currentY } = useIsEditing();
+  const { scrollRef, scrollY, scrollViewHeight } = useContext(ConfigProvider);
+
   const startY = useSharedValue(0);
+  const isDragging = useSharedValue(false);
+  const autoScrollOffset = useSharedValue(0);
+
+  const dragEdge = useDerivedValue(() =>
+    top ? top.value : currentY.value + height.value
+  );
+
+  useAutoScroll({
+    scrollRef,
+    scrollY,
+    scrollViewHeight,
+    maximumHour,
+    topEdgeY: dragEdge,
+    bottomEdgeY: dragEdge,
+    isActive: isDragging,
+    autoScrollOffset,
+    positionY: top || undefined,
+    heightValue: height,
+    invertHeight: !!top,
+  });
 
   const gesturePan = Gesture.Pan()
     .blocksExternalGesture(refMainContainer)
     .onStart(() => {
       startY.value = top ? top.value : height.value;
+      autoScrollOffset.value = 0;
+      isDragging.value = true;
     })
     .onUpdate(({ translationY }) => {
+      const effectiveTranslation = translationY + autoScrollOffset.value;
+
       if (top) {
         handleTopDrag(
           top,
           fiveMinuteInterval,
           startY,
-          translationY,
+          effectiveTranslation,
           zoomLevel,
           maximumHour,
           height
@@ -128,10 +162,13 @@ const DragBar = <T extends CalendarEvent>({
       handleBottomDrag(
         fiveMinuteInterval,
         startY,
-        translationY,
+        effectiveTranslation,
         zoomLevel,
         height
       );
+    })
+    .onFinalize(() => {
+      isDragging.value = false;
     });
 
   const styleDragBar = useMemo(

@@ -241,6 +241,9 @@ function EventCalendarContentInner<T extends CalendarEvent>(
           updateLocalStateAfterEdit,
           theme,
           initialEventEdit,
+          scrollY,
+          scrollRef: refScrollView,
+          scrollViewHeight,
         }}
       >
         <AllDayEvents />

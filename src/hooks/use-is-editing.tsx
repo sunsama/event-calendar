@@ -23,6 +23,8 @@ interface IsEditingType<T extends CalendarEvent = CalendarEvent> {
   isEditing: null | PartDayEventLayoutType<T>;
   updateEditing: (top: number, height: number) => void;
   currentY: SharedValue<number>;
+  isDragging: SharedValue<boolean>;
+  autoScrollOffset: SharedValue<number>;
   setIsEditing: (
     newValue: PartDayEventLayoutType<T> | null,
     updatedTimes?: {
@@ -58,6 +60,8 @@ const IsEditingProviderInner = <T extends CalendarEvent>(
   const [isEditing, baseSetIsEditing] =
     useState<null | PartDayEventLayoutType<T>>(null);
   const currentY = useSharedValue(0);
+  const isDragging = useSharedValue(false);
+  const autoScrollOffset = useSharedValue(0);
 
   const updateEditing = debounce(
     (start: number, end: number) => {
@@ -153,7 +157,15 @@ const IsEditingProviderInner = <T extends CalendarEvent>(
 
   return (
     <IsEditing.Provider
-      value={{ currentY, isEditing, setIsEditing, updateEditing, refMethods }}
+      value={{
+        currentY,
+        isDragging,
+        autoScrollOffset,
+        isEditing,
+        setIsEditing,
+        updateEditing,
+        refMethods,
+      }}
     >
       {children}
     </IsEditing.Provider>
