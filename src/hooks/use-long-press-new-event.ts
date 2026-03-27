@@ -16,7 +16,7 @@ export default function useLongPressNewEvent(refNewEvent: RefObject<any>) {
   const { isEditing } = useIsEditing();
   const isDragging = useSharedValue(false);
 
-  return Gesture.LongPress()
+  const gesture = Gesture.LongPress()
     .enabled(canCreateEvents && !isEditing)
     .withRef(refNewEvent as any)
     .numberOfPointers(1)
@@ -99,5 +99,12 @@ export default function useLongPressNewEvent(refNewEvent: RefObject<any>) {
         hour,
         minute,
       });
+    })
+    .onFinalize(() => {
+      "worklet";
+
+      isDragging.value = false;
     });
+
+  return { gesture, isDragging };
 }

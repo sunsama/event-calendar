@@ -17,6 +17,7 @@ import Animated, {
   useDerivedValue,
   useSharedValue,
 } from "react-native-reanimated";
+import useAutoScroll from "../hooks/use-auto-scroll";
 import { type CalendarEvent, EventExtend } from "../types";
 import gesturePan from "../utils/pan-edit-event-gesture";
 import DragBar from "../components/drag-bar";
@@ -31,6 +32,8 @@ const EditEventContainer = memo(
   ({ refNewEvent }: EditEventContainerProps) => {
     const {
       currentY,
+      isDragging,
+      autoScrollOffset,
       isEditing: editingEvent,
       setIsEditing,
       updateEditing,
@@ -44,8 +47,24 @@ const EditEventContainer = memo(
       renderEvent,
       timezone,
       dayDate,
+      scrollY,
+      scrollRef,
+      scrollViewHeight,
     } = useContext(ConfigProvider);
     const height = useSharedValue(0);
+    const bottomEdgeY = useDerivedValue(() => currentY.value + height.value);
+
+    useAutoScroll({
+      scrollRef,
+      scrollY,
+      scrollViewHeight,
+      maximumHour,
+      topEdgeY: currentY,
+      bottomEdgeY,
+      isActive: isDragging,
+      autoScrollOffset,
+      positionY: currentY,
+    });
 
     const calculateHeight = useCallback(
       (event: CalendarEvent, zoom: number) => {
@@ -202,7 +221,11 @@ const EditEventContainer = memo(
             maximumHour,
             height,
             refNewEvent,
-            fiveMinuteInterval
+            fiveMinuteInterval,
+            undefined,
+            undefined,
+            isDragging,
+            autoScrollOffset
           ).withRef(refMainContainer)
         )}
       >

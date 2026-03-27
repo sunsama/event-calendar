@@ -1,6 +1,10 @@
 import { Moment } from "moment-timezone";
 import { TextStyle, ViewStyle } from "react-native";
-import { DerivedValue, SharedValue } from "react-native-reanimated";
+import Animated, {
+  type AnimatedRef,
+  DerivedValue,
+  SharedValue,
+} from "react-native-reanimated";
 import { ReactNode } from "react";
 
 export type CalendarEvent = {
@@ -136,6 +140,9 @@ export interface Config<T extends CalendarEvent> {
   updateLocalStateAfterEdit: boolean;
   extraTimedComponents?: (zoomLevel: SharedValue<number>) => ReactNode;
   onZoomChange?: (zoomLevel: number) => void;
+  scrollY: SharedValue<number>;
+  scrollRef: AnimatedRef<Animated.ScrollView>;
+  scrollViewHeight: SharedValue<number>;
 }
 
 export type PrefabHour = {

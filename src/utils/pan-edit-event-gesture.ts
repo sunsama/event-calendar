@@ -13,7 +13,9 @@ const gesturePan = <T extends CalendarEvent>(
   refNewEvent: RefObject<any>,
   fiveMinuteInterval?: boolean,
   isEditing?: null | PartDayEventLayoutType<T>,
-  startEditing?: () => void
+  startEditing?: () => void,
+  isDragging?: SharedValue<boolean>,
+  autoScrollOffset?: SharedValue<number>
 ) =>
   Gesture.Pan()
     .blocksExternalGesture(refNewEvent)
@@ -29,8 +31,12 @@ const gesturePan = <T extends CalendarEvent>(
       }
 
       startY.value = top.value;
+      if (isDragging) isDragging.value = true;
+      if (autoScrollOffset) autoScrollOffset.value = 0;
     })
     .onUpdate(({ translationY }) => {
+      const effectiveTranslation =
+        translationY + (autoScrollOffset ? autoScrollOffset.value : 0);
       let freshUpdatedStartTime;
 
       if (fiveMinuteInterval) {
@@ -39,7 +45,7 @@ const gesturePan = <T extends CalendarEvent>(
         freshUpdatedStartTime = Math.max(
           0,
           startY.value +
-            Math.floor(translationY / zoomLevel.value / 5) *
+            Math.floor(effectiveTranslation / zoomLevel.value / 5) *
               (zoomLevel.value * 5)
         );
       } else {
@@ -48,7 +54,7 @@ const gesturePan = <T extends CalendarEvent>(
         freshUpdatedStartTime = Math.max(
           0,
           startY.value +
-            Math.floor(translationY / zoomLevel.value) * zoomLevel.value
+            Math.floor(effectiveTranslation / zoomLevel.value) * zoomLevel.value
         );
       }
 
@@ -59,6 +65,9 @@ const gesturePan = <T extends CalendarEvent>(
       }
 
       currentY.value = freshUpdatedStartTime;
+    })
+    .onFinalize(() => {
+      if (isDragging) isDragging.value = false;
     });
 
 export default gesturePan;

@@ -19,7 +19,7 @@ const BackgroundHoursLayout = memo(
       return { height: zoomLevel.value * 60 };
     }, []);
 
-    const longPressNewEvent = useLongPressNewEvent(refNewEvent);
+    const { gesture: longPressNewEvent } = useLongPressNewEvent(refNewEvent);
 
     return (
       <GestureDetector gesture={longPressNewEvent}>
