@@ -7,7 +7,7 @@ import Animated, {
 
 const AUTO_SCROLL_TOP_THRESHOLD = 80;
 const AUTO_SCROLL_BOTTOM_THRESHOLD = 150;
-const AUTO_SCROLL_MAX_SPEED = 8;
+const AUTO_SCROLL_MAX_SPEED_PPS = 480;
 
 type AutoScrollParams = {
   scrollRef: AnimatedRef<Animated.ScrollView>;
@@ -36,8 +36,10 @@ export default function useAutoScroll({
   heightValue,
   invertHeight,
 }: AutoScrollParams) {
-  useFrameCallback(() => {
+  useFrameCallback((frameInfo) => {
     if (!isActive.value) return;
+
+    const dt = (frameInfo.timeSincePreviousFrame ?? 16) / 1000;
 
     const viewportTop = scrollY.value;
     const viewportBottom = scrollY.value + scrollViewHeight.value;
@@ -52,13 +54,13 @@ export default function useAutoScroll({
       distFromTop <= distFromBottom
     ) {
       const ratio = Math.max(0, 1 - distFromTop / AUTO_SCROLL_TOP_THRESHOLD);
-      scrollDelta = -ratio * AUTO_SCROLL_MAX_SPEED;
+      scrollDelta = -ratio * AUTO_SCROLL_MAX_SPEED_PPS * dt;
     } else if (distFromBottom < AUTO_SCROLL_BOTTOM_THRESHOLD) {
       const ratio = Math.max(
         0,
         1 - distFromBottom / AUTO_SCROLL_BOTTOM_THRESHOLD
       );
-      scrollDelta = ratio * AUTO_SCROLL_MAX_SPEED;
+      scrollDelta = ratio * AUTO_SCROLL_MAX_SPEED_PPS * dt;
     }
 
     if (scrollDelta === 0) return;
