@@ -39,7 +39,7 @@ export default function useAutoScroll({
   useFrameCallback((frameInfo) => {
     if (!isActive.value) return;
 
-    const dt = (frameInfo.timeSincePreviousFrame ?? 16) / 1000;
+    const dt = Math.min(frameInfo.timeSincePreviousFrame ?? 16, 64) / 1000;
 
     const viewportTop = scrollY.value;
     const viewportBottom = scrollY.value + scrollViewHeight.value;
@@ -53,12 +53,15 @@ export default function useAutoScroll({
       distFromTop < AUTO_SCROLL_TOP_THRESHOLD &&
       distFromTop <= distFromBottom
     ) {
-      const ratio = Math.max(0, 1 - distFromTop / AUTO_SCROLL_TOP_THRESHOLD);
+      const ratio = Math.min(
+        1,
+        Math.max(0, 1 - distFromTop / AUTO_SCROLL_TOP_THRESHOLD)
+      );
       scrollDelta = -ratio * AUTO_SCROLL_MAX_SPEED_PPS * dt;
     } else if (distFromBottom < AUTO_SCROLL_BOTTOM_THRESHOLD) {
-      const ratio = Math.max(
-        0,
-        1 - distFromBottom / AUTO_SCROLL_BOTTOM_THRESHOLD
+      const ratio = Math.min(
+        1,
+        Math.max(0, 1 - distFromBottom / AUTO_SCROLL_BOTTOM_THRESHOLD)
       );
       scrollDelta = ratio * AUTO_SCROLL_MAX_SPEED_PPS * dt;
     }
