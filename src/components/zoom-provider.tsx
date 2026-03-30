@@ -7,7 +7,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { ConfigProvider } from "../utils/globals";
 import { StyleSheet } from "react-native";
 import doubleTapGesture from "../utils/double-tap-reset-zoom-gesture";
@@ -20,7 +20,9 @@ type ZoomProviderProps = {
 };
 
 // This fraction determines how quickly zoom grows
-const fraction = 0.1;
+const fraction = 0.5;
+// Minimum zoom change to commit — reduces cascading layout recalculations
+const ZOOM_STEP = 0.005;
 
 export default function ZoomProvider({
   children,
@@ -36,35 +38,35 @@ export default function ZoomProvider({
     maximumHour,
     onZoomChange,
   } = useContext(ConfigProvider);
-  const previewScale = useSharedValue(-1);
-
-  useEffect(() => {
-    previewScale.value = zoomLevel.get();
-  }, [zoomLevel, previewScale]);
+  const previewScale = useSharedValue(zoomLevel.get());
+  const focalTime = useSharedValue(0);
+  const screenFocalY = useSharedValue(0);
 
   const pinchGesture = Gesture.Pinch()
+    .onStart((event) => {
+      "worklet";
+      previewScale.value = zoomLevel.value;
+      focalTime.value = event.focalY / zoomLevel.value;
+      screenFocalY.value = event.focalY - scrollY.value;
+    })
     .onUpdate((event) => {
       "worklet";
 
-      const oldZoom = zoomLevel.value;
-      const newScale = previewScale.value * (1 + fraction * (event.scale - 1));
-      const newZoom = Math.min(maxZoomLevel, Math.max(minZoomLevel, newScale));
+      const rawScale = previewScale.value * (1 + fraction * (event.scale - 1));
+      const clamped = Math.min(maxZoomLevel, Math.max(minZoomLevel, rawScale));
+      const newZoom = Math.round(clamped / ZOOM_STEP) * ZOOM_STEP;
 
-      if (newZoom !== oldZoom) {
-        const ratio = newZoom / oldZoom;
-        const viewportFocalY = event.focalY - scrollY.value;
-        const maxScrollY = newZoom * 1440 - scrollViewHeight.value;
-        const newScrollY = Math.min(
-          Math.max(0, maxScrollY),
-          Math.max(0, (scrollY.value + viewportFocalY) * ratio - viewportFocalY)
-        );
+      if (newZoom === zoomLevel.value) return;
 
-        scrollTo(scrollRef, 0, newScrollY, false);
-        scrollY.value = newScrollY;
-      }
+      const maxScrollY = newZoom * 1440 - scrollViewHeight.value;
+      const newScrollY = Math.min(
+        Math.max(0, maxScrollY),
+        Math.max(0, focalTime.value * newZoom - screenFocalY.value)
+      );
 
+      scrollTo(scrollRef, 0, newScrollY, false);
+      scrollY.value = newScrollY;
       zoomLevel.value = newZoom;
-      previewScale.value = newZoom;
     })
     .onEnd(() => {
       if (onZoomChange) {
