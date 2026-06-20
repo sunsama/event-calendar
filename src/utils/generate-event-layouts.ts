@@ -76,16 +76,13 @@ export const generateEventLayouts = <T extends CalendarEvent>({
     ...(calendarViewInterval === "month" ? partDayEventsSorted : []),
   ];
 
-  const visibleDayCount = moment
-    .tz(endCalendarDate, timezone)
-    .diff(moment.tz(startCalendarDate, timezone), "days");
+  const startCalendarMoment = moment.tz(startCalendarDate, timezone);
+  const endCalendarMoment = moment.tz(endCalendarDate, timezone);
+  const visibleDayCount = endCalendarMoment.diff(startCalendarMoment, "days");
   const visibleDays: string[] = [];
   for (let dayCount = 0; dayCount <= visibleDayCount; dayCount++) {
     visibleDays.push(
-      moment
-        .tz(startCalendarDate, timezone)
-        .add(dayCount, "day")
-        .format("YYYY-MM-DD")
+      startCalendarMoment.clone().add(dayCount, "day").format("YYYY-MM-DD")
     );
   }
 
@@ -103,15 +100,14 @@ export const generateEventLayouts = <T extends CalendarEvent>({
   } = {};
 
   calendarViewDateRanges.forEach((date) => {
+    const basisMoment = moment.tz(date.basisDate, timezone);
     const calendarLayoutOptions = {
       visibleX: date.dayIndexes,
       enableWeekBreaks: calendarViewInterval === "month",
-      startOfWeekXOffset: moment
-        .tz(date.basisDate, timezone)
-        .diff(
-          startOfUserWeek(startDayOfWeekOffset, date.basisDate!, timezone),
-          "days"
-        ),
+      startOfWeekXOffset: basisMoment.diff(
+        startOfUserWeek(startDayOfWeekOffset, date.basisDate!, timezone),
+        "days"
+      ),
     };
     const calendarViewDayLayout = _reduce(
       calendarViewDayEvents,
@@ -119,7 +115,7 @@ export const generateEventLayouts = <T extends CalendarEvent>({
         const eventStartIndex = moment
           .tz(event.start, timezone)
           .startOf("day")
-          .diff(moment.tz(date.basisDate, timezone), "days");
+          .diff(basisMoment, "days");
         const eventDurationDays = getDurationInDays(event, timezone);
 
         calendarLayout.findFitAndInsert(
@@ -139,16 +135,13 @@ export const generateEventLayouts = <T extends CalendarEvent>({
     calendarDates.forEach((calendarDate) => {
       const currentDayDate = moment.tz(calendarDate, timezone).startOf("day");
       const startDate = currentDayDate.toDate();
-      const endDate = moment.tz(startDate, timezone).endOf("day").toDate();
+      const endDate = currentDayDate.clone().endOf("day").toDate();
       const showHours = !["month"].includes(calendarViewInterval);
       const dayId = calendarDate;
       const allDayEventsLayout: AllDayEventLayoutType<T>[] = [];
       let partDayEventsLayout: PartDayEventLayoutType<T>[] = [];
 
-      const x = moment(startDate).diff(
-        moment.tz(date.basisDate, timezone),
-        "days"
-      );
+      const x = currentDayDate.diff(basisMoment, "days");
       for (let y = 0; y < calendarViewDayRowHeight; ++y) {
         const {
           event,

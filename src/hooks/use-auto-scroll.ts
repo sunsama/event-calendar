@@ -69,13 +69,23 @@ export default function useAutoScroll({
     if (scrollDelta === 0) return;
 
     const maxScrollY = Math.max(0, maximumHour.value - scrollViewHeight.value);
+    // maxScrollY ignores the calendar's bottom content inset (padding for the
+    // floating tab bar), so when the user has scrolled into that inset scrollY
+    // can exceed it. Never clamp BELOW the current offset, otherwise the first
+    // qualifying frame yanks the viewport up to maxScrollY. (#11368)
+    const effectiveMaxScrollY = Math.max(maxScrollY, scrollY.value);
     const newScrollY = Math.min(
-      maxScrollY,
+      effectiveMaxScrollY,
       Math.max(0, scrollY.value + scrollDelta)
     );
     const actualDelta = newScrollY - scrollY.value;
 
     if (Math.abs(actualDelta) < 0.5) return;
+
+    // Belt-and-suspenders: never move opposite to the chosen direction.
+    // (#11368 -- the bottom-inset yank is already prevented by
+    // effectiveMaxScrollY above; this guards any future clamp changes.)
+    if (actualDelta * scrollDelta < 0) return;
 
     scrollTo(scrollRef, 0, newScrollY, false);
     scrollY.value = newScrollY;

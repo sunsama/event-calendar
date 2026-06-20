@@ -1,4 +1,4 @@
-import { memo, useCallback, useContext, useState } from "react";
+import { memo, useCallback, useContext, useMemo, useState } from "react";
 import { ConfigProvider, DEFAULT_MINUTE_HEIGHT } from "../utils/globals";
 import { LayoutChangeEvent, StyleSheet, Text, View } from "react-native";
 import EventContainer from "../components/event-container";
@@ -48,9 +48,13 @@ const AllDayEvents = memo(
       }
     }, [canCreateEvents, onCreateEvent]);
 
-    const allDayEvents = showAllDayEvents
-      ? layout.allDayEventsLayout
-      : layout.allDayEventsLayout.slice(0, maxAllDayEvents);
+    const allDayEvents = useMemo(
+      () =>
+        showAllDayEvents
+          ? layout.allDayEventsLayout
+          : layout.allDayEventsLayout.slice(0, maxAllDayEvents),
+      [showAllDayEvents, layout.allDayEventsLayout, maxAllDayEvents]
+    );
     const restEventAmount =
       layout.allDayEventsLayout.length - allDayEvents.length;
 

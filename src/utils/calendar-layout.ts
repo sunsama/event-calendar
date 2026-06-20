@@ -1,4 +1,3 @@
-import { max } from "lodash";
 import { EventExtend } from "../types";
 
 export class CalendarLayout {
@@ -9,6 +8,8 @@ export class CalendarLayout {
   visibleX: Set<number>;
   enableWeekBreaks: boolean;
   startOfWeekXOffset: number;
+  private cachedHeight: number = 0;
+  private cachedHeightDirty: boolean = true;
 
   constructor({
     visibleX,
@@ -36,6 +37,7 @@ export class CalendarLayout {
       this.array2d[x] = column;
     }
     column[y] = value;
+    this.cachedHeightDirty = true;
   }
   // assign value to the line of cells from (x, y) to (x + w, y)
   setRange(x: number, y: number, duration: number, value: any) {
@@ -71,9 +73,18 @@ export class CalendarLayout {
   }
   // find the height of the 2d array
   height() {
-    return this.array2d.length > 0
-      ? max(this.array2d.map((col) => (col && col.length) || 0))
-      : 0;
+    if (!this.cachedHeightDirty) {
+      return this.cachedHeight;
+    }
+    let maxHeight = 0;
+    for (const col of this.array2d) {
+      if (col && col.length > maxHeight) {
+        maxHeight = col.length;
+      }
+    }
+    this.cachedHeight = maxHeight;
+    this.cachedHeightDirty = false;
+    return this.cachedHeight;
   }
   // get the event and associated view data for the given cell
   getViewAt(x: number, y: number) {

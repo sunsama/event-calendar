@@ -2,6 +2,28 @@ import moment, { type Moment } from "moment-timezone";
 import { isDate, range, size } from "lodash";
 import { CalendarEvent, PrefabHour } from "../types";
 
+// Cached Intl.DateTimeFormat instances for fast timezone-aware day/hour extraction.
+// Avoids creating Moment instances in hot paths like isAllDayOrSpansMidnight.
+let _cachedTz = "";
+let _dayFormatter: Intl.DateTimeFormat;
+let _hourFormatter: Intl.DateTimeFormat;
+
+function ensureFormatters(timezone: string) {
+  if (timezone !== _cachedTz) {
+    _cachedTz = timezone;
+    _dayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: timezone });
+    _hourFormatter = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      hour12: false,
+      timeZone: timezone,
+    });
+  }
+}
+
+function toDate(date: Date | string): Date {
+  return typeof date === "string" ? new Date(date) : date;
+}
+
 export const generatePrefabHours = (
   timeFormat: string = "HH:mm"
 ): PrefabHour[] => {
@@ -62,15 +84,19 @@ export const isAllDayOrSpansMidnight = <T extends CalendarEvent>(
     return true;
   }
 
-  // Does the range start/end span midnight in the given timezone?
-  const startMoment = moment.tz(start, timezone);
-  const endMoment = moment.tz(end, timezone);
+  ensureFormatters(timezone);
 
-  // Handle special case where range ends at midnight exactly, in which case spansMidnight should return false
-  return !startMoment.isSame(
-    endMoment.hour() === 0 ? endMoment.subtract(1, "minute") : endMoment,
-    "day"
-  );
+  const endDateObj = toDate(end);
+
+  // If end hour is 0 in user's timezone, subtract 1 minute so events
+  // ending exactly at midnight aren't considered as spanning midnight
+  const endHour = parseInt(_hourFormatter.format(endDateObj), 10);
+  const effectiveEnd =
+    endHour === 0 ? new Date(endDateObj.getTime() - 60_000) : endDateObj;
+
+  const startDay = _dayFormatter.format(toDate(start));
+  const endDay = _dayFormatter.format(effectiveEnd);
+  return startDay !== endDay;
 };
 
 // Returns the count of unique dates in the provided timezone
@@ -79,17 +105,20 @@ export const getDurationInDays = <T extends CalendarEvent>(
   timezone: string
 ) => {
   // the event duration in days calculation depends on if the event is all day
-  return calendarEvent.isAllDay
-    ? moment
+  if (calendarEvent.isAllDay) {
+    return (
+      moment
         .tz(calendarEvent.end, timezone)
         .diff(moment.tz(calendarEvent.start, timezone), "days") + 1
-    : size(
-        daysInRange({
-          startDate: calendarEvent.start,
-          endDate: calendarEvent.end,
-          timezone,
-        })
-      );
+    );
+  }
+  return size(
+    daysInRange({
+      startDate: calendarEvent.start,
+      endDate: calendarEvent.end,
+      timezone,
+    })
+  );
 };
 
 // Returns an array of days (e.g. ['2022-01-02']) in a given date range.
@@ -102,23 +131,20 @@ export const daysInRange = ({
   endDate: Date | string;
   timezone: string;
 }) => {
-  const countOfDaysInRange = moment
-    .tz(endDate, timezone)
-    .diff(moment.tz(startDate, timezone), "days");
-  const startDay = moment.tz(startDate, timezone).format("YYYY-MM-DD");
+  const startMoment = moment.tz(startDate, timezone);
+  const endMoment = moment.tz(endDate, timezone);
+  const countOfDaysInRange = endMoment.diff(startMoment, "days");
   const days = [];
+  const maxIterations = Math.min(30, Math.abs(countOfDaysInRange));
   // Make sure we loop at a max of 30 times here as we had events that were scheduled for all day long for
   // 1000 years in the future and this was causing the app to crash
   for (
     let countOfDaysAfterStart = 0;
-    countOfDaysAfterStart <= Math.min(30, Math.abs(countOfDaysInRange));
+    countOfDaysAfterStart <= maxIterations;
     countOfDaysAfterStart++
   ) {
     days.push(
-      moment
-        .tz(startDay, timezone)
-        .add(countOfDaysAfterStart, "day")
-        .format("YYYY-MM-DD")
+      startMoment.clone().add(countOfDaysAfterStart, "day").format("YYYY-MM-DD")
     );
   }
   return days;

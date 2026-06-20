@@ -53,6 +53,16 @@ const EditEventContainer = memo(
     } = useContext(ConfigProvider);
     const height = useSharedValue(0);
     const bottomEdgeY = useDerivedValue(() => currentY.value + height.value);
+    // isDragging flips true the instant the long-press starts, but currentY and
+    // height are only initialized from editingEvent.position by a JS-thread
+    // effect a few frames later. During that window topEdge/bottomEdge are 0, so
+    // the auto-scroll sees the event at the very top of the day and force-scrolls
+    // the viewport upward (jumping by the bottom-inset amount when the user is
+    // scrolled into the floating-tab-bar padding). Gate auto-scroll on the
+    // geometry being initialized (height > 0). (#11368)
+    const autoScrollActive = useDerivedValue(
+      () => isDragging.value && height.value > 0
+    );
 
     useAutoScroll({
       scrollRef,
@@ -61,7 +71,7 @@ const EditEventContainer = memo(
       maximumHour,
       topEdgeY: currentY,
       bottomEdgeY,
-      isActive: isDragging,
+      isActive: autoScrollActive,
       autoScrollOffset,
       positionY: currentY,
     });
