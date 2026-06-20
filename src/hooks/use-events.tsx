@@ -6,6 +6,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useMemo,
   useState,
 } from "react";
 import { cloneDeep, isEqual } from "lodash";
@@ -93,15 +94,18 @@ export const EventsProvider = <T extends CalendarEvent>({
     updateEventsLayout({ ...initialProps, events: clonedEvents });
   }, [initialProps, clonedEvents, updateEventsLayout]);
 
+  const contextValue = useMemo(
+    () => ({
+      clonedEvents,
+      updateClonedEvents: setClonedEvents,
+      eventsLayout,
+      updateEventsLayout,
+    }),
+    [clonedEvents, eventsLayout, updateEventsLayout]
+  );
+
   return (
-    <EventsContext.Provider
-      value={{
-        clonedEvents,
-        updateClonedEvents: setClonedEvents,
-        eventsLayout,
-        updateEventsLayout,
-      }}
-    >
+    <EventsContext.Provider value={contextValue}>
       {children}
     </EventsContext.Provider>
   );

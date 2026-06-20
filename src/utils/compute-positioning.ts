@@ -14,9 +14,10 @@ const computePositioning = <T extends CalendarEvent>({
   timezone,
 }: ComputePositioning<T>): EventPosition => {
   const startDateMoment = moment.tz(collisionObject.event.start, timezone);
-  const durationMinutes = moment
-    .tz(collisionObject.event.end, timezone)
-    .diff(startDateMoment, "minutes");
+  const durationMinutes =
+    (new Date(collisionObject.event.end).getTime() -
+      new Date(collisionObject.event.start).getTime()) /
+    60000;
 
   let width = 100;
   let margin = 0;

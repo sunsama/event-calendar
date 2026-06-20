@@ -174,6 +174,9 @@ const arePropsEqual = <T extends CalendarEvent>(
     pl.event.id === nl.event.id &&
     pl.event.start === nl.event.start &&
     pl.event.end === nl.event.end &&
+    pl.event.title === nl.event.title &&
+    pl.event.calendarId === nl.event.calendarId &&
+    pl.event.isAllDay === nl.event.isAllDay &&
     pl.position.top === nl.position.top &&
     pl.position.height === nl.position.height &&
     pl.position.width === nl.position.width &&
