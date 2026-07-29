@@ -16,16 +16,17 @@ const gesturePan = <T extends CalendarEvent>(
   startEditing?: () => void,
   isDragging?: SharedValue<boolean>,
   autoScrollOffset?: SharedValue<number>
-) =>
-  Gesture.Pan()
+) => {
+  const hasIsEditing = !!isEditing;
+  return Gesture.Pan()
     .blocksExternalGesture(refNewEvent)
     .onStart(() => {
       if (startEditing) {
-        if (isEditing) {
+        if (hasIsEditing) {
           return;
         }
 
-        if (!isEditing) {
+        if (!hasIsEditing) {
           runOnJS(startEditing)();
         }
       }
@@ -69,5 +70,6 @@ const gesturePan = <T extends CalendarEvent>(
     .onFinalize(() => {
       if (isDragging) isDragging.value = false;
     });
+};
 
 export default gesturePan;

@@ -18,7 +18,7 @@ import Animated, {
   useSharedValue,
 } from "react-native-reanimated";
 import useAutoScroll from "../hooks/use-auto-scroll";
-import { type CalendarEvent, EventExtend } from "../types";
+import { EventExtend } from "../types";
 import gesturePan from "../utils/pan-edit-event-gesture";
 import DragBar from "../components/drag-bar";
 import { StyleSheet } from "react-native";
@@ -77,9 +77,9 @@ const EditEventContainer = memo(
     });
 
     const calculateHeight = useCallback(
-      (event: CalendarEvent, zoom: number) => {
-        const start = new Date(event.start);
-        const end = new Date(event.end);
+      (startStr: string, endStr: string, zoom: number) => {
+        const start = new Date(startStr);
+        const end = new Date(endStr);
 
         // We can't use the position.height as that has a minimum time of 30 minutes, which might not be relevant to
         // our actual duration, meaning we'll have to calculate the height based on the start and end times
@@ -93,23 +93,31 @@ const EditEventContainer = memo(
         return;
       }
 
-      calculateHeight(editingEvent.event, zoomLevel.value);
+      calculateHeight(
+        editingEvent.event.start,
+        editingEvent.event.end,
+        zoomLevel.value
+      );
       currentY.value = editingEvent.position.top * zoomLevel.value;
     }, [height, editingEvent, currentY, zoomLevel, timezone, calculateHeight]);
 
+    const eventStart = editingEvent?.event.start;
+    const eventEnd = editingEvent?.event.end;
+    const eventTop = editingEvent?.position.top;
     useAnimatedReaction(
       () => zoomLevel.value,
       (zoom) => {
-        if (editingEvent) {
-          runOnJS(calculateHeight)(editingEvent.event, zoom);
-          currentY.value = editingEvent.position.top * zoom;
+        if (eventStart && eventEnd) {
+          runOnJS(calculateHeight)(eventStart, eventEnd, zoom);
+          currentY.value = (eventTop || 0) * zoom;
         }
       },
-      [height, currentY, zoomLevel, editingEvent]
+      [height, currentY, zoomLevel, eventStart, eventEnd, eventTop]
     );
 
+    const hasEditingEvent = !!editingEvent;
     const styleAnimatedPosition = useAnimatedStyle(() => {
-      if (!editingEvent) {
+      if (!hasEditingEvent) {
         return { opacity: 0 };
       }
 
@@ -121,7 +129,7 @@ const EditEventContainer = memo(
         opacity: 1,
         width: "100%",
       };
-    }, [editingEvent]);
+    }, [hasEditingEvent, height, currentY]);
 
     const startY = useSharedValue(0);
 
