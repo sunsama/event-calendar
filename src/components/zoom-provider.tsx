@@ -38,7 +38,10 @@ export default function ZoomProvider({
     maximumHour,
     onZoomChange,
   } = useContext(ConfigProvider);
-  const previewScale = useSharedValue(zoomLevel.get());
+  // Always overwritten in onStart before onUpdate reads it, so the initial
+  // value here is never actually used — avoids reading zoomLevel.value
+  // during render, which Reanimated strict mode warns about.
+  const previewScale = useSharedValue(0);
   const focalTime = useSharedValue(0);
   const screenFocalY = useSharedValue(0);
 
