@@ -105,6 +105,12 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
 
   const eventStart = layout.event.start;
   const eventEnd = layout.event.end;
+  const eventId = layout.event.id;
+  const positionTop = layout.position.top;
+  const positionWidth = layout.position.width;
+  const positionMarginLeft = layout.position.marginLeft;
+  const isEditingEventId = isEditing?.event.id;
+
   useAnimatedReaction(
     () => zoomLevel.value,
     (newZoomLevel) => {
@@ -120,9 +126,9 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
   useAnimatedReaction(
     () => zoomLevel.value,
     (newZoomLevel) => {
-      top.value = newZoomLevel * layout.position.top;
+      top.value = newZoomLevel * positionTop;
     },
-    [layout.position.top]
+    [positionTop]
   );
 
   const render = useMemo(
@@ -130,18 +136,14 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
     [height, layout.event, renderEvent]
   );
 
-  const eventId = layout.event.id;
-  const layoutPosition = layout.position;
-  const isEditingEventId = isEditing?.event.id;
-
   const stylePosition = useAnimatedStyle(() => {
     const basePosition: any = {
       position: "absolute",
       height: height.value,
       top: top.value,
       opacity: 1,
-      width: layoutPosition.width,
-      marginLeft: layoutPosition.marginLeft,
+      width: positionWidth,
+      marginLeft: positionMarginLeft,
 
       // This is to prevent the event from being clickable while editing
       pointerEvents: isEditingEventId ? "none" : "auto",
@@ -152,7 +154,7 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
     }
 
     return basePosition;
-  }, [layoutPosition, isEditingEventId, eventId]);
+  }, [positionWidth, positionMarginLeft, isEditingEventId, eventId]);
 
   return (
     <GestureDetector gesture={gestures}>
