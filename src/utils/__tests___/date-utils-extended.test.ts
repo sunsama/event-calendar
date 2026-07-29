@@ -7,6 +7,7 @@ import {
   daysInRange,
   startOfUserWeek,
   computeCalendarDateRange,
+  normalizeEventDates,
 } from "../date-utils";
 import { CalendarEvent } from "../../types";
 
@@ -298,6 +299,39 @@ describe("startOfUserWeek", () => {
     // With offset 2 (Tuesday), should return the Tuesday of that week
     const result = startOfUserWeek(2, "2023-10-11", "UTC");
     expect(result.format("YYYY-MM-DD")).toBe("2023-10-10"); // Tuesday
+  });
+});
+
+describe("normalizeEventDates", () => {
+  it("should convert Date start/end to ISO strings", () => {
+    const evt = {
+      ...event("", ""),
+      start: new Date("2023-01-01T08:00:00.000Z"),
+      end: new Date("2023-01-01T09:00:00.000Z"),
+    } as unknown as CalendarEvent;
+
+    const normalized = normalizeEventDates(evt);
+
+    expect(normalized.start).toBe("2023-01-01T08:00:00.000Z");
+    expect(normalized.end).toBe("2023-01-01T09:00:00.000Z");
+  });
+
+  it("should leave string start/end untouched and return the same reference", () => {
+    const evt = event("2023-01-01T08:00:00Z", "2023-01-01T09:00:00Z");
+
+    expect(normalizeEventDates(evt)).toBe(evt);
+  });
+
+  it("should normalize only the fields that are Date instances", () => {
+    const evt = {
+      ...event("2023-01-01T08:00:00.000Z", ""),
+      end: new Date("2023-01-01T09:00:00.000Z"),
+    } as unknown as CalendarEvent;
+
+    const normalized = normalizeEventDates(evt);
+
+    expect(normalized.start).toBe("2023-01-01T08:00:00.000Z");
+    expect(normalized.end).toBe("2023-01-01T09:00:00.000Z");
   });
 });
 

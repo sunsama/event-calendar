@@ -10,6 +10,7 @@ import {
   getDuration,
   getDurationInDays,
   isAllDayOrSpansMidnight,
+  normalizeEventDates,
   startOfUserWeek,
 } from "../utils/date-utils";
 import computePositioning from "../utils/compute-positioning";
@@ -42,6 +43,10 @@ export const generateEventLayouts = <T extends CalendarEvent>({
   startDayOfWeekOffset = 0,
   timezone,
 }: GenerateEventLayouts<T>) => {
+  // Normalize start/end to strings before events flow into any layout object,
+  // since layouts get closed over by Reanimated worklets that can't clone Dates.
+  events = events.map(normalizeEventDates);
+
   // Calculate spacial layout for CalendarViewDay events
   // in month view, midnight-spanning part-day events are rendered as all-day multi-day
   const [allDayEvents, partDayEvents] = _partition([...events], (event) =>

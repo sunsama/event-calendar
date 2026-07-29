@@ -24,6 +24,24 @@ function toDate(date: Date | string): Date {
   return typeof date === "string" ? new Date(date) : date;
 }
 
+// Event layouts flow into Reanimated worklet closures (useAnimatedReaction,
+// useAnimatedStyle, gesture handlers), which can't clone a `Date` instance
+// across the JS/UI thread boundary ("[Worklets] Cannot copy value of type
+// 'Date'."). Consumers may pass `start`/`end` as `Date` objects even though
+// `CalendarEvent` types them as `string`, so normalize to ISO strings as
+// soon as events enter the layout pipeline.
+export const normalizeEventDates = <T extends CalendarEvent>(event: T): T => {
+  if (!isDate(event.start) && !isDate(event.end)) {
+    return event;
+  }
+
+  return {
+    ...event,
+    start: isDate(event.start) ? event.start.toISOString() : event.start,
+    end: isDate(event.end) ? event.end.toISOString() : event.end,
+  };
+};
+
 export const generatePrefabHours = (
   timeFormat: string = "HH:mm"
 ): PrefabHour[] => {

@@ -38,6 +38,35 @@ describe("generateEventLayouts", () => {
     expect(dayLayout.partDayEventsLayout[0].event.id).toBe("2");
   });
 
+  it("should normalize Date start/end to strings in the resulting layout", () => {
+    // Consumers may pass native Date objects even though CalendarEvent types
+    // start/end as string; layouts flow into Reanimated worklet closures that
+    // can't clone a Date, so generateEventLayouts must normalize them first.
+    const events = [
+      {
+        id: "1",
+        calendarId: "primary-calendar",
+        title: "Timed Event",
+        start: new Date("2023-10-10T08:30:00Z"),
+        end: new Date("2023-10-10T09:30:00Z"),
+      },
+    ] as unknown as CalendarEvent[];
+
+    const layouts = generateEventLayouts({
+      startCalendarDate: "2023-10-10",
+      endCalendarDate: "2023-10-10",
+      events,
+      timezone: "UTC",
+      userCalendarId: "primary-calendar",
+    });
+
+    const { event } = layouts["2023-10-10"]!.partDayEventsLayout[0]!;
+    expect(typeof event.start).toBe("string");
+    expect(typeof event.end).toBe("string");
+    expect(event.start).toBe("2023-10-10T08:30:00.000Z");
+    expect(event.end).toBe("2023-10-10T09:30:00.000Z");
+  });
+
   it("should handle events with overlapping times", () => {
     const events: CalendarEvent[] = [
       {
