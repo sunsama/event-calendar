@@ -103,16 +103,18 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
     ).activateAfterLongPress(500)
   );
 
+  const eventStart = layout.event.start;
+  const eventEnd = layout.event.end;
   useAnimatedReaction(
     () => zoomLevel.value,
     (newZoomLevel) => {
-      const start = new Date(layout.event.start);
-      const end = new Date(layout.event.end);
+      const start = new Date(eventStart);
+      const end = new Date(eventEnd);
       const diff = (end.valueOf() - start.valueOf()) / 60_000;
 
       height.value = Math.max(MIN_EVENT_HEIGHT_PX, newZoomLevel * diff);
     },
-    [layout.event]
+    [eventStart, eventEnd]
   );
 
   useAnimatedReaction(
@@ -128,25 +130,29 @@ const TimedEventContainerInner = <T extends CalendarEvent>({
     [height, layout.event, renderEvent]
   );
 
+  const eventId = layout.event.id;
+  const layoutPosition = layout.position;
+  const isEditingEventId = isEditing?.event.id;
+
   const stylePosition = useAnimatedStyle(() => {
     const basePosition: any = {
       position: "absolute",
       height: height.value,
       top: top.value,
       opacity: 1,
-      width: layout.position.width,
-      marginLeft: layout.position.marginLeft,
+      width: layoutPosition.width,
+      marginLeft: layoutPosition.marginLeft,
 
       // This is to prevent the event from being clickable while editing
-      pointerEvents: isEditing ? "none" : "auto",
+      pointerEvents: isEditingEventId ? "none" : "auto",
     };
 
-    if (isEditing?.event.id === layout.event.id) {
+    if (isEditingEventId === eventId) {
       basePosition.opacity = 0.5;
     }
 
     return basePosition;
-  }, [layout, isEditing]);
+  }, [layoutPosition, isEditingEventId, eventId]);
 
   return (
     <GestureDetector gesture={gestures}>
