@@ -146,7 +146,7 @@ function EventCalendarContentInner<T extends CalendarEvent>(
 ) {
   const ownZoomLevel = useSharedValue(initialZoomLevel || defaultZoomLevel);
   const zoomLevel = sharedZoomLevel ?? ownZoomLevel;
-  const isUserScrolling = useSharedValue(false);
+  const followTargetY = useSharedValue(-1);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
   const scrollY = useSharedValue(0);
@@ -227,34 +227,33 @@ function EventCalendarContentInner<T extends CalendarEvent>(
   );
 
   const scrollHandler = useAnimatedScrollHandler({
-    onBeginDrag: () => {
-      isUserScrolling.value = true;
-    },
-    onEndDrag: () => {
-      isUserScrolling.value = false;
-    },
-    onMomentumBegin: () => {
-      isUserScrolling.value = true;
-    },
-    onMomentumEnd: () => {
-      isUserScrolling.value = false;
-    },
     onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
+      const y = event.contentOffset.y;
+      scrollY.value = y;
 
-      if (sharedScrollY && isUserScrolling.value) {
-        sharedScrollY.value = event.contentOffset.y;
+      if (!sharedScrollY) {
+        return;
       }
+
+      // A scroll that lands on the offset we were told to follow is our own
+      // programmatic scroll; anything else came from the user.
+      if (Math.abs(y - followTargetY.value) < 1) {
+        return;
+      }
+
+      followTargetY.value = -1;
+      sharedScrollY.value = y;
     },
   });
 
   useAnimatedReaction(
     () => (sharedScrollY ? sharedScrollY.value : -1),
     (y) => {
-      if (y < 0 || isUserScrolling.value || y === scrollY.value) {
+      if (y < 0 || Math.abs(y - scrollY.value) < 1) {
         return;
       }
 
+      followTargetY.value = y;
       scrollTo(refScrollView, 0, y, false);
       scrollY.value = y;
     },
@@ -303,7 +302,6 @@ function EventCalendarContentInner<T extends CalendarEvent>(
       scrollRef: refScrollView,
       scrollViewHeight,
       sharedScrollY,
-      isUserScrolling,
     }),
     [
       startCalendarDate,
@@ -337,7 +335,6 @@ function EventCalendarContentInner<T extends CalendarEvent>(
       refScrollView,
       scrollViewHeight,
       sharedScrollY,
-      isUserScrolling,
     ]
   );
 

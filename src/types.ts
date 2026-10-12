@@ -144,7 +144,6 @@ export interface Config<T extends CalendarEvent> {
   scrollRef: AnimatedRef<Animated.ScrollView>;
   scrollViewHeight: SharedValue<number>;
   sharedScrollY?: SharedValue<number>;
-  isUserScrolling: SharedValue<boolean>;
 }
 
 export type PrefabHour = {
