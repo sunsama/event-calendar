@@ -13,7 +13,8 @@ const doubleTapGesture = <T extends CalendarEvent>(
   onZoomChange?: Config<T>["onZoomChange"],
   scrollY?: SharedValue<number>,
   scrollRef?: AnimatedRef<Animated.ScrollView>,
-  scrollViewHeight?: SharedValue<number>
+  scrollViewHeight?: SharedValue<number>,
+  sharedScrollY?: SharedValue<number>
 ) =>
   Gesture.Tap()
     .numberOfTaps(2)
@@ -35,6 +36,9 @@ const doubleTapGesture = <T extends CalendarEvent>(
 
           scrollTo(scrollRef, 0, newScrollY, false);
           scrollY.value = newScrollY;
+          if (sharedScrollY) {
+            sharedScrollY.value = newScrollY;
+          }
         }
 
         zoomLevel.value = initialZoomLevel;

@@ -37,6 +37,8 @@ export default function ZoomProvider({
     minZoomLevel,
     maximumHour,
     onZoomChange,
+    sharedScrollY,
+    isUserScrolling,
   } = useContext(ConfigProvider);
   // Always overwritten in onStart before onUpdate reads it, so the initial
   // value here is never actually used — avoids reading zoomLevel.value
@@ -48,6 +50,7 @@ export default function ZoomProvider({
   const pinchGesture = Gesture.Pinch()
     .onStart((event) => {
       "worklet";
+      isUserScrolling.value = true;
       previewScale.value = zoomLevel.value;
       focalTime.value = event.focalY / zoomLevel.value;
       screenFocalY.value = event.focalY - scrollY.value;
@@ -69,7 +72,13 @@ export default function ZoomProvider({
 
       scrollTo(scrollRef, 0, newScrollY, false);
       scrollY.value = newScrollY;
+      if (sharedScrollY) {
+        sharedScrollY.value = newScrollY;
+      }
       zoomLevel.value = newZoom;
+    })
+    .onFinalize(() => {
+      isUserScrolling.value = false;
     })
     .onEnd(() => {
       if (onZoomChange) {
@@ -93,7 +102,8 @@ export default function ZoomProvider({
       onZoomChange,
       scrollY,
       scrollRef,
-      scrollViewHeight
+      scrollViewHeight,
+      sharedScrollY
     )
   );
 

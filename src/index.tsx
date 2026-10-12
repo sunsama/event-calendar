@@ -3,10 +3,12 @@ import AllDayEvents from "./components/all-day-events";
 import { ScrollView } from "react-native-gesture-handler";
 import Animated, {
   runOnJS,
+  type SharedValue,
   useAnimatedRef,
   useAnimatedReaction,
   useAnimatedScrollHandler,
   useSharedValue,
+  scrollTo,
 } from "react-native-reanimated";
 import ZoomProvider from "./components/zoom-provider";
 import TimedEvents from "./components/timed-events";
@@ -69,6 +71,16 @@ interface BaseProps<T extends CalendarEvent = CalendarEvent> {
   timeFormat?: string;
   timezone?: string;
   updateLocalStateAfterEdit?: boolean;
+  /**
+   * Zoom level shared between calendars, so pinching one zooms all of them.
+   * When set, it is used instead of the internal zoom level.
+   */
+  sharedZoomLevel?: SharedValue<number>;
+  /**
+   * Scroll offset shared between calendars. A calendar writes it while the
+   * user scrolls, pinches or double-taps it, and follows it otherwise.
+   */
+  sharedScrollY?: SharedValue<number>;
 }
 
 export interface EventCalenderProps<T extends CalendarEvent = CalendarEvent>
@@ -127,10 +139,14 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     startCalendarDate,
     onScroll,
     initialScrollTime,
+    sharedZoomLevel,
+    sharedScrollY,
   }: EventCalenderContentProps<T>,
   refMethods: Ref<EventCalendarMethods>
 ) {
-  const zoomLevel = useSharedValue(initialZoomLevel || defaultZoomLevel);
+  const ownZoomLevel = useSharedValue(initialZoomLevel || defaultZoomLevel);
+  const zoomLevel = sharedZoomLevel ?? ownZoomLevel;
+  const isUserScrolling = useSharedValue(false);
   const createY = useSharedValue(-1);
   const maximumHour = useSharedValue(0);
   const scrollY = useSharedValue(0);
@@ -146,6 +162,15 @@ function EventCalendarContentInner<T extends CalendarEvent>(
     (event: LayoutChangeEvent) => {
       scrollViewHeight.value = event.nativeEvent.layout.height;
 
+      if (sharedScrollY && sharedScrollY.value >= 0) {
+        hasScrolledToInitialTime.current = true;
+        (refScrollView.current as any)?.scrollTo({
+          y: sharedScrollY.value,
+          animated: false,
+        });
+        return;
+      }
+
       if (initialScrollTime != null && !hasScrolledToInitialTime.current) {
         hasScrolledToInitialTime.current = true;
         (refScrollView.current as any)?.scrollTo({
@@ -154,7 +179,13 @@ function EventCalendarContentInner<T extends CalendarEvent>(
         });
       }
     },
-    [initialScrollTime, zoomLevel, scrollViewHeight, refScrollView]
+    [
+      initialScrollTime,
+      zoomLevel,
+      scrollViewHeight,
+      refScrollView,
+      sharedScrollY,
+    ]
   );
 
   const { eventsLayout } = useEvents();
@@ -196,10 +227,39 @@ function EventCalendarContentInner<T extends CalendarEvent>(
   );
 
   const scrollHandler = useAnimatedScrollHandler({
+    onBeginDrag: () => {
+      isUserScrolling.value = true;
+    },
+    onEndDrag: () => {
+      isUserScrolling.value = false;
+    },
+    onMomentumBegin: () => {
+      isUserScrolling.value = true;
+    },
+    onMomentumEnd: () => {
+      isUserScrolling.value = false;
+    },
     onScroll: (event) => {
       scrollY.value = event.contentOffset.y;
+
+      if (sharedScrollY && isUserScrolling.value) {
+        sharedScrollY.value = event.contentOffset.y;
+      }
     },
   });
+
+  useAnimatedReaction(
+    () => (sharedScrollY ? sharedScrollY.value : -1),
+    (y) => {
+      if (y < 0 || isUserScrolling.value || y === scrollY.value) {
+        return;
+      }
+
+      scrollTo(refScrollView, 0, y, false);
+      scrollY.value = y;
+    },
+    [sharedScrollY]
+  );
 
   useAnimatedReaction(
     () => scrollY.value,
@@ -242,6 +302,8 @@ function EventCalendarContentInner<T extends CalendarEvent>(
       scrollY,
       scrollRef: refScrollView,
       scrollViewHeight,
+      sharedScrollY,
+      isUserScrolling,
     }),
     [
       startCalendarDate,
@@ -274,6 +336,8 @@ function EventCalendarContentInner<T extends CalendarEvent>(
       scrollY,
       refScrollView,
       scrollViewHeight,
+      sharedScrollY,
+      isUserScrolling,
     ]
   );
 
