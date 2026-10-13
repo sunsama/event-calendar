@@ -37,6 +37,7 @@ export default function ZoomProvider({
     minZoomLevel,
     maximumHour,
     onZoomChange,
+    sharedScrollY,
   } = useContext(ConfigProvider);
   // Always overwritten in onStart before onUpdate reads it, so the initial
   // value here is never actually used — avoids reading zoomLevel.value
@@ -69,6 +70,9 @@ export default function ZoomProvider({
 
       scrollTo(scrollRef, 0, newScrollY, false);
       scrollY.value = newScrollY;
+      if (sharedScrollY) {
+        sharedScrollY.value = newScrollY;
+      }
       zoomLevel.value = newZoom;
     })
     .onEnd(() => {
@@ -93,7 +97,8 @@ export default function ZoomProvider({
       onZoomChange,
       scrollY,
       scrollRef,
-      scrollViewHeight
+      scrollViewHeight,
+      sharedScrollY
     )
   );
 
