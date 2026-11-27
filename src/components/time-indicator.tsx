@@ -30,6 +30,9 @@ const TimeIndicator = memo(
           clearInterval(interval);
 
           if (appState === "active") {
+            // The interval was paused in the background, so catch up now
+            // rather than showing the old time until the first tick.
+            currentMoment.value = currentMinutes();
             interval = setInterval(() => {
               currentMoment.value = currentMinutes();
             }, 20000);
